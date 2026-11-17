@@ -79,6 +79,8 @@ function writeLocal(key, value) {
   localStorage.setItem('knut-campus-guide:'+key, JSON.stringify(value));
 }
 let localPosts = readLocal('posts', []);
+// 프로필 편집에서 바꾸는 이름·소개 (이 브라우저에만 저장)
+let profile = {name:'KNUTIPS', bio:'한국교통대 충주캠퍼스', ...readLocal('profile', {})};
 const likes = new Set(readLocal('likes', []));
 const comments = readLocal('comments', {});
 let profileTab = 'posts';
@@ -159,7 +161,7 @@ function categoryRail(active) {
 }
 
 function brandAvatar() {
-  return '<img class="account-avatar" src="assets/app-192.png" alt="" width="34" height="34">';
+  return '<img class="account-avatar" src="assets/profile-logo.webp" alt="" width="34" height="34">';
 }
 
 function postCover(post, grid = false) {
@@ -296,15 +298,15 @@ function savedPage() {
     <main class="scroll">
       <section class="profile">
         <div class="profile-line">${brandAvatar()}<div class="profile-info">
-          <h1>KNUTIPS</h1>
+          <h1>${escape(profile.name)}</h1>
           <div class="profile-counts">
             <a href="${route('my')}"><b>${localPosts.length}</b>게시물</a>
             <span><b>0</b>팔로워</span>
             <span><b>0</b>팔로잉</span>
           </div>
         </div></div>
-        <p>한국교통대 충주캠퍼스</p>
-        <div class="profile-actions"><a class="pill" href="${route('compose')}">새 게시물</a><a class="pill" href="${route('search')}">장소 찾아보기</a><a class="pill profile-chat" href="${route('chat')}">${icon('chat')}KNUTUIDE</a></div>
+        <p>${escape(profile.bio)}</p>
+        <div class="profile-actions"><a class="pill" href="${route('profile-edit')}">프로필 편집</a><a class="pill" href="${route('chat')}">${icon('chat')}챗봇</a></div>
       </section>
       <nav class="profile-tabs" aria-label="프로필 게시물">
         <a href="${route('my')}" aria-label="내 게시물" ${profileTab==='posts'?'aria-current="page"':''}>${icon('grid')}</a>
@@ -315,6 +317,19 @@ function savedPage() {
 }
 
 // 인스타그램 프로필의 세 줄 메뉴 자리. 이 앱에서 실제로 할 수 있는 것만 둔다.
+function profileEditPage() {
+  return `${top('프로필 편집',iconLink('back','뒤로',route('my')))}
+    <main class="scroll compose">
+      <form id="profile-form">
+        <div class="profile-edit-avatar">${brandAvatar()}</div>
+        <label>이름 <input name="name" value="${escape(profile.name)}" required maxlength="30"></label>
+        <label>소개 <textarea name="bio" maxlength="100" placeholder="나를 소개해 보세요">${escape(profile.bio)}</textarea></label>
+        <p>이름과 소개는 이 브라우저에만 저장돼요.</p>
+        <button class="primary" type="submit">저장</button>
+      </form>
+    </main>`;
+}
+
 function settingsPage() {
   const row = (href, symbol, label, sub = '') =>
     `<a class="setting-row" href="${href}">${icon(symbol)}<span><strong>${label}</strong>${sub?`<small>${sub}</small>`:''}</span>${icon('arrow')}</a>`;
@@ -336,13 +351,14 @@ function settingsPage() {
 
 function resetData() {
   if (!confirm('이 브라우저에 저장된 게시물·좋아요·댓글·저장을 모두 지울까요? 되돌릴 수 없어요.')) return;
-  for (const key of ['posts','likes','comments','saved']) {
+  for (const key of ['posts','likes','comments','saved','profile']) {
     try { localStorage.removeItem('knut-campus-guide:'+key); } catch {}
   }
   localPosts = [];
   likes.clear();
   for (const id of Object.keys(comments)) delete comments[id];
   saved = new Set();
+  profile = {name:'KNUTIPS', bio:'한국교통대 충주캠퍼스'};
   render();
   toast('내 기록을 모두 지웠어요.');
 }
@@ -773,11 +789,12 @@ function render() {
     app.innerHTML = chatPage(top('KNUTUIDE', iconLink('back','프로필로',route('my'))));
     scrollChat(app);
   } else if (path === 'settings') app.innerHTML = settingsPage();
+  else if (path === 'profile-edit') app.innerHTML = profileEditPage();
   else if (path === 'compose') app.innerHTML = composePage();
   else if (path === 'post') app.innerHTML = localPostPage(findPost(params.get('id')));
   else if (path === 'place') app.innerHTML = placePage(place);
   else app.innerHTML = home(category);
-  renderNav(path === 'place' ? '' : path === 'settings' || path === 'chat' ? 'my' : path);
+  renderNav(path === 'place' ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path);
 }
 
 function toast(message) {
@@ -888,9 +905,18 @@ function readPhoto(file) {
 
 app.addEventListener('submit', async event => {
   const form = event.target;
-  if (!['compose-form','comment-form'].includes(form.id)) return;
+  if (!['compose-form','comment-form','profile-form'].includes(form.id)) return;
   event.preventDefault();
   const fields = new FormData(form);
+  if (form.id==='profile-form') {
+    const name = fields.get('name').trim();
+    if (!name) return;
+    profile = {name, bio:fields.get('bio').trim()};
+    try { writeLocal('profile', profile); } catch { toast('프로필을 저장하지 못했어요.'); return; }
+    location.hash = route('my');
+    toast('프로필을 저장했어요.');
+    return;
+  }
   if (form.id==='comment-form') {
     const id = form.dataset.id;
     const text = fields.get('text').trim();

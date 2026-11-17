@@ -278,3 +278,7 @@ img{display:block;width:100%;object-fit:cover}
 .category-disc{border-radius:18px}
 .category[aria-current="true"] .category-disc{box-shadow:none;border:2px solid var(--accent)}
 .category[aria-current="true"]>span:last-child{padding:1px 8px;border-radius:999px;background:var(--accent);color:#0c2142}
+
+/* 프로필 편집 */
+.profile-edit-avatar{display:grid;place-items:center;padding:6px 0 4px}
+.profile-edit-avatar .account-avatar{width:84px;height:84px}

@@ -1,6 +1,4 @@
 /* 챗봇 (chat.js) */
-/* 프로필 버튼 줄의 챗봇 버튼 — 「새 게시물」「장소 찾아보기」 옆에 같은 모양으로, 파란 글자로 구분 */
-.profile-actions .profile-chat{flex:none;padding-inline:14px;color:var(--accent)}
 
 .chat-page{flex:1;min-height:0;display:flex;flex-direction:column}
 .chat-log{flex:1;min-height:0;overflow:auto;scrollbar-width:none;padding:14px 12px;display:flex;flex-direction:column;gap:10px}
