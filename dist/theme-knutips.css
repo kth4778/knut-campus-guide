@@ -1,0 +1,30 @@
+/* 화이트 모드를 KNUTIPS(누팁스) 앱 모양으로: 빨간 K 로고, 빨간 동그라미 + 계정 색 작은 네모, 테두리 있는 언어 버튼.
+   theme.css(화이트 모드 색) 뒤에 읽어요. 다크 모드는 건드리지 않아요. */
+:root[data-theme="light"]{--brand:#8b1a1f;--brand-ink:#ffffff;--ring:#dcdcd8}
+
+/* 로고: 첫 글자 K 를 빨간 네모에 */
+[data-theme="light"] .home-top .middle.brand{color:#111;font-weight:900;letter-spacing:.02em!important}
+[data-theme="light"] .home-top .middle.brand::first-letter{background:var(--brand);color:var(--brand-ink);padding:0 5px;margin-right:3px;border-radius:2px}
+
+/* 언어 버튼: 흰 바탕 + 회색 테두리 */
+[data-theme="light"] .lang-btn{background:#fff;border:1px solid #d9dce0;border-radius:6px;color:#111}
+[data-theme="light"] .lang-btn b{font-weight:800}
+
+/* 홈 동그라미 줄: 회색 고리, 아직 안 본 계정은 금색→빨강 고리 */
+[data-theme="light"] .story{color:#111}
+[data-theme="light"] .story .story-ring{background:linear-gradient(135deg,#d6a32b,var(--brand) 60%)}
+[data-theme="light"] .story.seen .story-ring,[data-theme="light"] .story-new .story-ring{background:var(--ring)}
+[data-theme="light"] .story.seen{color:#111}
+/* 계정 동그라미는 빨강으로 통일하고, 원래 계정 색은 오른쪽 아래 작은 네모로 */
+[data-theme="light"] .story .acct-disc{position:relative;background:var(--brand)}
+[data-theme="light"] .story .acct-disc::after{content:"";position:absolute;right:1px;bottom:4px;width:9px;height:9px;background:var(--acct);box-shadow:0 0 0 2px #fff}
+
+/* 제보하기: 밝은 회색 원 + 검은 카메라 + 빨간 + */
+[data-theme="light"] .report-disc{background:#f1f1ee;color:#111;box-shadow:0 0 0 2.5px #fff}
+[data-theme="light"] .story-new .story-plus{background:var(--brand)}
+[data-theme="light"] .story-new .story-name{color:#111}
+
+/* 강조 버튼 · 고른 탭도 빨강으로 */
+[data-theme="light"] .primary,[data-theme="light"] .moa-btn.go,[data-theme="light"] .moa-new-btn{background:var(--brand);color:#fff}
+[data-theme="light"] .nav a[aria-current="page"]{color:var(--brand)}
+[data-theme="light"] .lang-menu button[aria-pressed="true"],[data-theme="light"] .lang-menu button[aria-current="true"]{background:var(--brand);color:#fff}
