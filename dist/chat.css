@@ -1,7 +1,8 @@
 /* 챗봇 (chat.js) */
-.profile-counts .chat-count{color:var(--accent)}
-.profile-counts .chat-count b{height:19px;display:flex;align-items:center}
-.profile-counts .chat-count .icon{width:19px;height:19px}
+/* 프로필 오른쪽 챗봇 버튼 — 숫자 줄 오른쪽 남는 자리를 쓴다 */
+.profile-chat{flex:none;display:grid;justify-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--accent)}
+.profile-chat img{width:64px;height:64px;border-radius:16px;box-shadow:0 6px 16px #2a6cff40;transition:transform .15s}
+.profile-chat:hover img{transform:translateY(-2px) scale(1.04)}
 
 .chat-page{flex:1;min-height:0;display:flex;flex-direction:column}
 .chat-log{flex:1;min-height:0;overflow:auto;scrollbar-width:none;padding:14px 12px;display:flex;flex-direction:column;gap:10px}

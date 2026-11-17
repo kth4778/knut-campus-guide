@@ -309,10 +309,11 @@ function savedPage() {
           <h1>우리학교 가이드</h1>
           <div class="profile-counts">
             <a href="${route('my')}"><b>${localPosts.length}</b>게시물</a>
-            <a href="${route('my',{tab:'saved'})}"><b>${savedItems.length}</b>저장됨</a>
-            <a class="chat-count" href="${route('chat')}"><b>${icon('chat')}</b>챗봇</a>
+            <span><b>0</b>팔로워</span>
+            <span><b>0</b>팔로잉</span>
           </div>
-        </div></div>
+        </div>
+        <a class="profile-chat" href="${route('chat')}" aria-label="챗봇에게 물어보기"><img src="assets/chatbot.webp" alt="" width="64" height="64"><span>챗봇</span></a></div>
         <p>한국교통대 충주캠퍼스</p>
         <div class="profile-actions"><a class="pill" href="${route('compose')}">새 게시물</a><a class="pill" href="${route('search')}">장소 찾아보기</a></div>
       </section>
