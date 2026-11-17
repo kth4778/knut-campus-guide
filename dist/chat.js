@@ -47,10 +47,33 @@ function bubble(m) {
 }
 
 // 질문 낱말이 이름·분류·지역·건물·메뉴·학생 의견에 얼마나 들어 있는지로 장소를 골라요
+// 영어·중국어·일본어 질문도 장소를 찾을 수 있게, 질문 속 낱말을 자료의 한국어 낱말로 바꿔 함께 찾아요
+const FOREIGN = [
+  [/print|打印|印刷|プリント/, '프린트 프린터 인쇄'], [/cop(y|ies)|复印|コピー/, '복사'], [/bind|装订|製本/, '제본'],
+  [/restaurant|\beat\b|food|meal|lunch|dinner|吃|饭|餐|美食|食事|ご飯|ごはん|グルメ|ランチ/, '맛집 식당 밥'], [/cheap|budget|便宜|安い/, '저렴 가성비 착한'],
+  [/cafeteria|dining hall|食堂|学食|学生食堂/, '학생식당 식당'], [/caf[eé]|coffee|咖啡|カフェ|コーヒー/, '카페 커피'], [/dessert|甜品|デザート/, '디저트'],
+  [/bar|pub|drink|beer|alcohol|酒|居酒屋|飲み/, '술집 주점 술'], [/chicken|鸡|チキン/, '치킨'], [/burrito/, '부리또'], [/pizza|披萨|ピザ/, '피자'],
+  [/study|reading room|自习|学习|阅览|勉強|自習/, '열람실 공부 독서실'], [/library|图书馆|図書館/, '도서관'],
+  [/\brest\b|relax|break|\bnap\b|休息|休憩|休み/, '휴식 쉬기 쉼터 공강'], [/walk|stroll|散步|散歩/, '산책 둘레길'], [/photo|picture|拍照|写真/, '사진'],
+  [/bus|公交|巴士|バス/, '버스 정류장'], [/express|高速/, '고속버스'], [/taxi|出租车|タクシー/, '택시'], [/train|station|火车|车站|電車|駅/, '충주역 기차 역'],
+  [/downtown|city|市区|市内/, '시내'], [/terminal|客运站|ターミナル/, '터미널'],
+  [/dorm|dormitory|宿舍|寮/, '생활관 기숙사'], [/room|rent|apartment|租房|部屋|一人暮らし/, '원룸 자취'],
+  [/gym|workout|exercise|fitness|健身|运动|ジム|運動/, '헬스 피트니스 운동'], [/convenience|便利店|コンビニ/, '편의점'],
+  [/bank|atm|银行|銀行/, '은행 ATM'], [/post office|mail|parcel|邮局|郵便/, '우체국'], [/hospital|clinic|medicine|医院|药|病院|薬/, '보건 병원 약'],
+  [/counsel|心理|相談/, '상담'], [/scholarship|奖学金|奨学金/, '장학금'], [/course|registration|class|选课|履修/, '수강신청'],
+  [/club|社团|サークル/, '동아리'], [/wifi|wi-fi|无线|ワイファイ/, '와이파이'], [/certificate|证明|証明書/, '증명서'],
+  [/delivery|外卖|配達/, '배달'], [/karaoke|唱歌|カラオケ/, '노래방 코인노래'], [/movie|cinema|电影|映画/, '영화 CGV'], [/laundry|洗衣|洗濯/, '세탁'],
+];
+function foreignWords(question) {
+  const q = norm(question);
+  return FOREIGN.filter(([re]) => re.test(q)).flatMap(([, ko]) => ko.split(' ').map(norm));
+}
+
 function findPlaces(question, limit = 6) {
   const words = norm(question).replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/)
     .map(w => w.replace(/(은|는|이|가|을|를|에서|에|으로|로|도|만|좀|해줘|해|야|요)$/u, ''))
-    .filter(w => w.length >= 2 && !STOP.has(w));
+    .filter(w => w.length >= 2 && !STOP.has(w))
+    .concat(foreignWords(question));
   if (!words.length) return [];
   return getPlaces().map(p => {
     const name = norm(p.name), meta = norm([p.category, p.area, p.location?.building].join(' '));
