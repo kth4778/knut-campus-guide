@@ -254,3 +254,17 @@ img{display:block;width:100%;object-fit:cover}
 .post-caption>strong:first-child::before{content:"★";font-size:11px}
 .post-caption p strong{display:block;font-size:14px;margin-bottom:1px}
 .post-caption p{color:#d5dce5}
+/* 2) 하트·말풍선 아이콘 줄 → 글자가 함께 있는 버튼 */
+.post-actions{gap:5px;padding:10px 10px 4px;flex-wrap:wrap}
+.post-actions .ib{min-width:0;min-height:32px;padding:0 9px;border-radius:999px;background:var(--surface);display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:650;color:#d5dce5}
+.post-actions .ib .icon{width:16px;height:16px}
+.post-actions .ib:hover{background:#2c333b}
+.post-actions .ib[data-action="like"]::after{content:"좋아요"}
+.post-actions .ib[data-action="like"][aria-pressed="true"]{background:#ff45661f}
+.post-actions .ib[data-action="comments"]::after{content:"댓글"}
+.post-actions .ib[aria-label="지도에서 위치 보기"]::after{content:"지도"}
+.post-actions .ib[aria-label="캠퍼스 지도"]::after{content:"캠퍼스 지도"}
+.post-actions .ib[data-action="copy"]::after{content:"공유"}
+.post-actions .ib[data-action="save"]::after{content:"저장"}
+.post-actions .ib[data-action="save"][aria-pressed="true"]{background:#a6c8ff26;color:var(--accent)}
+.post-actions .ib[data-action="save"][aria-pressed="true"]::after{content:"저장됨"}
