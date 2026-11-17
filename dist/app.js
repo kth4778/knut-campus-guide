@@ -1,4 +1,5 @@
-import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress} from './transit.js';
+import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
+  LIVE_MAX, LIVE_EVERY, liveColor, routeSort, routeIndex, liveBuses, liveBusInfo} from './transit.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -93,6 +94,8 @@ let searchLimit = 35;
 let currentView = '';
 let toastTimer;
 let placeBack = '#/';
+// 실시간 버스 위치 (지도 '버스' 분류에서만 돌아요)
+const live = {picked:new Set(readLocal('liveRoutes', ['999'])), index:null, buses:[], error:'', last:null, timer:null, on:false};
 
 function readRoute() {
   const [raw = '', query = ''] = location.hash.slice(1).split('?');
@@ -391,7 +394,7 @@ function openSheet(title, mount) {
 }
 
 function openBusSheet(stop) {
-  openSheet(stop.name, body => mountBusStop(body, stop));
+  openSheet(stop.name, body => mountBusStop(body, stop, {onLive:showLiveRoute}));
 }
 
 function openExpressSheet(terminal) {
@@ -434,6 +437,7 @@ function mapPage() {
     <div class="chips map-chips" aria-label="지도 카테고리">
       ${mapCategories.map(name=>`<button class="chip${transitCategories.includes(name)?' transit-chip':''}" data-action="map-category" data-category="${escape(name)}" aria-pressed="${name===mapCategory}">${name}</button>`).join('')}
     </div>
+    <div id="live-row" class="chips live-row" aria-label="실시간 버스 노선" hidden></div>
     <main class="map-panel" aria-label="장소 지도">
       <div id="map-canvas" class="map-canvas"></div>
       <button class="ib map-reset" type="button" data-action="campus" aria-label="캠퍼스 중심으로">${icon('target')}</button>
@@ -534,6 +538,83 @@ function paintTransit() {
   for (const stop of BUS_STOPS) {
     addPoint(stop.latlng, `<span class="marker transit-marker bus">${icon('bus')}</span>`, stop.name, () => openBusSheet(stop), 300);
   }
+  if (!live.on) return;
+  for (const bus of live.buses) {
+    addPoint(bus.latlng, `<span class="live-bus" style="background:${liveColor(bus.no)}">${escape(bus.no)}</span>`,
+      `${bus.no}번 버스`, () => openSheet(`${bus.no}번 버스`, body => { body.innerHTML = liveBusInfo(bus); }), 1100);
+  }
+}
+
+function renderLiveRow() {
+  const row = document.getElementById('live-row');
+  if (!row) return;
+  row.hidden = !live.on;
+  if (!live.on) return;
+  const time = live.last ? [live.last.getHours(), live.last.getMinutes(), live.last.getSeconds()].map(n => String(n).padStart(2,'0')).join(':') : '';
+  const status = !busKey() ? 'config.js 에 버스 API 키가 필요해요'
+    : live.error ? live.error
+    : live.index ? `실시간 ${live.buses.length}대${time ? ' · ' + time : ''}` : '노선 불러오는 중…';
+  const numbers = live.index ? Object.keys(live.index).sort(routeSort) : [];
+  row.innerHTML = `<span class="live-status">${live.error || !busKey() ? '' : '<i></i>'}${escape(status)}</span>`
+    + numbers.map(no => {
+      const on = live.picked.has(no);
+      return `<button class="chip" data-action="live-route" data-no="${escape(no)}" aria-pressed="${on}" ${on?`style="background:${liveColor(no)};color:#fff"`:''}>${escape(no)}</button>`;
+    }).join('');
+}
+
+async function livePoll() {
+  if (!live.on || !live.index || !busKey()) return;
+  const {buses, error} = await liveBuses([...live.picked], live.index);
+  if (!live.on) return;
+  Object.assign(live, {buses, error, last:new Date()});
+  if (map) paintMarkers();
+  renderLiveRow();
+}
+
+async function liveStart() {
+  if (live.on) return;
+  live.on = true;
+  renderLiveRow();
+  if (!busKey()) return;
+  try { live.index = await routeIndex(); }
+  catch { live.error = '노선 목록을 못 불러왔어요'; }
+  if (!live.on) return;
+  renderLiveRow();
+  livePoll();
+  live.timer = setInterval(() => { if (!document.hidden) livePoll(); }, LIVE_EVERY);
+}
+
+function liveStop() {
+  live.on = false;
+  live.buses = [];
+  clearInterval(live.timer);
+  renderLiveRow();
+}
+
+function toggleLiveRoute(no) {
+  if (live.picked.has(no)) live.picked.delete(no);
+  else {
+    if (live.picked.size >= LIVE_MAX) { toast(`노선은 ${LIVE_MAX}개까지 고를 수 있어요.`); return; }
+    live.picked.add(no);
+  }
+  try { writeLocal('liveRoutes', [...live.picked]); } catch {}
+  live.buses = live.buses.filter(bus => live.picked.has(bus.no));
+  if (map) paintMarkers();
+  renderLiveRow();
+  livePoll();
+}
+
+// 정류장 도착 목록의 '위치' 버튼: 그 노선을 골라서 지도에 띄워요.
+function showLiveRoute(no) {
+  if (!live.picked.has(no)) {
+    if (live.picked.size >= LIVE_MAX) live.picked.delete([...live.picked][0]);
+    live.picked.add(no);
+    try { writeLocal('liveRoutes', [...live.picked]); } catch {}
+  }
+  app.querySelector('dialog.transit-sheet')?.close();
+  toast(`${no}번 버스 위치를 보여줘요.`);
+  if (mapCategory === '버스' && live.on) { renderLiveRow(); livePoll(); }
+  else location.hash = route('map', {category:'버스'});
 }
 
 function paintMarkers() {
@@ -561,6 +642,8 @@ function updateMap(focus, category) {
   const buttons = app.querySelectorAll('[data-action="map-category"]');
   buttons.forEach(button => button.setAttribute('aria-pressed', button.dataset.category===category));
   showMapResult(focusedMapPlace);
+  if (category === '버스') liveStart();
+  else liveStop();
   if (!map) return;
   paintMarkers();
   const center = focusedMapPlace?.latlng ?? campus;
@@ -661,6 +744,7 @@ function render() {
     return;
   }
   destroyMap();
+  liveStop();
   app.querySelector('dialog.transit-sheet')?.close();
   if (path !== currentView) {
     homeLimit = 16;
@@ -761,6 +845,7 @@ app.addEventListener('click', event => {
     case 'map-category':
       location.hash=route('map',control.dataset.category==='전체'?{}:{category:control.dataset.category});
       break;
+    case 'live-route': toggleLiveRoute(control.dataset.no); break;
     case 'campus':
       updateMap(null,mapCategory);
       history.replaceState(history.state,'',route('map',mapCategory==='전체'?{}:{category:mapCategory}));

@@ -233,3 +233,41 @@ export function mountExpress(body, terminal, {extra = ''} = {}) {
   const timer = setInterval(() => { if (!document.hidden && state.day === 0) load(); }, 60000);
   return () => { alive = false; clearInterval(timer); };
 }
+
+// ---------- 실시간 시내버스 위치 (TAGO 버스위치정보) ----------
+// 학교 주변 정류장을 지나는 노선 목록은 data/bus-routes.json (TAGO, 2026-11-12 기준)에 넣어 뒀어요.
+// 하루 호출 한도 때문에 고른 노선(최대 LIVE_MAX개)만 20초마다 위치를 받아요.
+const CITY = 33020; // 충주시
+export const LIVE_MAX = 4;
+export const LIVE_EVERY = 20000;
+export const liveColor = no => /급행/.test(no) ? '#e5483f' : String(no) === '999' ? '#9b2a2e' : '#4f9a1c';
+export const routeSort = (a, b) => (parseInt(a) || 9999) - (parseInt(b) || 9999) || a.localeCompare(b);
+
+let routeIndexReady;
+export function routeIndex() {
+  routeIndexReady ??= fetch('./data/bus-routes.json')
+    .then(response => { if (!response.ok) throw new Error('노선 목록 없음'); return response.json(); })
+    .catch(error => { routeIndexReady = null; throw error; });
+  return routeIndexReady;
+}
+
+// 고른 노선 번호들의 버스 위치. 일부 노선이 실패해도 받은 것만 돌려줘요.
+export async function liveBuses(numbers, index) {
+  const jobs = [];
+  numbers.forEach(no => Object.entries(index[no] || {}).forEach(([routeId, dir]) => jobs.push(
+    tago('BusLcInfoInqireService/getRouteAcctoBusLcList', {cityCode:CITY, routeId})
+      .then(list => list.map(bus => ({no, dir, vehicleno:bus.vehicleno, latlng:[+bus.gpslati, +bus.gpslong], nodenm:bus.nodenm, nodeord:bus.nodeord}))),
+  )));
+  const results = await Promise.allSettled(jobs);
+  const buses = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value).filter(bus => bus.latlng[0] && bus.latlng[1]);
+  const failed = results.find(r => r.status === 'rejected');
+  let error = '';
+  if (failed && !buses.length) error = /등록|SERVICE_KEY|NOT_REGISTERED/.test(failed.reason?.message || '') ? '버스위치정보 API 활용신청이 필요해요' : '위치를 못 불러왔어요';
+  return {buses, error};
+}
+
+export function liveBusInfo(bus) {
+  return `<p class="transit-sub">${esc(bus.dir)} · 차량 ${esc(bus.vehicleno || '')}</p>
+    <p class="live-now">지금 <b>${esc(bus.nodenm || '')}</b> 근처 (${esc(bus.nodeord)}번째 정류장)</p>
+    <p class="transit-foot">20초마다 위치가 갱신돼요</p>`;
+}

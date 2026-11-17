@@ -281,3 +281,9 @@ img{display:block;width:100%;object-fit:cover}
 .setting-row.danger{grid-template-columns:24px minmax(0,1fr);color:#ff8a8a}
 .setting-row.danger small{color:#c08b8b}
 .setting-note{font-size:12px;line-height:1.6;color:var(--muted);padding:2px 16px 8px}
+.live-row{border-bottom:1px solid var(--line);align-items:center;padding-top:0}
+.live-row[hidden]{display:none}
+.live-status{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:11px;color:var(--muted);padding-right:4px}
+.live-status i{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 3px #4ade8033}
+.live-bus{min-width:30px;height:22px;padding:0 6px;display:grid;place-items:center;border-radius:11px;border:2px solid #fff;color:#fff;font:800 11px/1 "Guide Roboto",system-ui,sans-serif;box-shadow:0 2px 6px #09112788;white-space:nowrap}
+.live-now{background:#24331d;color:#cfeeb8;border-radius:10px;padding:10px 12px;font-size:13px}
