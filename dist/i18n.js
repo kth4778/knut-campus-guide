@@ -160,7 +160,7 @@
     // 화이트 모드 버튼 (theme.js)
     '화이트 모드로 바꾸기': ['Switch to light mode', '切换到浅色模式', 'ライトモードにする'], '다크 모드로 바꾸기': ['Switch to dark mode', '切换到深色模式', 'ダークモードにする'],
     // 챗봇
-    'KNUTUIDE에게 질문': ['Ask KNUTUIDE', '向KNUTUIDE提问', 'KNUTUIDEに質問'], '학교생활 무엇이든 물어보세요': ['Ask anything about campus life', '关于校园生活，随便问', '学校生活のことなら何でも聞いてね'],
+    '누티에게 질문': ['Ask Nuti', '向Nuti提问', 'Nutiに質問'], '누티': ['Nuti', 'Nuti', 'ヌティ'], '누티 Nuti': ['Nuti', 'Nuti', 'ヌティ Nuti'], '누티 이모티콘': ['Nuti stickers', 'Nuti表情', 'ヌティのスタンプ'], '학교생활 무엇이든 물어보세요': ['Ask anything about campus life', '关于校园生活，随便问', '学校生活のことなら何でも聞いてね'],
     '보내기': ['Send', '发送', '送信'], '주소': ['Address', '地址', 'アドレス'], '모델': ['Model', '模型', 'モデル'], '대화 지우기': ['Clear chat', '清除对话', '会話を消す'], 'LLM 연결': ['LLM connection', 'LLM连接', 'LLM接続'],
     '프로필로': ['To profile', '回到我的', 'プロフィールへ'],
     '학교 앞 싼 밥집 추천해줘': ['Cheap eats near campus?', '推荐学校附近便宜的饭店', '学校前の安いご飯屋さんを教えて'],
@@ -200,10 +200,15 @@
     [/^(.+) 게시물$/, '{1} post', '{1} 的帖子', '{1}の投稿'],
     [/^(.+) 지도에서 보기$/, 'View {1} on map', '在地图上查看 {1}', '{1}を地図で見る'],
     [/^(.+) 외 (\d+)곳$/, '{1} and {2} more', '{1} 等 {2} 处', '{1} ほか{2}か所'],
-    [/^안녕하세요, KNUTUIDE예요! 충주캠퍼스 맛집·숨은장소·생활꿀팁 (\d*)개를 바탕으로 답해 드려요\. 무엇이 궁금하세요\?$/,
-      'Hi, I’m KNUTUIDE! I answer using {1} food spots, hidden spots and life tips from Chungju Campus. What would you like to know?',
-      '你好，我是KNUTIPS的KNUTUIDE！我会根据忠州校区的 {1} 条美食·秘密景点·生活小贴士来回答。想了解什么？',
-      'こんにちは、KNUTUIDEです！忠州キャンパスのグルメ・穴場・生活のコツ {1}件をもとにお答えします。何が知りたいですか？'],
+    // 챗봇 누티 첫 인사 (chat.js intro)
+    [/^안녕하세요! 저는 한국교통대학교 친구 누티\(Nuti\)예요 🍎$/, 'Hi! I’m Nuti, your Korea National University of Transportation friend 🍎', '你好！我是韩国交通大学的朋友 Nuti 🍎', 'こんにちは！韓国交通大学の友だち、ヌティ(Nuti)です 🍎'],
+    [/^이런 걸 도와드릴 수 있어요$/, 'Here’s what I can help with', '我可以帮你这些', 'こんなことを手伝えます'],
+    [/^🍚 학교 앞 맛집·카페 추천$/, '🍚 Food and café picks near campus', '🍚 推荐学校附近的美食·咖啡店', '🍚 学校周辺のグルメ・カフェ紹介'],
+    [/^🖨️ 프린트·복사 같은 생활꿀팁$/, '🖨️ Life tips like printing and copying', '🖨️ 打印·复印等生活小贴士', '🖨️ 印刷・コピーなど生活のコツ'],
+    [/^📚 공부하기 좋은 곳, 쉬기 좋은 곳$/, '📚 Good places to study or rest', '📚 适合学习·休息的地方', '📚 勉強・休憩にいい場所'],
+    [/^🚌 버스 정류장·교통 정보$/, '🚌 Bus stops and transport info', '🚌 公交车站·交通信息', '🚌 バス停・交通情報'],
+    [/^충주캠퍼스 장소·꿀팁 (\d+)개를 보고 답해 드려요\.$/, 'I answer using {1} places and tips from Chungju Campus.', '我会参考忠州校区的 {1} 条地点·小贴士来回答。', '忠州キャンパスの場所・コツ {1}件をもとにお答えします。'],
+    [/^궁금한 걸 물어보거나, 아래 이모티콘 버튼으로 저한테 이모티콘을 보내 보세요!$/, 'Ask me anything, or send me a sticker with the button below!', '有问题就问我，也可以用下面的按钮给我发表情！', '何でも聞いてね。下のボタンでスタンプも送ってみて！'],
   ];
 
   const HANGUL = /[가-힣]/;

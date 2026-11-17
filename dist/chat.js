@@ -1,5 +1,8 @@
-// 챗봇: 내 컴퓨터에서 돌아가는 LLM(Ollama)에 질문하고, places.json에서 찾은 장소를 근거로 답해요.
+// 챗봇 누티(Nuti): 내 컴퓨터에서 돌아가는 LLM(Ollama)에 질문하고, places.json에서 찾은 장소를 근거로 답해요.
+// 이모티콘(stickers.js)을 주고받을 수 있고, 처음 들어오면 누티가 이모티콘과 함께 자기가 할 수 있는 일을 소개해요.
 // 대화 기록과 연결 설정은 이 브라우저(localStorage)에만 저장돼요.
+
+import {stickerImg, stickerButton, stickerPanel, stickerLabel, stickerSrc, isSticker} from './stickers.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = value => String(value ?? '').normalize('NFKC').toLowerCase();
@@ -21,10 +24,12 @@ export function chatPage(header) {
   const c = config();
   return `${header}
     <main class="chat-page">
-      <div class="chat-log" id="chat-log" aria-live="polite">${messages.length ? messages.map(bubble).join('') : intro()}</div>
+      <div class="chat-log" id="chat-log" aria-live="polite">${intro() + messages.map(bubble).join('')}</div>
+      ${stickerPanel()}
       <div class="chat-suggest">${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
       <form class="chat-form" id="chat-form">
-        <input name="q" aria-label="KNUTUIDE에게 질문" placeholder="학교생활 무엇이든 물어보세요" autocomplete="off" maxlength="300" required>
+        ${stickerButton()}
+        <input name="q" aria-label="누티에게 질문" placeholder="학교생활 무엇이든 물어보세요" autocomplete="off" maxlength="300" required>
         <button type="submit" class="primary" ${busy?'disabled':''}>보내기</button>
       </form>
       <details class="chat-config">
@@ -37,13 +42,40 @@ export function chatPage(header) {
     </main>`;
 }
 
+// 누티의 첫 인사: 이모티콘을 보내며 할 수 있는 일을 소개해요
+const NUTI_FACE = `<img class="nuti-face" src="${stickerSrc('hello')}" alt="" width="32" height="32">`;
 function intro() {
-  return `<div class="chat-msg bot chat-intro"><p>안녕하세요, KNUTUIDE예요! 충주캠퍼스 맛집·숨은장소·생활꿀팁 ${getPlaces().length || ''}개를 바탕으로 답해 드려요. 무엇이 궁금하세요?</p></div>`;
+  const count = getPlaces().length;
+  const lines = [
+    {sticker:'hello'},
+    {text:`안녕하세요! 저는 한국교통대학교 친구 누티(Nuti)예요 🍎`},
+    {text:`이런 걸 도와드릴 수 있어요\n🍚 학교 앞 맛집·카페 추천\n🖨️ 프린트·복사 같은 생활꿀팁\n📚 공부하기 좋은 곳, 쉬기 좋은 곳\n🚌 버스 정류장·교통 정보\n${count ? `충주캠퍼스 장소·꿀팁 ${count}개를 보고 답해 드려요.` : ''}`},
+    {sticker:'together'},
+    {text:'궁금한 걸 물어보거나, 아래 이모티콘 버튼으로 저한테 이모티콘을 보내 보세요!'},
+  ];
+  return lines.map(line => `<div class="chat-msg bot chat-intro${line.sticker ? ' sticker-msg' : ''}">${NUTI_FACE}${line.sticker ? stickerImg(line.sticker) : `<p>${esc(line.text).replace(/\n/g, '<br>')}</p>`}</div>`).join('');
 }
 
 function bubble(m) {
+  const bot = m.role !== 'user';
+  if (m.sticker) return `<div class="chat-msg ${bot ? 'bot' : 'me'} sticker-msg">${bot ? NUTI_FACE : ''}${stickerImg(m.sticker)}</div>`;
   const refs = (m.refs ?? []).map(r => `<a class="chip" href="#/place?id=${esc(r.id)}">${esc(r.name)}</a>`).join('');
-  return `<div class="chat-msg ${m.role === 'user' ? 'me' : 'bot'}${m.error ? ' error' : ''}"><p>${esc(m.content).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>${refs ? `<div class="chat-refs">${refs}</div>` : ''}</div>`;
+  return `<div class="chat-msg ${bot ? 'bot' : 'me'}${m.error ? ' error' : ''}">${bot ? NUTI_FACE : ''}<p>${esc(m.content).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>${refs ? `<div class="chat-refs">${refs}</div>` : ''}</div>`;
+}
+
+// 이모티콘을 보내면 누티도 이모티콘으로 답해요 (LLM 없이 바로)
+const REACT = {hello:'hello', yay:'yay', love:'shy', curious:'curious', sad:'together', sleepy:'goodjob', yum:'yum', study:'levelup',
+  cafe:'cafe', go:'go', shy:'love', levelup:'yay', together:'together', goodjob:'love'};
+function sendSticker(root, id) {
+  if (!isSticker(id)) return;
+  messages.push({role:'user', sticker:id, content:`(이모티콘: ${stickerLabel(id)})`});
+  paint(root);
+  setTimeout(() => {
+    messages.push({role:'assistant', sticker:REACT[id] || 'hello', content:`(이모티콘: ${stickerLabel(REACT[id] || 'hello')})`});
+    messages = messages.slice(-40);
+    write(LOG, messages);
+    paint(root);
+  }, 700);
 }
 
 // 질문 낱말이 이름·분류·지역·건물·메뉴·학생 의견에 얼마나 들어 있는지로 장소를 골라요
@@ -99,7 +131,7 @@ function answerLanguage() {
 }
 
 function systemPrompt(found) {
-  return `너는 KNUTIPS 앱의 안내 챗봇 KNUTUIDE이다. 국립한국교통대학교 충주캠퍼스 학생을 돕는다. 이름을 물으면 KNUTUIDE라고 답한다. 한국어 존댓말로 3~5문장 안에 짧게 답한다.
+  return `너는 KNUTIPS 앱의 캠퍼스 친구 챗봇 누티(Nuti)이다. 사과 모자를 쓴 수달 캐릭터이고, 국립한국교통대학교 충주캠퍼스 학생을 돕는다. 이름을 물으면 누티(Nuti)라고 답한다. 한국어 존댓말로 3~5문장 안에 짧고 다정하게 답한다.
 아래 [자료]는 학생들이 직접 모은 장소·꿀팁이다. 자료에 있는 내용만 근거로 답하고, 장소 이름은 자료에 적힌 그대로 쓴다.
 자료에 없는 내용은 지어내지 말고 "가이드 자료에는 없어요"라고 말한 뒤 학교 홈페이지나 에브리타임 확인을 권한다.${answerLanguage()}
 [자료]
@@ -109,7 +141,7 @@ ${found.length ? found.map(describe).join('\n') : '(질문과 맞는 자료 없�
 function paint(root) {
   const log = root.querySelector('#chat-log');
   if (!log) return;
-  log.innerHTML = messages.length ? messages.map(bubble).join('') : intro();
+  log.innerHTML = intro() + messages.map(bubble).join('');
   log.scrollTop = log.scrollHeight;
   const send = root.querySelector('#chat-form button');
   if (send) send.disabled = busy;
@@ -118,7 +150,7 @@ function paint(root) {
 async function ask(root, question) {
   if (busy || !question.trim()) return;
   const found = findPlaces(question);
-  const history = messages.filter(m => !m.error).slice(-6).map(({role, content}) => ({role, content}));
+  const history = messages.filter(m => !m.error && !m.sticker).slice(-6).map(({role, content}) => ({role, content}));
   messages.push({role:'user', content:question.trim()});
   const answer = {role:'assistant', content:'생각하는 중…', refs:found.slice(0, 3).map(p => ({id:p.id, name:p.name}))};
   messages.push(answer);
@@ -175,6 +207,8 @@ export function initChat(root, options) {
     ask(root, q);
   });
   root.addEventListener('click', event => {
+    const sticker = event.target.closest('.chat-page [data-sticker]');
+    if (sticker) { sendSticker(root, sticker.dataset.sticker); return; }
     const control = event.target.closest('[data-chat]');
     if (!control) return;
     if (control.dataset.chat === 'ask') ask(root, control.dataset.q);

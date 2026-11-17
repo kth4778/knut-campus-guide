@@ -354,7 +354,7 @@ function savedPage() {
           </div>
         </div></div>
         <p>${escape(profile.bio)}</p>
-        <div class="profile-actions"><a class="pill" href="${route('profile-edit')}">프로필 편집</a><a class="pill" href="${route('chat')}">${icon('chat')}챗봇</a></div>
+        <div class="profile-actions"><a class="pill" href="${route('profile-edit')}">프로필 편집</a><a class="pill" href="${route('chat')}">${icon('chat')}누티</a></div>
       </section>
       <nav class="profile-tabs" aria-label="프로필 게시물">
         <a href="${route('my')}" aria-label="내 게시물" ${profileTab==='posts'?'aria-current="page"':''}>${icon('grid')}</a>
@@ -869,7 +869,7 @@ function render() {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
   } else if (path === 'chat') {
-    app.innerHTML = chatPage(top('KNUTUIDE', iconLink('back','프로필로',route('my'))));
+    app.innerHTML = chatPage(top('누티 Nuti', iconLink('back','프로필로',route('my'))));
     scrollChat(app);
   } else if (path === 'settings') app.innerHTML = settingsPage();
   else if (path === 'profile-edit') app.innerHTML = profileEditPage();
