@@ -10,8 +10,8 @@ h1,h2,h3,p{margin:0}
 img{display:block;width:100%;object-fit:cover}
 /* 아이폰 18 Pro Max 외관(창이 충분히 크면 화면 너비 440px = 실제 Pro Max 크기까지 커진다): gpt-image로 만든 틀 그림(assets/iphone-frame.webp, 887×1774)을 화면 위에 덮는다.
    그림 속 화면 구멍은 x 68~817, y 66~1709 px. 화면은 구멍보다 6px씩 크게 깔아 둥근 모서리 틈이 검은 베젤 밑에 숨게 한다. */
-.device{--h:clamp(600px,calc(100svh - 24px),1026px);position:relative;margin:auto;height:var(--h);width:calc(var(--h) * .5);filter:drop-shadow(0 30px 40px #1b223355)}
-.device::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:url("assets/iphone-frame.webp") center / 100% 100% no-repeat}
+.device{--h:clamp(600px,calc(100svh - 24px),1026px);position:relative;margin:auto;height:var(--h);width:calc(var(--h) * .5)}
+.device::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:url("assets/iphone-frame.webp") center / 100% 100% no-repeat;filter:drop-shadow(0 30px 40px #1b223355)}
 .screen{position:absolute;left:6.99%;right:7.22%;top:3.38%;bottom:3.33%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--text);border-radius:15.5% / 7.1%;isolation:isolate}
 /* 유리 반사: 아주 옅게 */
 .screen::after{content:"";position:absolute;inset:0;z-index:700;pointer-events:none;border-radius:inherit;background:linear-gradient(118deg,#ffffff0d 0%,#ffffff05 22%,transparent 40%);box-shadow:inset 0 0 0 1px #ffffff0a}
@@ -30,7 +30,7 @@ img{display:block;width:100%;object-fit:cover}
 .icon{width:23px;height:23px;vertical-align:middle;flex:none}
 .ib{min-width:38px;min-height:37px;display:grid;place-items:center;border-radius:10px}
 .ib:hover{background:var(--surface)}
-.nav{flex:none;height:56px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:2px 7px;border-top:1px solid var(--line);background:var(--bg)}
+.nav{position:relative;z-index:5;flex:none;height:56px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:2px 7px;border-top:1px solid var(--line);background:var(--bg)}
 .nav a{height:45px;border-radius:26px;display:grid;place-content:center;justify-items:center;gap:2px;color:var(--muted);font-size:10px;font-weight:650}
 .nav a[aria-current="page"]{background:var(--surface);color:var(--text)}
 .nav a[data-tab="map"]{color:var(--accent)}
@@ -88,7 +88,8 @@ img{display:block;width:100%;object-fit:cover}
 .detail-body section p,.detail-body li{font-size:13px;line-height:1.6;color:#d5dce5;overflow-wrap:anywhere}
 .detail-body ul{padding-left:19px;margin:0;display:grid;gap:4px}
 .saved-link{color:var(--accent)}
-.map-panel{position:relative;flex:1;min-height:0}
+/* 지도 타일은 z-index를 써서 지도 밖(하단 탭)까지 클릭을 가로챈다 → 지도 패널을 따로 잘린 층으로 가둔다 */
+.map-panel{position:relative;z-index:0;flex:1;min-height:0;overflow:hidden}
 .map-canvas{position:absolute;inset:0;width:100%;height:100%;background:#dce2d7;color:#1b222d;isolation:isolate}
 .map-canvas .leaflet-control-attribution{font-size:9px}
 .map-chips{border-bottom:1px solid var(--line)}
