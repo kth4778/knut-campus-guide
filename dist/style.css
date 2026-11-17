@@ -218,35 +218,50 @@ img{display:block;width:100%;object-fit:cover}
 .grade.premium{background:#4b3484;color:#eadfff!important}
 .exp-past{justify-self:start}
 
-/* ===== 인스타 느낌 덜어내기 (기능은 그대로, 모양만) ===== */
-/* 1) 피드 게시물: 화면 끝까지 붙은 정사각 사진 → 둥근 카드 */
-.feed-post{margin:12px 10px 0;padding:0 0 12px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#ffffff06,transparent 40%),var(--bg);overflow:hidden}
-.feed-post:last-child{margin-bottom:12px}
-.post-header{min-height:52px;padding:8px 8px 8px 12px}
-.post-cover{width:auto;margin:0 10px;border-radius:16px;aspect-ratio:16/11}
+/* ===== 인스타그램 홈 ===== */
+/* 위쪽 줄: 로고는 왼쪽, 아이콘은 오른쪽 (다국어 지구본 버튼도 오른쪽에 붙는다) */
+.top.home-top,.top.home-top.has-lang{grid-template-columns:minmax(0,1fr) auto;padding:0 6px 0 15px}
+.home-top .middle.brand{text-align:left;font-size:26px!important;font-weight:900;letter-spacing:-.06em!important}
+.home-actions{display:flex;align-items:center;gap:0}
+
+/* 스토리 줄 맨 앞 「새 게시물」 */
+.story-new .story-ring{background:none;padding:3px;position:relative}
+.story-new .story-name{color:var(--muted)}
+.story-plus{position:absolute;right:0;bottom:0;width:21px;height:21px;border-radius:50%;background:#3d8bff;color:#fff;border:2.5px solid var(--bg);display:grid;place-items:center;font-style:normal;font-weight:800;font-size:15px;line-height:1}
+
+/* 게시물: 화면 끝까지 붙은 정사각 사진 */
+.feed-post{margin:0;padding:0 0 16px;border:0;border-radius:0;background:none}
+.post-header{min-height:54px;padding:8px 4px 8px 12px}
+.post-header .ib{color:var(--text)}
+.post-cover{position:relative;margin:0;border-radius:0;aspect-ratio:1/1;user-select:none;-webkit-user-select:none}
 .welcome-post .post-cover{aspect-ratio:4/3}
-.cover-art{gap:8px}
-.cover-art img,.cover-art>.icon{width:min(26vw,120px);height:min(26vw,120px)}
-.cover-credit{padding:6px 14px 0}
-.post-caption{padding:2px 14px 0}
-.post-caption>strong:first-child{display:inline-flex;align-items:center;gap:4px;margin:4px 0 6px;padding:3px 9px;border-radius:999px;background:#ffd66b1f;color:#ffd66b;font-size:11.5px}
-.post-caption>strong:first-child::before{content:"★";font-size:11px}
-.post-caption p strong{display:block;font-size:14px;margin-bottom:1px}
-.post-caption p{color:#d5dce5}
-/* 2) 하트·말풍선 아이콘 줄 → 글자가 함께 있는 버튼 */
-.post-actions{gap:5px;padding:10px 10px 4px;flex-wrap:wrap}
-.post-actions .ib{min-width:0;min-height:32px;padding:0 9px;border-radius:999px;background:var(--surface);display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:650;color:#d5dce5}
-.post-actions .ib .icon{width:16px;height:16px}
-.post-actions .ib:hover{background:#2c333b}
-.post-actions .ib[data-action="like"]::after{content:"좋아요"}
-.post-actions .ib[data-action="like"][aria-pressed="true"]{background:#ff45661f}
-.post-actions .ib[data-action="comments"]::after{content:"댓글"}
-.post-actions a.ib[href*="focus="]::after{content:"지도"}
-.post-actions a.ib[href="#/map"]::after{content:"캠퍼스 지도"}
-.post-actions .ib[data-action="copy"]::after{content:"공유"}
-.post-actions .ib[data-action="save"]::after{content:"저장"}
-.post-actions .ib[data-action="save"][aria-pressed="true"]{background:#a6c8ff26;color:var(--accent)}
-.post-actions .ib[data-action="save"][aria-pressed="true"]::after{content:"저장됨"}
+.cover-art img,.cover-art>.icon{width:min(34vw,150px);height:min(34vw,150px)}
+.cover-credit{padding:6px 13px 0}
+
+/* 아이콘 줄: ♡ 💬 ✈︎ 📍 … 🔖 */
+.post-actions{gap:0;padding:4px 4px 0}
+.post-actions .ib{min-width:42px;min-height:42px;border-radius:50%}
+.post-actions .ib:hover{background:none;opacity:.7}
+.post-actions .icon{width:25px;height:25px}
+/* 하트 그림(heart.png)은 여백이 커서 옆 아이콘보다 작아 보인다 → 크기를 맞춘다 */
+.post-actions .ib[data-action="like"] .icon{transform:scale(1.25)}
+.post-actions .ib[data-action="like"]:active .icon{transform:scale(1.05)}
+.post-actions .ib[data-action="like"][aria-pressed="true"]{color:#ff3040}
+
+/* 추천 수 · 캡션 · 댓글 · 날짜 */
+.post-caption{padding:0 13px}
+.post-likes{font-size:13.5px;font-weight:750;margin-bottom:3px}
+.caption-text{font-size:13.5px;line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.caption-text strong{font-weight:750;margin-right:2px}
+.caption-more{display:inline-block;font-size:13px;color:var(--muted)}
+.post-caption button{margin-top:5px;font-size:13px}
+.post-time{margin-top:5px;font-size:11px;color:var(--muted);letter-spacing:.01em}
+
+/* 두 번 눌러 좋아요: 가운데 하트가 튀어 올랐다 사라진다 */
+.like-burst{position:absolute;left:50%;top:50%;width:96px;height:96px;margin:-48px 0 0 -48px;pointer-events:none;opacity:0;
+  background:#fff;mask:url('assets/heartFilled.png') center / contain no-repeat;-webkit-mask:url('assets/heartFilled.png') center / contain no-repeat;filter:drop-shadow(0 4px 14px #0008)}
+.like-burst.on{animation:like-burst .8s ease-out}
+@keyframes like-burst{0%{opacity:0;transform:scale(.3)}15%{opacity:.95;transform:scale(1.15)}30%{transform:scale(.95)}45%,75%{opacity:.95;transform:scale(1)}100%{opacity:0;transform:scale(1) translateY(-30px)}}
 
 /* 설정 */
 .settings{padding-bottom:20px}

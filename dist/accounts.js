@@ -94,7 +94,9 @@ export function accountAvatar(post) {
 // ---------- 홈 맨 위 동그라미 줄 ----------
 export function storyRail() {
   const { escape, route } = ctx;
+  // 맨 앞은 인스타 「내 스토리」 자리: 새 게시물 쓰기
   return `<nav class="stories" aria-label="계정">
+    <a class="story story-new" href="${route('compose')}"><span class="story-ring"><img class="acct-disc md" src="assets/profile-logo.webp" alt=""><i class="story-plus">+</i></span><span class="story-name">새 게시물</span></a>
     ${ACCOUNTS.filter(a => accountPosts(a).length).map(a => `<a class="story${seen.has(a.id) ? ' seen' : ''}" href="${route('account', {id:a.id})}">
       <span class="story-ring">${disc(a)}</span><span class="story-name">${escape(a.name)}</span>
     </a>`).join('')}
@@ -160,10 +162,15 @@ export function partnerFeedPost(p) {
     <header class="post-header">
       <a href="${route('account', {id:'제휴'})}" aria-label="교통대 제휴 계정 열기">${disc(account, 'sm')}</a>
       <a class="post-owner" href="${route('account', {id:'제휴'})}"><strong>교통대 제휴</strong><small>${escape(p.cat)} · ${escape(shortAddr(p.addr))}</small></a>
-      ${ctx.iconLink('arrow', '게시물 열기', url)}
+      ${ctx.iconLink('more', '게시물 열기', url)}
     </header>
-    <a class="post-cover" href="${url}" aria-label="${escape(p.name)} 제휴 게시물">${partnerCard(p)}</a>
-    <div class="post-caption"><p><strong>교통대 제휴</strong> ${escape(p.name)} 제휴 혜택이에요. 재학생·휴학생 학생증을 보여주세요.</p></div>
+    <div class="post-cover" data-like-area="${p.id}" aria-label="${escape(p.name)} 제휴 · 두 번 누르면 좋아요">${partnerCard(p)}<span class="like-burst" aria-hidden="true"></span></div>
+    <div class="post-actions">${ctx.likeButton(p.id)}${ctx.iconLink('arrow', '제휴 게시물 열기', url)}</div>
+    <div class="post-caption">
+      <p class="post-likes" data-likes="${p.id}" ${ctx.isLiked(p.id) ? '' : 'hidden'}>추천 1개</p>
+      <p class="caption-text"><a href="${route('account', {id:'제휴'})}"><strong>교통대 제휴</strong></a> ${escape(p.name)} 제휴 혜택이에요. 재학생·휴학생 학생증을 보여주세요.</p>
+      ${p.from ? `<p class="post-time">${+p.from.slice(5, 7)}월 ${+p.from.slice(8)}일</p>` : ''}
+    </div>
   </article>`;
 }
 

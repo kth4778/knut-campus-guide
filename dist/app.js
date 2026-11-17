@@ -34,6 +34,8 @@ const paths = {
   book: '<path d="M3 4h6l3 2 3-2h6v15h-6l-3 2-3-2H3zm9 2v15"/>',
   spark: '<path d="M12 2c1 7 3 9 10 10-7 1-9 3-10 10-1-7-3-9-10-10 7-1 9-3 10-10z"/>',
   share: '<path d="M12 15V3m-5 5 5-5 5 5M5 12H3v9h18v-9h-2"/>',
+  send: '<path d="M21.5 2.5 10.6 13.4M21.5 2.5 14.6 21l-4-7.6-7.6-4z"/>',
+  more: '<circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
   moa: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
@@ -207,24 +209,35 @@ function creditLine(post) {
   </div>`;
 }
 
+// 인스타그램처럼: 아이콘만 있는 줄(♡ 💬 ✈︎ 📍 … 🔖) → 추천 수 → 캡션 2줄 → 댓글 → 날짜
 function postActions(post) {
   const on = likes.has(post.id);
   return `<div class="post-actions">
     ${button(on?'heartFilled':'heart',on?'좋아요 취소':'좋아요','like',`data-id="${post.id}" aria-pressed="${on}"`)}
     ${button('comment','댓글','comments',`data-id="${post.id}"`)}
+    ${post.local ? '' : button('send','게시물 링크 복사','copy',`data-id="${post.id}"`)}
     ${post.latlng ? iconLink('pin','지도에서 위치 보기',route('map',{focus:post.id})) : ''}
-    ${post.local ? '' : button('share','게시물 링크 복사','copy',`data-id="${post.id}"`)}
     ${saveButton(post)}
   </div>`;
 }
 
-function postCaption(post) {
+const likeCount = post => (post.rec || 0) + (likes.has(post.id) ? 1 : 0);
+
+function postedDate(post) {
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(post.checked || '') ? new Date(post.checked) : null;
+  return date ? `${date.getMonth() + 1}월 ${date.getDate()}일` : '';
+}
+
+function postCaption(post, url) {
   const text = post.local ? post.caption : (post.reasons?.[0] ?? post.address ?? '');
   const count = comments[post.id]?.length ?? 0;
+  const n = likeCount(post);
   return `<div class="post-caption">
-    ${post.rec ? `<strong>추천 ${post.rec}개</strong>` : ''}
-    <p><strong>${escape(post.name)}</strong> ${escape(text)}</p>
-    <button data-action="comments" data-id="${post.id}">${count?'댓글 '+count+'개 모두 보기':'댓글 달기'}</button>
+    <p class="post-likes" data-likes="${post.id}" ${n?'':'hidden'}>추천 ${n}개</p>
+    <p class="caption-text"><a href="${url}"><strong>${escape(post.name)}</strong></a> ${escape(text)}</p>
+    ${text.length > 60 ? `<a class="caption-more" href="${url}">더 보기</a>` : ''}
+    <button data-action="comments" data-id="${post.id}">${count?'댓글 '+count+'개 모두 보기':'댓글 달기…'}</button>
+    ${postedDate(post) ? `<p class="post-time">${postedDate(post)}</p>` : ''}
   </div>`;
 }
 
@@ -234,12 +247,12 @@ function feedPost(post) {
     <header class="post-header">
       ${accountAvatar(post) || `<a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>`}
       <a class="post-owner" href="${url}"><strong>${escape(post.name)}</strong><small>${escape(post.category)}${post.area && post.area!=='장소 없음'?' · '+escape(post.area):''}</small></a>
-      ${iconLink('arrow','게시물 열기',url)}
+      ${iconLink('more','게시물 열기',url)}
     </header>
-    <a class="post-cover" href="${url}" aria-label="${escape(post.name)} 게시물">${postCover(post)}</a>
+    <div class="post-cover" data-like-area="${post.id}" aria-label="${escape(post.name)} 사진 · 두 번 누르면 좋아요">${postCover(post)}<span class="like-burst" aria-hidden="true"></span></div>
     ${creditLine(post)}
     ${postActions(post)}
-    ${postCaption(post)}
+    ${postCaption(post, url)}
   </article>`;
 }
 
@@ -247,7 +260,7 @@ function welcomePost() {
   return `<article class="feed-post welcome-post">
     <header class="post-header"><a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>
       <a class="post-owner" href="${route('map')}"><strong>KNUTIPS</strong><small>한국교통대 충주캠퍼스</small></a>
-      ${iconLink('pin','캠퍼스 지도',route('map'))}
+      ${iconLink('more','캠퍼스 지도',route('map'))}
     </header>
     <a class="post-cover campus-cover" href="${route('map')}" aria-label="캠퍼스 지도 열기">
       <img class="cover-image" src="assets/campus.webp" alt="충주캠퍼스 일러스트" width="900" height="675" fetchpriority="high">
@@ -263,7 +276,7 @@ function home(category) {
     ? [...localPosts.map(post => ({kind:'place', post})), ...homeFeed(places)]
     : [...localPosts, ...places].filter(post => post.category === category).map(post => ({kind:'place', post}));
   const visible = items.slice(0, homeLimit);
-  return `${top('KNUTIPS', iconLink('plus','새 게시물',route('compose')), iconLink('bookmark','저장한 게시물',route('my',{tab:'saved'})), true)}
+  return `<header class="top home-top"><div class="middle brand">KNUTIPS</div><div class="home-actions">${iconLink('plus','새 게시물',route('compose'))}</div></header>
     <main class="scroll" aria-label="홈">
       ${storyRail()}
       ${category==='전체'?welcomePost():''}
@@ -867,6 +880,7 @@ app.addEventListener('click', event => {
       control.innerHTML = icon(likes.has(id)?'heartFilled':'heart');
       control.setAttribute('aria-label',likes.has(id)?'좋아요 취소':'좋아요');
       control.setAttribute('aria-pressed',likes.has(id));
+      updateLikeCount(id);
       break;
     }
     case 'comments': openComments(control.dataset.id); break;
@@ -912,6 +926,37 @@ app.addEventListener('click', event => {
       history.replaceState(history.state,'',route('map',mapCategory==='전체'?{}:{category:mapCategory}));
       break;
   }
+});
+
+function updateLikeCount(id) {
+  const post = findPost(id);
+  app.querySelectorAll(`[data-likes="${id}"]`).forEach(line => {
+    const n = post ? likeCount(post) : (likes.has(id) ? 1 : 0);
+    line.textContent = `추천 ${n}개`;
+    line.hidden = !n;
+  });
+}
+
+// 사진을 두 번 누르면 좋아요 (인스타처럼 이미 누른 건 취소하지 않는다) + 하트가 튀어 오른다
+let lastTap = {id:'', at:0};
+app.addEventListener('click', event => {
+  const area = event.target.closest('[data-like-area]');
+  if (!area) return;
+  const id = area.dataset.likeArea;
+  const now = Date.now();
+  if (lastTap.id !== id || now - lastTap.at > 320) { lastTap = {id, at:now}; return; }
+  lastTap = {id:'', at:0};
+  const burst = area.querySelector('.like-burst');
+  burst.classList.remove('on'); void burst.offsetWidth; burst.classList.add('on');
+  if (likes.has(id)) return;
+  likes.add(id);
+  try { writeLocal('likes',[...likes]); } catch {}
+  app.querySelectorAll(`[data-action="like"][data-id="${id}"]`).forEach(control => {
+    control.innerHTML = icon('heartFilled');
+    control.setAttribute('aria-label','좋아요 취소');
+    control.setAttribute('aria-pressed','true');
+  });
+  updateLikeCount(id);
 });
 
 function readPhoto(file) {
@@ -1005,7 +1050,9 @@ async function start() {
     }));
     byId = new Map(places.map(place => [place.id,place]));
     mappedPlaces = places.filter(place => place.latlng);
-    await initAccounts({escape, route, top, iconLink, postCover, getPlaces:() => places});
+    await initAccounts({escape, route, top, iconLink, postCover, getPlaces:() => places,
+      isLiked:id => likes.has(id),
+      likeButton:id => button(likes.has(id)?'heartFilled':'heart',likes.has(id)?'좋아요 취소':'좋아요','like',`data-id="${id}" aria-pressed="${likes.has(id)}"`)});
     window.addEventListener('hashchange', event => {
       if (['place','compose','post'].includes(readRoute()[0]) && readRoute()[0] !== currentView) {
         placeBack = new URL(event.oldURL).hash || '#/';
