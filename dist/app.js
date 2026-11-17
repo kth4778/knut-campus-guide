@@ -276,7 +276,7 @@ function home(category) {
     ? [...localPosts.map(post => ({kind:'place', post})), ...homeFeed(places)]
     : [...localPosts, ...places].filter(post => post.category === category).map(post => ({kind:'place', post}));
   const visible = items.slice(0, homeLimit);
-  return `<header class="top home-top"><div class="middle brand">KNUTIPS</div><div class="home-actions">${iconLink('plus','새 게시물',route('compose'))}</div></header>
+  return `<header class="top home-top"><div class="middle brand">KNUTIPS</div><div class="home-actions"></div></header>
     <main class="scroll" aria-label="홈">
       ${storyRail()}
       ${category==='전체'?welcomePost():''}

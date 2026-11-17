@@ -96,7 +96,7 @@ export function storyRail() {
   const { escape, route } = ctx;
   // 맨 앞은 인스타 「내 스토리」 자리: 새 게시물 쓰기
   return `<nav class="stories" aria-label="계정">
-    <a class="story story-new" href="${route('compose')}"><span class="story-ring"><img class="acct-disc md" src="assets/profile-logo.webp" alt=""><i class="story-plus">+</i></span><span class="story-name">새 게시물</span></a>
+    <a class="story story-new" href="${route('compose')}"><span class="story-ring"><span class="report-disc"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span><i class="story-plus">+</i></span><span class="story-name">제보하기</span></a>
     ${ACCOUNTS.filter(a => accountPosts(a).length).map(a => `<a class="story${seen.has(a.id) ? ' seen' : ''}" href="${route('account', {id:a.id})}">
       <span class="story-ring">${disc(a)}</span><span class="story-name">${escape(a.name)}</span>
     </a>`).join('')}
