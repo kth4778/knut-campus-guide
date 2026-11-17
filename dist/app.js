@@ -313,7 +313,7 @@ function savedPage() {
             <span><b>0</b>팔로잉</span>
           </div>
         </div>
-        <a class="profile-chat" href="${route('chat')}" aria-label="챗봇에게 물어보기"><img src="assets/chatbot.webp" alt="" width="64" height="64"><span>챗봇</span></a></div>
+        <a class="profile-chat" href="${route('chat')}" aria-label="챗봇에게 물어보기">${icon('chat')}<span>챗봇</span></a></div>
         <p>한국교통대 충주캠퍼스</p>
         <div class="profile-actions"><a class="pill" href="${route('compose')}">새 게시물</a><a class="pill" href="${route('search')}">장소 찾아보기</a></div>
       </section>

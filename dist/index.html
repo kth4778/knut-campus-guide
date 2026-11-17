@@ -9,14 +9,23 @@
   <link rel="icon" href="assets/app-192.png">
   <link rel="stylesheet" href="vendor/leaflet.css">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="island.css">
   <link rel="stylesheet" href="moa.css">
   <link rel="stylesheet" href="chat.css">
   <script src="vendor/leaflet.js" defer></script>
   <script src="app.js" type="module"></script>
   <script src="desktop-scroll.js" defer></script>
+  <script src="island.js" defer></script>
 </head>
 <body>
   <div class="device">
+    <div class="island-live" role="button" tabindex="0" aria-label="지금 재생 중: 캠퍼스 산책. 누르면 크게 보기">
+      <span class="island-art"></span>
+      <span class="island-info"><strong>캠퍼스 산책</strong><small>Lo-fi · 우리학교 가이드 · <span class="island-time">0:38</span></small></span>
+      <span class="island-eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+      <button type="button" class="island-toggle" aria-label="재생/일시정지"><svg class="pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg><svg class="play" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5Z"/></svg></button>
+      <span class="island-bar"><i></i></span>
+    </div>
     <div class="screen">
       <div class="status" aria-hidden="true">
         <span class="status-time">9:41</span><span class="island"></span>

@@ -1,0 +1,39 @@
+/* 다이내믹 아일랜드 「지금 재생 중」 — 틀 그림(iphone-frame.webp) 속 아일랜드 자리에 그대로 겹친다.
+   그림 속 아일랜드 위치(887×1774 기준): x 329~556, y 89~155 → 아래 % 값 */
+.island-live{position:absolute;z-index:3;left:37.09%;top:5.02%;width:25.7%;height:3.78%;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 3.2% 0 1.6%;
+  border-radius:999px;background:#000;color:#fff;cursor:pointer;overflow:hidden;
+  transition:left .35s cubic-bezier(.3,1.3,.5,1),width .35s cubic-bezier(.3,1.3,.5,1),height .35s cubic-bezier(.3,1.3,.5,1),border-radius .35s}
+.island-art{flex:none;height:62%;aspect-ratio:1;border-radius:6px;background:url("assets/album.webp") center / cover;box-shadow:0 0 0 1px #ffffff1a}
+.island-info{display:none;min-width:0;flex:1}
+.island-info strong{display:block;font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.island-info small{display:block;font-size:12px;color:#9aa4b2;margin-top:1px}
+
+/* 소리 막대: 높이가 엇갈려 출렁인다. 색은 앨범 표지의 파랑 */
+.island-eq{flex:none;display:flex;align-items:center;gap:2px;height:46%}
+.island-eq i{display:block;width:3px;height:100%;border-radius:2px;background:linear-gradient(#9cc4ff,#4f7cff);transform-origin:center;animation:island-eq 1s ease-in-out infinite}
+.island-eq i:nth-child(1){animation-duration:.9s}
+.island-eq i:nth-child(2){animation-duration:.7s;animation-delay:-.3s}
+.island-eq i:nth-child(3){animation-duration:1.1s;animation-delay:-.5s}
+.island-eq i:nth-child(4){animation-duration:.8s;animation-delay:-.2s}
+.island-eq i:nth-child(5){animation-duration:1s;animation-delay:-.6s}
+@keyframes island-eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+.island-live.paused .island-eq i{animation-play-state:paused;transform:scaleY(.25)}
+
+/* 누르면 커져서 곡 정보·진행 막대·재생 버튼이 보인다 */
+.island-live.open{left:9.5%;width:81%;height:9.6%;border-radius:34px;flex-wrap:wrap;align-content:center;padding:0 5% ;gap:6px 12px}
+.island-live.open .island-art{height:auto;width:15%}
+.island-live.open .island-info{display:block}
+.island-live.open .island-eq{height:22px}
+.island-bar{display:none;width:100%;height:4px;border-radius:2px;background:#ffffff26;overflow:hidden}
+.island-bar i{display:block;height:100%;width:0;background:#fff;border-radius:2px}
+.island-live.open .island-bar{display:block}
+.island-toggle{display:none;flex:none;width:26px;height:26px;color:#fff}
+.island-toggle svg{width:100%;height:100%;fill:currentColor}
+.island-live.open .island-toggle{display:block}
+.island-toggle .play{display:none}
+.island-live.paused .island-toggle .play{display:block}
+.island-live.paused .island-toggle .pause{display:none}
+
+@media (prefers-reduced-motion:reduce){.island-eq i{animation:none;transform:scaleY(.6)}.island-live{transition:none}}
+@media (max-width:520px){.island-live{display:none}}
