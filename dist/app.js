@@ -224,14 +224,14 @@ function feedPost(post) {
 function welcomePost() {
   return `<article class="feed-post welcome-post">
     <header class="post-header"><a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>
-      <a class="post-owner" href="${route('map')}"><strong>우리학교 가이드</strong><small>한국교통대 충주캠퍼스</small></a>
+      <a class="post-owner" href="${route('map')}"><strong>KNUTIPS</strong><small>한국교통대 충주캠퍼스</small></a>
       ${iconLink('pin','캠퍼스 지도',route('map'))}
     </header>
     <a class="post-cover campus-cover" href="${route('map')}" aria-label="캠퍼스 지도 열기">
       <img class="cover-image" src="assets/campus.webp" alt="충주캠퍼스 일러스트" width="900" height="675" fetchpriority="high">
     </a>
     <div class="post-actions">${iconLink('pin','캠퍼스 지도',route('map'))}</div>
-    <div class="post-caption"><p><strong>우리학교 가이드</strong> 충주캠퍼스의 교내 시설과 학교 앞 장소를 찾아보세요.</p></div>
+    <div class="post-caption"><p><strong>KNUTIPS</strong> 충주캠퍼스의 교내 시설과 학교 앞 장소를 찾아보세요.</p></div>
   </article>`;
 }
 
@@ -248,7 +248,7 @@ function home(category) {
   const allPosts = [...localPosts,...places];
   const items = category === '전체' ? allPosts : allPosts.filter(post => post.category === category);
   const visible = items.slice(0, homeLimit);
-  return `${top('우리학교 가이드', iconLink('plus','새 게시물',route('compose')), iconLink('bookmark','저장한 게시물',route('my',{tab:'saved'})), true)}
+  return `${top('KNUTIPS', iconLink('plus','새 게시물',route('compose')), iconLink('bookmark','저장한 게시물',route('my',{tab:'saved'})), true)}
     <main class="scroll" aria-label="홈">
       ${categoryRail(category)}
       ${category==='전체'?moaBanner():''}
@@ -302,11 +302,11 @@ function savedPage() {
   const empty = profileTab==='saved'
     ? `<div class="empty"><p>아직 저장한 게시물이 없어요.</p><a class="primary" href="${route('search')}">장소 찾아보기</a></div>`
     : `<div class="empty"><strong>첫 번째 게시물을 만들어보세요</strong><p>학교에서 발견한 장소를 기록해 보세요.</p><a class="primary" href="${route('compose')}">새 게시물</a></div>`;
-  return `${top('우리학교 가이드',iconLink('plus','새 게시물',route('compose')),iconLink('menu','설정',route('settings')))}
+  return `${top('KNUTIPS',iconLink('plus','새 게시물',route('compose')),iconLink('menu','설정',route('settings')))}
     <main class="scroll">
       <section class="profile">
         <div class="profile-line">${brandAvatar()}<div class="profile-info">
-          <h1>우리학교 가이드</h1>
+          <h1>KNUTIPS</h1>
           <div class="profile-counts">
             <a href="${route('my')}"><b>${localPosts.length}</b>게시물</a>
             <span><b>0</b>팔로워</span>
