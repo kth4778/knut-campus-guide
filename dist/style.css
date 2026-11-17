@@ -183,8 +183,8 @@ img{display:block;width:100%;object-fit:cover}
 .sheet-top button{position:absolute;right:6px;top:4px}
 .comment-list{min-height:128px;max-height:220px;overflow:auto;padding:10px 13px}
 .comment-list p{display:flex;align-items:center;gap:8px;font-size:13px;padding:7px 0;overflow-wrap:anywhere}
-.comment-sheet form{display:flex;align-items:center;gap:8px;padding:9px;border-top:1px solid var(--line)}
-.comment-sheet form button{flex:none;padding:5px;color:var(--accent);font-weight:700}
+.comment-sheet:not(.moa-sheet) form{display:flex;align-items:center;gap:8px;padding:9px;border-top:1px solid var(--line)}
+.comment-sheet:not(.moa-sheet) form button{flex:none;padding:5px;color:var(--accent);font-weight:700}
 @media(max-width:520px){.comment-sheet{inset:auto 0 0;width:100%;max-width:none;padding-bottom:env(safe-area-inset-bottom)}}
 
 /* 버스 · 고속버스 */
