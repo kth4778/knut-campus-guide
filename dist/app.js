@@ -74,6 +74,10 @@ let byId = new Map();
 let mappedPlaces = [];
 let map = null;
 let mapMarkers = null;
+const NAVER_MAP_ID = 'g0yc562ytb';
+let usingNaver = false;
+let naverFailed = false;
+let naverInfo = null;
 let mapCategory = '전체';
 let focusedMapPlace = null;
 let searchQuery = '';
@@ -404,8 +408,40 @@ function mapGroupPopup(group) {
   return popup;
 }
 
+function clearMarkers() {
+  if (usingNaver) {
+    mapMarkers.forEach(marker => marker.setMap(null));
+    mapMarkers = [];
+    naverInfo.close();
+  } else mapMarkers.clearLayers();
+}
+
+function addLeafletMarker(group, place, selected, name) {
+  const marker = L.marker(place.latlng, {
+    title:name, alt:name, zIndexOffset:selected?1000:0, riseOnHover:true,
+    icon:L.divIcon({className:'guide-pin',html:markerHtml(place,selected,group.length),iconSize:[26,26],iconAnchor:[13,13]}),
+  }).addTo(mapMarkers);
+  if (group.length>1) marker.bindPopup(() => mapGroupPopup(group), {offset:[0,-9]});
+  else marker.on('click', () => { location.hash = route('map',{focus:place.id}); });
+}
+
+function addNaverMarker(group, place, selected, name) {
+  const {maps} = window.naver;
+  const marker = new maps.Marker({
+    map, position:new maps.LatLng(...place.latlng), title:name, zIndex:selected?1000:0,
+    icon:{content:markerHtml(place,selected,group.length), anchor:new maps.Point(13,13)},
+  });
+  maps.Event.addListener(marker, 'click', () => {
+    if (group.length>1) {
+      naverInfo.setContent(mapGroupPopup(group));
+      naverInfo.open(map, marker);
+    } else location.hash = route('map',{focus:place.id});
+  });
+  mapMarkers.push(marker);
+}
+
 function paintMarkers() {
-  mapMarkers.clearLayers();
+  clearMarkers();
   const groups = new Map();
   for (const place of mappedPlaces) {
     if (mapCategory !== '전체' && place.category!==mapCategory && place!==focusedMapPlace) continue;
@@ -417,12 +453,7 @@ function paintMarkers() {
     const selected = group.includes(focusedMapPlace);
     const place = selected ? focusedMapPlace : group[0];
     const name = group.length===1 ? place.name : `${place.name} 외 ${group.length - 1}곳`;
-    const marker = L.marker(place.latlng, {
-      title:name, alt:name, zIndexOffset:selected?1000:0, riseOnHover:true,
-      icon:L.divIcon({className:'guide-pin',html:markerHtml(place,selected,group.length),iconSize:[26,26],iconAnchor:[13,13]}),
-    }).addTo(mapMarkers);
-    if (group.length>1) marker.bindPopup(() => mapGroupPopup(group), {offset:[0,-9]});
-    else marker.on('click', () => { location.hash = route('map',{focus:place.id}); });
+    (usingNaver ? addNaverMarker : addLeafletMarker)(group, place, selected, name);
   }
 }
 
@@ -434,16 +465,71 @@ function updateMap(focus, category) {
   showMapResult(focusedMapPlace);
   if (!map) return;
   paintMarkers();
+  const center = focusedMapPlace?.latlng ?? campus;
+  const zoom = focusedMapPlace ? 17 : 15;
+  if (usingNaver) {
+    map.setCenter(new window.naver.maps.LatLng(...center));
+    map.setZoom(zoom);
+    return;
+  }
   map.invalidateSize({pan:false});
   map.closePopup();
-  if (focusedMapPlace) map.setView(focusedMapPlace.latlng, 17);
-  else map.setView(campus, 15);
+  map.setView(center, zoom);
 }
 
-function bindMap(focus, category) {
+function destroyMap() {
+  if (!map) return;
+  if (usingNaver) {
+    clearMarkers();
+    map.destroy();
+  } else map.remove();
+  map = null;
+}
+
+// 네이버 지도를 먼저 시도한다. SDK를 못 받거나 인증에 실패하면 Leaflet으로 그린다.
+function loadNaverMaps() {
+  if (!loadNaverMaps.ready) {
+    // 등록 안 된 주소에서는 스크립트는 받아지고 이 함수만 불린다.
+    window.navermap_authFailure = () => {
+      naverFailed = true;
+      if (currentView !== 'map' || !usingNaver) return;
+      // 인증에 실패한 지도는 정리 중에 오류를 내기도 하고, 지도 칸에 실패 안내 배경을 남긴다.
+      try { destroyMap(); } catch {}
+      map = null;
+      const canvas = document.getElementById('map-canvas');
+      canvas.replaceWith(Object.assign(document.createElement('div'), {id:'map-canvas', className:'map-canvas'}));
+      startLeaflet();
+      updateMap(focusedMapPlace, mapCategory);
+    };
+    loadNaverMaps.ready = new Promise(resolve => {
+      const script = document.createElement('script');
+      script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${NAVER_MAP_ID}`;
+      script.onload = resolve;
+      script.onerror = resolve;
+      setTimeout(resolve, 4000);
+      document.head.append(script);
+    });
+  }
+  return loadNaverMaps.ready;
+}
+
+function startNaver() {
+  const {maps} = window.naver;
+  usingNaver = true;
+  map = new maps.Map('map-canvas', {
+    center:new maps.LatLng(...campus), zoom:15, scaleControl:false, mapDataControl:false,
+    logoControlOptions:{position:maps.Position.BOTTOM_LEFT},
+    zoomControl:true, zoomControlOptions:{position:maps.Position.RIGHT_BOTTOM, style:maps.ZoomControlStyle.SMALL},
+  });
+  mapMarkers = [];
+  naverInfo = new maps.InfoWindow({borderColor:'#c9d2e0', anchorSize:new maps.Size(10,8), pixelOffset:new maps.Point(0,-6)});
+  maps.Event.addListener(map, 'click', () => naverInfo.close());
+}
+
+function startLeaflet() {
+  usingNaver = false;
   if (!window.L) {
     document.getElementById('map-canvas').innerHTML = '<div class="empty"><p>지도를 불러오지 못했어요.</p><a class="primary" href="#/search">장소 검색</a></div>';
-    updateMap(focus, category);
     return;
   }
   map = L.map('map-canvas',{zoomControl:false,scrollWheelZoom:true,attributionControl:true}).setView(campus,15);
@@ -455,7 +541,16 @@ function bindMap(focus, category) {
   }).addTo(map);
   tiles.on('tileerror', () => toast('배경 지도 연결이 지연되고 있어요.'));
   mapMarkers = L.layerGroup().addTo(map);
+}
+
+function bindMap(focus, category) {
   updateMap(focus, category);
+  loadNaverMaps().then(() => {
+    if (currentView !== 'map' || map) return;
+    if (window.naver?.maps && !naverFailed) startNaver();
+    else startLeaflet();
+    updateMap(focusedMapPlace, mapCategory);
+  });
 }
 
 function render() {
@@ -467,8 +562,7 @@ function render() {
     updateMap(place, category);
     return;
   }
-  map?.remove();
-  map = null;
+  destroyMap();
   if (path !== currentView) {
     homeLimit = 16;
     searchLimit = 35;

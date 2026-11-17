@@ -86,7 +86,7 @@ img{display:block;width:100%;object-fit:cover}
 .detail-body ul{padding-left:19px;margin:0;display:grid;gap:4px}
 .saved-link{color:var(--accent)}
 .map-panel{position:relative;flex:1;min-height:0}
-.map-canvas{position:absolute;inset:0;background:#dce2d7;color:#1b222d;isolation:isolate}
+.map-canvas{position:absolute;inset:0;width:100%;height:100%;background:#dce2d7;color:#1b222d;isolation:isolate}
 .map-canvas .leaflet-control-attribution{font-size:9px}
 .map-chips{border-bottom:1px solid var(--line)}
 .map-reset{position:absolute;z-index:401;right:10px;top:12px;background:#fff;color:#19273a;box-shadow:0 2px 8px #24345c44}
@@ -99,7 +99,8 @@ img{display:block;width:100%;object-fit:cover}
 .map-result .place-row{padding:0;border:0;min-height:44px}
 .map-result p{font-size:12px;color:var(--muted);line-height:1.5}
 .map-result .location-note{padding-top:5px}
-.map-popup{color:#182741;display:grid;gap:5px;font:13px "Guide Roboto",system-ui,sans-serif;max-height:140px;overflow:auto}
+.map-popup{padding:8px 10px;color:#182741;display:grid;gap:5px;font:13px "Guide Roboto",system-ui,sans-serif;max-height:140px;overflow:auto}
+.leaflet-popup .map-popup{padding:0}
 .map-popup a{display:block;padding:3px 3px;color:#16488e;text-decoration:underline}
 .toast{position:absolute;z-index:600;bottom:78px;left:50%;transform:translateX(-50%);background:#26313d;color:white;border-radius:18px;padding:8px 13px;white-space:nowrap;font-size:12px;opacity:0;pointer-events:none}
 .toast.show{opacity:1}
