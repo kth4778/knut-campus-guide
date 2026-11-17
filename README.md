@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://knut-campus-guide.cnblue123429.chatgpt.site/"><b>🔗 바로 써보기</b></a>
+  <a href="https://kth4778.github.io/knut-campus-guide/"><b>🔗 바로 써보기</b></a>
 </p>
 
 <p align="center">
@@ -49,7 +49,7 @@
 
 ## 로컬에서 실행
 
-빌드 과정이 없어요. `dist/`가 편집하는 곳이자 그대로 배포되는 폴더예요.
+빌드 과정이 없어요. `dist/`가 편집하는 곳이자 그대로 배포되는 폴더예요. `main`에 push하면 GitHub Actions가 `dist/`를 GitHub Pages에 자동으로 배포해요.
 
 ```bash
 python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
@@ -83,7 +83,7 @@ python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
 
 네이버 지도 JavaScript API v3를 먼저 불러와요. SDK를 못 받거나 인증에 실패하면 Leaflet + OpenStreetMap으로 바뀌어요.
 
-네이버 지도는 네이버 클라우드 Maps 애플리케이션에 **등록된 주소에서만** 떠요. 등록된 로컬 주소는 `http://localhost:5178`이에요. 다른 포트(예: 8853)에서는 Leaflet 지도가 떠요. 이건 고장이 아니에요.
+네이버 지도는 네이버 클라우드 Maps 애플리케이션에 **등록된 주소에서만** 떠요. 배포 주소 `https://kth4778.github.io`도 등록돼 있어요. 등록된 로컬 주소는 `http://localhost:5178`이에요. 다른 포트(예: 8853)에서는 Leaflet 지도가 떠요. 이건 고장이 아니에요.
 
 ## 알아둘 것
 
