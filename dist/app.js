@@ -113,13 +113,40 @@ function top(title, left = '', right = '', brand = false) {
   return `<header class="top"><div>${left}</div><div class="middle${brand?' brand':''}">${escape(title)}</div><div>${right}</div></header>`;
 }
 
+// 하단 탭 아이콘: 평소엔 같은 굵기의 빈 선, 선택된 탭은 같은 모양을 꽉 채운다 (돋보기는 굵은 선)
+const tabShapes = {
+  home: {
+    line: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/>',
+    fill: '<path fill-rule="evenodd" d="M2.4 9.2 12 1.7l9.6 7.5V19a2.7 2.7 0 0 1-2.7 2.7H5.1A2.7 2.7 0 0 1 2.4 19zM9.8 21.7v-6.2h4.4v6.2z"/>',
+  },
+  moa: {
+    line: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
+    fill: '<circle cx="9" cy="7.8" r="4"/><path d="M1.8 20.6a7.2 7.2 0 0 1 14.4 0z"/><path fill="none" stroke="currentColor" stroke-width="2.3" d="M16 4.4a3.6 3.6 0 0 1 0 7M18 14a6.6 6.6 0 0 1 3.8 6.1"/>',
+  },
+  pin: {
+    line: '<path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+    fill: '<path fill-rule="evenodd" d="M20.6 10c0 6.5-8.6 12-8.6 12S3.4 16.5 3.4 10a8.6 8.6 0 1 1 17.2 0ZM12 7.3a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Z"/>',
+  },
+  search: {
+    line: '<circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/>',
+    fill: '<circle cx="10.5" cy="10.5" r="6.6" fill="none" stroke="currentColor" stroke-width="2.9"/><path fill="none" stroke="currentColor" stroke-width="2.9" d="m15.8 15.8 5.2 5.2"/>',
+  },
+  // 프로필 로고(학사모 쓴 지도 핀)를 다른 탭과 같은 선 아이콘으로
+  logo: {
+    line: '<path d="M3.5 6.2 12 2.5l8.5 3.7L12 9.9z"/><path d="M20.5 6.2v3.6"/><path d="M17.4 15.6c0 4-5.4 7-5.4 7s-5.4-3-5.4-7a5.4 5.4 0 0 1 10.8 0Z"/><circle cx="12" cy="15.6" r="1.9"/>',
+    fill: '<path d="M2.8 6.2 12 2.1l9.2 4.1L12 10.3z"/><path fill="none" stroke="currentColor" stroke-width="2.2" d="M20.9 6.4v3.8"/><path fill-rule="evenodd" d="M18 15.6c0 4.4-6 7.6-6 7.6s-6-3.2-6-7.6a6 6 0 0 1 12 0ZM12 13.6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>',
+  },
+};
+const tabIcon = (name, on) =>
+  `<svg class="icon tab-icon" viewBox="0 0 24 24" fill="${on?'currentColor':'none'}" stroke="${on?'none':'currentColor'}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${tabShapes[name][on?'fill':'line']}</svg>`;
+
 function renderNav(active) {
   const links = [
     ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
   ];
   nav.innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
-    : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${page==='my'?brandAvatar():icon(symbol, page==='' && active===page)}<span>${label}</span></a>`).join('');
+    : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${tabIcon(page==='my'?'logo':symbol, active===page)}<span>${label}</span></a>`).join('');
 }
 
 function placeIcon(category) {

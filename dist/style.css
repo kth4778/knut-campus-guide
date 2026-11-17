@@ -32,9 +32,10 @@ img{display:block;width:100%;object-fit:cover}
 .ib:hover{background:var(--surface)}
 .nav{position:relative;z-index:5;flex:none;height:56px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:2px 7px;border-top:1px solid var(--line);background:var(--bg)}
 .nav a{height:45px;border-radius:26px;display:grid;place-content:center;justify-items:center;gap:2px;color:var(--muted);font-size:10px;font-weight:650}
-.nav a[aria-current="page"]{background:var(--surface);color:var(--text)}
-.nav a[data-tab="map"]{color:var(--accent)}
-.nav a[data-tab="map"] .icon{width:25px;height:25px}
+.nav a[aria-current="page"]{color:var(--text);font-weight:800}
+.nav .tab-icon{width:25px;height:25px;transition:transform .18s}
+.nav a[aria-current="page"] .tab-icon{animation:tab-pop .22s ease-out}
+@keyframes tab-pop{0%{transform:scale(.82)}70%{transform:scale(1.08)}100%{transform:scale(1)}}
 .gesture{flex:none;height:22px;display:grid;place-items:center;background:var(--bg)}
 .gesture::after{content:"";width:36%;height:5px;border-radius:3px;background:#f4f6f9}
 .rail{display:grid;grid-auto-columns:minmax(57px,1fr);grid-auto-flow:column;gap:7px;overflow:auto;scrollbar-width:none;padding:13px 13px 12px;border-bottom:1px solid var(--line)}
@@ -119,8 +120,6 @@ img{display:block;width:100%;object-fit:cover}
 @media(max-width:340px){.rail{gap:2px;padding-inline:7px;grid-auto-columns:minmax(48px,1fr)}}
 
 .native-icon{display:inline-block;background:currentColor;mask:var(--glyph) center / contain no-repeat}
-.nav .account-avatar{width:23px;height:23px}
-.nav [data-tab="my"][aria-current="page"] .account-avatar{outline:1px solid currentColor;outline-offset:2px}
 .account-avatar{width:33px;height:33px;flex:none;border-radius:50%;background:#252d3e}
 .feed-post{padding-bottom:12px;border-bottom:1px solid var(--line)}
 .post-header{display:flex;align-items:center;min-height:55px;gap:9px;padding:7px 8px 7px 12px}
