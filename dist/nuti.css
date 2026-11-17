@@ -16,3 +16,8 @@
 .sticker-panel button:hover{outline:2px solid var(--brand,#3566d4)}
 .sticker-panel img{width:100%;height:auto;border-radius:10px}
 
+
+/* 프로필 '누티 Nuti' 버튼 위로 빼꼼 내다보는 누티 (이모티콘과 같은 그림체, assets/nuti/peek.webp) */
+.profile-actions .profile-nuti{position:relative;overflow:visible}
+.profile-nuti .nuti-en{font-weight:500;color:var(--muted)}
+.nuti-peek{position:absolute;left:50%;bottom:calc(100% - 5px);width:74px;height:auto;transform:translateX(-50%);pointer-events:none;z-index:1}

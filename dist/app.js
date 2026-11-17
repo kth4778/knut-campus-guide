@@ -354,7 +354,7 @@ function savedPage() {
           </div>
         </div></div>
         <p>${escape(profile.bio)}</p>
-        <div class="profile-actions"><a class="pill" href="${route('profile-edit')}">프로필 편집</a><a class="pill" href="${route('chat')}">${icon('chat')}누티</a></div>
+        <div class="profile-actions"><a class="pill" href="${route('profile-edit')}">프로필 편집</a><a class="pill profile-nuti" href="${route('chat')}"><img class="nuti-peek" src="assets/nuti/peek.webp" alt="" width="320" height="174">${icon('chat')}누티 <span class="nuti-en">Nuti</span></a></div>
       </section>
       <nav class="profile-tabs" aria-label="프로필 게시물">
         <a href="${route('my')}" aria-label="내 게시물" ${profileTab==='posts'?'aria-current="page"':''}>${icon('grid')}</a>
