@@ -1,8 +1,51 @@
-# 우리학교 가이드 — 한국교통대 충주캠퍼스
+<p align="center">
+  <img src="docs/images/banner.jpg" alt="우리학교 가이드 배너" width="100%">
+</p>
 
-충주캠퍼스의 맛집·숨은장소·생활꿀팁을 인스타그램처럼 넘겨 보고 지도에서 찾는 모바일 웹이에요.
+<h1 align="center">우리학교 가이드</h1>
 
-- 배포 주소: https://knut-campus-guide.cnblue123429.chatgpt.site/
+<p align="center">
+  한국교통대 충주캠퍼스의 맛집 · 숨은장소 · 생활꿀팁을<br>
+  인스타그램처럼 넘겨 보고, 지도에서 바로 찾는 모바일 웹
+</p>
+
+<p align="center">
+  <a href="https://knut-campus-guide.cnblue123429.chatgpt.site/"><b>🔗 바로 써보기</b></a>
+</p>
+
+<p align="center">
+  <img alt="장소" src="https://img.shields.io/badge/장소·정보-321개-4f7cff">
+  <img alt="좌표" src="https://img.shields.io/badge/지도_핀-242곳-2db400">
+  <img alt="빌드" src="https://img.shields.io/badge/빌드-필요_없음-555">
+  <img alt="지도" src="https://img.shields.io/badge/지도-네이버_→_Leaflet_대체-03c75a">
+</p>
+
+## 화면
+
+<table>
+  <tr>
+    <th>홈 피드</th>
+    <th>검색</th>
+    <th>지도</th>
+  </tr>
+  <tr>
+    <td><img src="docs/images/screen-home.jpg" alt="홈 피드 화면" width="240"></td>
+    <td><img src="docs/images/screen-search.jpg" alt="검색 화면" width="240"></td>
+    <td><img src="docs/images/screen-map.jpg" alt="지도 화면" width="240"></td>
+  </tr>
+  <tr>
+    <td>위쪽 동그라미로 분류를 고르면<br>그 분류 게시물만 보여요</td>
+    <td>장소·건물·메뉴로 찾고,<br>누르면 지도로 바로 가요</td>
+    <td>고른 장소의 핀이<br>파랗게 강조돼요</td>
+  </tr>
+</table>
+
+## 주요 기능
+
+- **카테고리 피드** — 전체 · 맛집 · 숨은장소 · 생활꿀팁 · 자유
+- **검색 → 지도** — 좌표가 있는 장소는 `#/map?focus=<ID>`로 바로 이동해 핀을 강조하고, 좌표가 없는 글은 상세로 열려요
+- **지도** — 같은 건물의 장소는 핀 하나로 묶고, 누르면 목록이 떠요
+- **좋아요 · 댓글 · 저장 · 글쓰기** — 각자 브라우저에 저장돼요
 
 ## 로컬에서 실행
 
