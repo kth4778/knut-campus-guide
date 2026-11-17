@@ -111,7 +111,7 @@ function top(title, left = '', right = '', brand = false) {
 
 function renderNav(active) {
   const links = [
-    ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
+    ['','홈','home'], [null], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
   ];
   nav.innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
@@ -233,6 +233,15 @@ function welcomePost() {
   </article>`;
 }
 
+// MOA는 하단 탭 대신 홈 위쪽 배너로 들어가요 (하단 탭 빈칸은 비워 둬요)
+function moaBanner() {
+  return `<a class="moa-banner" href="${route('moa')}">
+    <span aria-hidden="true">🛵🚕</span>
+    <span><strong>MOA 같이하기</strong><small>배달비·택시비를 같이 나눠요</small></span>
+    ${icon('arrow')}
+  </a>`;
+}
+
 function home(category) {
   const allPosts = [...localPosts,...places];
   const items = category === '전체' ? allPosts : allPosts.filter(post => post.category === category);
@@ -240,6 +249,7 @@ function home(category) {
   return `${top('우리학교 가이드', iconLink('plus','새 게시물',route('compose')), iconLink('bookmark','저장한 게시물',route('my',{tab:'saved'})), true)}
     <main class="scroll" aria-label="홈">
       ${categoryRail(category)}
+      ${category==='전체'?moaBanner():''}
       ${category==='전체'?welcomePost():''}
       ${visible.map(feedPost).join('')}
       ${items.length>visible.length?`<div class="more-row"><button class="pill" data-action="more-home">게시물 더 보기</button></div>`:''}
@@ -762,7 +772,7 @@ function render() {
     app.innerHTML = mapPage();
     bindMap(place, category);
   } else if (path === 'search') app.innerHTML = searchPage();
-  else if (path === 'moa') app.innerHTML = moaPage(top('MOA', '', `<button type="button" class="ib" data-moa="new" aria-label="모집하기">${icon('plus')}</button>`));
+  else if (path === 'moa') app.innerHTML = moaPage(top('MOA', iconLink('back','홈으로',route('')), `<button type="button" class="ib" data-moa="new" aria-label="모집하기">${icon('plus')}</button>`));
   else if (path === 'my') {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
