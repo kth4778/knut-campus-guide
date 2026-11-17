@@ -1,4 +1,2 @@
 .DS_Store
 .openai/
-# 버스 API 키가 들어가는 파일. config.example.js를 복사해서 만들어요
-dist/config.js
