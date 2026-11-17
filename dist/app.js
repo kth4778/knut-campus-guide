@@ -2,6 +2,7 @@ import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
   LIVE_MAX, LIVE_EVERY, liveColor, routeSort, routeIndex, liveBuses, liveBusInfo} from './transit.js';
 
 import {moaPage, initMoa, openNewFund} from './moa.js';
+import {chatPage, initChat, scrollChat} from './chat.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -35,6 +36,7 @@ const paths = {
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
   moa: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
+  chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12Z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
   bus: '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3m8-3v3M8 14.5h.01M16 14.5h.01"/>',
 };
 
@@ -308,6 +310,7 @@ function savedPage() {
           <div class="profile-counts">
             <a href="${route('my')}"><b>${localPosts.length}</b>게시물</a>
             <a href="${route('my',{tab:'saved'})}"><b>${savedItems.length}</b>저장됨</a>
+            <a class="chat-count" href="${route('chat')}"><b>${icon('chat')}</b>챗봇</a>
           </div>
         </div></div>
         <p>한국교통대 충주캠퍼스</p>
@@ -776,12 +779,15 @@ function render() {
   else if (path === 'my') {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
+  } else if (path === 'chat') {
+    app.innerHTML = chatPage(top('챗봇', iconLink('back','프로필로',route('my'))));
+    scrollChat(app);
   } else if (path === 'settings') app.innerHTML = settingsPage();
   else if (path === 'compose') app.innerHTML = composePage();
   else if (path === 'post') app.innerHTML = localPostPage(findPost(params.get('id')));
   else if (path === 'place') app.innerHTML = placePage(place);
   else app.innerHTML = home(category);
-  renderNav(path === 'place' ? '' : path === 'settings' ? 'my' : path);
+  renderNav(path === 'place' ? '' : path === 'settings' || path === 'chat' ? 'my' : path);
 }
 
 function toast(message) {
@@ -945,6 +951,7 @@ function loadConfig() {
 }
 
 initMoa(app, {toast});
+initChat(app, {toast, getPlaces:() => places});
 
 async function start() {
   try {

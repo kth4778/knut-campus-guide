@@ -1,0 +1,30 @@
+/* 챗봇 (chat.js) */
+.profile-counts .chat-count{color:var(--accent)}
+.profile-counts .chat-count b{height:19px;display:flex;align-items:center}
+.profile-counts .chat-count .icon{width:19px;height:19px}
+
+.chat-page{flex:1;min-height:0;display:flex;flex-direction:column}
+.chat-log{flex:1;min-height:0;overflow:auto;scrollbar-width:none;padding:14px 12px;display:flex;flex-direction:column;gap:10px}
+.chat-log::-webkit-scrollbar{display:none}
+.chat-msg{max-width:84%;display:grid;gap:7px}
+.chat-msg p{padding:10px 13px;border-radius:18px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.chat-msg.bot{align-self:flex-start}
+.chat-msg.bot p{background:var(--surface);border-bottom-left-radius:6px}
+.chat-msg.me{align-self:flex-end}
+.chat-msg.me p{background:var(--blue);color:#fff;border-bottom-right-radius:6px}
+.chat-msg.error p{background:#ff8a8a1f;color:#ffc2c2}
+.chat-refs{display:flex;flex-wrap:wrap;gap:5px}
+.chat-refs .chip{padding:5px 10px;font-size:11.5px;color:var(--accent)}
+.chat-suggest{flex:none;display:flex;gap:6px;overflow:auto;scrollbar-width:none;padding:6px 12px}
+.chat-suggest::-webkit-scrollbar{display:none}
+.chat-form{flex:none;display:flex;gap:7px;padding:8px 12px;border-top:1px solid var(--line)}
+.chat-form input{flex:1;min-width:0;height:40px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--text);padding:0 15px;font-size:14px}
+.chat-form .primary{border-radius:20px;padding:0 15px}
+.chat-form .primary:disabled{opacity:.5}
+.chat-config{flex:none;padding:0 12px 8px;font-size:12px;color:var(--muted)}
+.chat-config summary{cursor:pointer;padding:4px 0}
+.chat-config label{display:grid;gap:4px;margin-top:8px}
+.chat-config input{border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--text);padding:7px 9px;font:inherit}
+.chat-config-actions{display:flex;gap:6px;margin:8px 0}
+.chat-config p{line-height:1.5}
+.chat-config code{font-size:11px;overflow-wrap:anywhere}
