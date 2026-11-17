@@ -14,10 +14,15 @@
 </head>
 <body>
   <div class="device">
+    <span class="hw hw-action" aria-hidden="true"></span><span class="hw hw-up" aria-hidden="true"></span><span class="hw hw-down" aria-hidden="true"></span><span class="hw hw-side" aria-hidden="true"></span>
     <div class="screen">
       <div class="status" aria-hidden="true">
-        <span>9:41</span><span class="island"></span>
-        <span class="status-icons"><i class="signal"></i><i class="wifi"></i><i class="battery"></i></span>
+        <span class="status-time">9:41</span><span class="island"></span>
+        <span class="status-icons">
+          <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.2c2.6 0 5 1 6.8 2.7l1.2-1.3A11.4 11.4 0 0 0 8 .4 11.4 11.4 0 0 0 0 3.6l1.2 1.3A9.7 9.7 0 0 1 8 2.2Z"/><path d="M8 5.6c1.7 0 3.2.6 4.4 1.7l1.2-1.3A8 8 0 0 0 8 3.8 8 8 0 0 0 2.4 6l1.2 1.3A6.3 6.3 0 0 1 8 5.6Z"/><path d="M8 9c.8 0 1.5.3 2 .8L8 12 6 9.8c.5-.5 1.2-.8 2-.8Z"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.8" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="16.5" height="9" rx="2.4"/><path d="M25 4.4v4.2c.8-.3 1.4-1.1 1.4-2.1s-.6-1.8-1.4-2.1Z" opacity=".45"/></svg>
+        </span>
       </div>
       <div id="app"><p class="loading" role="status">캠퍼스 가이드를 불러오는 중…</p></div>
       <nav id="nav" class="nav" aria-label="주요 메뉴"></nav>
