@@ -23,6 +23,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # 저장소 Secret 'BUS_API_KEY'가 있으면 배포본에만 config.js를 만들어 넣어요 (git에는 안 올라감)
+      - name: 버스 API 키 넣기
+        env:
+          BUS_API_KEY: ${{ secrets.BUS_API_KEY }}
+        run: |
+          if [ -n "$BUS_API_KEY" ]; then
+            printf "window.KNUT_CONFIG = { BUS_API_KEY: '%s' };\n" "$BUS_API_KEY" > dist/config.js
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

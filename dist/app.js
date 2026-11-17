@@ -722,8 +722,20 @@ app.addEventListener('submit', async event => {
   } finally { submit.disabled = false; }
 });
 
+// config.js(버스 API 키)는 git에 없을 수 있어요. 없으면 키 없이 시작해요.
+function loadConfig() {
+  if (!loadConfig.ready) loadConfig.ready = new Promise(resolve => {
+    const script = document.createElement('script');
+    script.src = 'config.js';
+    script.onload = script.onerror = resolve;
+    document.head.append(script);
+  });
+  return loadConfig.ready;
+}
+
 async function start() {
   try {
+    await loadConfig();
     const response = await fetch('./data/places.json');
     if (!response.ok) throw new Error('Place data unavailable');
     places = (await response.json()).map(place => ({
