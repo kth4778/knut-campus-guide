@@ -1,6 +1,8 @@
 import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
   LIVE_MAX, LIVE_EVERY, liveColor, routeSort, routeIndex, liveBuses, liveBusInfo} from './transit.js';
 
+import {moaPage, initMoa} from './moa.js';
+
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
 const campus = [36.969692, 127.872252];
@@ -32,6 +34,7 @@ const paths = {
   share: '<path d="M12 15V3m-5 5 5-5 5 5M5 12H3v9h18v-9h-2"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
+  moa: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
   bus: '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3m8-3v3M8 14.5h.01M16 14.5h.01"/>',
 };
 
@@ -108,7 +111,7 @@ function top(title, left = '', right = '', brand = false) {
 
 function renderNav(active) {
   const links = [
-    ['','홈','home'], [null], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
+    ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
   ];
   nav.innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
@@ -755,6 +758,7 @@ function render() {
     app.innerHTML = mapPage();
     bindMap(place, category);
   } else if (path === 'search') app.innerHTML = searchPage();
+  else if (path === 'moa') app.innerHTML = moaPage(top('MOA'));
   else if (path === 'my') {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
@@ -919,6 +923,8 @@ function loadConfig() {
   });
   return loadConfig.ready;
 }
+
+initMoa(app, {toast});
 
 async function start() {
   try {
