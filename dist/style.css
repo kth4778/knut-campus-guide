@@ -241,8 +241,8 @@ img{display:block;width:100%;object-fit:cover}
 .post-actions .ib[data-action="like"]::after{content:"좋아요"}
 .post-actions .ib[data-action="like"][aria-pressed="true"]{background:#ff45661f}
 .post-actions .ib[data-action="comments"]::after{content:"댓글"}
-.post-actions .ib[aria-label="지도에서 위치 보기"]::after{content:"지도"}
-.post-actions .ib[aria-label="캠퍼스 지도"]::after{content:"캠퍼스 지도"}
+.post-actions a.ib[href*="focus="]::after{content:"지도"}
+.post-actions a.ib[href="#/map"]::after{content:"캠퍼스 지도"}
 .post-actions .ib[data-action="copy"]::after{content:"공유"}
 .post-actions .ib[data-action="save"]::after{content:"저장"}
 .post-actions .ib[data-action="save"][aria-pressed="true"]{background:#a6c8ff26;color:var(--accent)}

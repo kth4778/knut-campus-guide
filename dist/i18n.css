@@ -1,0 +1,34 @@
+/* 다국어 모드 (i18n.js) — 홈 위쪽 지구본 버튼과 언어 메뉴 */
+.top.has-lang{grid-template-columns:86px minmax(0,1fr) 86px}
+.top.has-lang>div:last-child{display:flex;align-items:center;justify-content:flex-end;gap:2px}
+.lang{position:relative}
+.lang-btn{height:32px;display:inline-flex;align-items:center;gap:3px;padding:0 8px;border-radius:16px;background:var(--surface);color:var(--text);font-size:11.5px}
+.lang-btn .icon{width:16px;height:16px}
+.lang-btn b{font-weight:750;letter-spacing:.02em}
+.lang-menu{position:absolute;z-index:650;top:38px;right:0;min-width:120px;padding:5px;border:1px solid var(--line);border-radius:14px;background:var(--bg);box-shadow:0 10px 28px #0009;display:grid;gap:2px}
+.lang-menu[hidden]{display:none}
+.lang-menu button{text-align:left;padding:9px 11px;border-radius:9px;font-size:13.5px;font-weight:600}
+.lang-menu button:hover{background:var(--surface)}
+.lang-menu button[aria-current="true"]{background:var(--accent);color:#0c2142}
+/* 피드 버튼 글자(style.css의 ::after)도 언어에 맞게 */
+html[lang="en"] .post-actions .ib[data-action="like"]::after{content:"Like"}
+html[lang="en"] .post-actions .ib[data-action="comments"]::after{content:"Comment"}
+html[lang="en"] .post-actions a.ib[href*="focus="]::after{content:"Map"}
+html[lang="en"] .post-actions a.ib[href="#/map"]::after{content:"Campus map"}
+html[lang="en"] .post-actions .ib[data-action="copy"]::after{content:"Share"}
+html[lang="en"] .post-actions .ib[data-action="save"]::after{content:"Save"}
+html[lang="en"] .post-actions .ib[data-action="save"][aria-pressed="true"]::after{content:"Saved"}
+html[lang="zh"] .post-actions .ib[data-action="like"]::after{content:"赞"}
+html[lang="zh"] .post-actions .ib[data-action="comments"]::after{content:"评论"}
+html[lang="zh"] .post-actions a.ib[href*="focus="]::after{content:"地图"}
+html[lang="zh"] .post-actions a.ib[href="#/map"]::after{content:"校园地图"}
+html[lang="zh"] .post-actions .ib[data-action="copy"]::after{content:"分享"}
+html[lang="zh"] .post-actions .ib[data-action="save"]::after{content:"收藏"}
+html[lang="zh"] .post-actions .ib[data-action="save"][aria-pressed="true"]::after{content:"已收藏"}
+html[lang="ja"] .post-actions .ib[data-action="like"]::after{content:"いいね"}
+html[lang="ja"] .post-actions .ib[data-action="comments"]::after{content:"コメント"}
+html[lang="ja"] .post-actions a.ib[href*="focus="]::after{content:"地図"}
+html[lang="ja"] .post-actions a.ib[href="#/map"]::after{content:"キャンパスマップ"}
+html[lang="ja"] .post-actions .ib[data-action="copy"]::after{content:"共有"}
+html[lang="ja"] .post-actions .ib[data-action="save"]::after{content:"保存"}
+html[lang="ja"] .post-actions .ib[data-action="save"][aria-pressed="true"]::after{content:"保存済み"}
