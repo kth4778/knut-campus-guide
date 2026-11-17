@@ -111,7 +111,7 @@ function top(title, left = '', right = '', brand = false) {
 
 function renderNav(active) {
   const links = [
-    ['','홈','home'], [null], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
+    ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
   ];
   nav.innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
