@@ -1,4 +1,4 @@
-import {BUS_STOPS, mountBusStop} from './transit.js';
+import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress} from './transit.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -12,7 +12,7 @@ const categories = [
 ];
 const categoryInfo = new Map(categories.map(([name, icon, asset]) => [name, {icon, asset}]));
 // 지도에만 있는 교통 분류
-const transitCategories = ['버스'];
+const transitCategories = ['버스', '고속버스'];
 const mapCategories = [...categories.map(([name]) => name), ...transitCategories];
 const paths = {
   home: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/>',
@@ -360,6 +360,10 @@ function openBusSheet(stop) {
   openSheet(stop.name, body => mountBusStop(body, stop));
 }
 
+function openExpressSheet(terminal) {
+  openSheet(terminal.name, body => mountExpress(body, terminal));
+}
+
 function placePage(place) {
   if (!place) return `${top('장소 정보',iconLink('back','뒤로',placeBack))}<main class="scroll empty">등록된 장소를 찾을 수 없어요.</main>`;
   const address = place.address && !['확인 안 됨','해당 없음'].includes(place.address) ? place.address : '';
@@ -412,6 +416,10 @@ function markerHtml(place, selected, count) {
 function showMapResult(place) {
   const result = document.getElementById('map-result');
   if (!place) {
+    if (mapCategory === '고속버스') {
+      result.innerHTML = `<p>교통대 정류소·충주터미널 · 누르면 서울행 시간표와 요금이 나와요.</p>`;
+      return;
+    }
     if (mapCategory === '버스') {
       result.innerHTML = `<p>정류장 ${BUS_STOPS.length}곳 · 정류장을 누르면 실시간 도착 정보가 나와요.</p>`;
       return;
@@ -483,6 +491,11 @@ function addPoint(latlng, html, title, onClick, zIndex = 500) {
 }
 
 function paintTransit() {
+  if (mapCategory === '전체' || mapCategory === '고속버스') {
+    for (const terminal of EXP_TERMINALS) {
+      addPoint(terminal.latlng, `<span class="marker transit-marker exp">${icon('bus')}</span>`, terminal.name, () => openExpressSheet(terminal), 900);
+    }
+  }
   if (mapCategory !== '전체' && mapCategory !== '버스') return;
   for (const stop of BUS_STOPS) {
     addPoint(stop.latlng, `<span class="marker transit-marker bus">${icon('bus')}</span>`, stop.name, () => openBusSheet(stop), 300);

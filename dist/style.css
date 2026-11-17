@@ -220,6 +220,24 @@ img{display:block;width:100%;object-fit:cover}
 .arrivals li b{min-width:52px}
 .arrivals li small{margin-left:auto;color:var(--muted);font-size:11px}
 .arrivals li .pill{min-height:28px;padding:4px 9px;background:#2d3640}
+.exp-seg,.exp-chips{display:flex;gap:6px;flex-wrap:wrap}
+.exp-seg .chip{flex:1}
+.chip:disabled{opacity:.4}
+.exp-list{display:grid;gap:6px}
+.exp-row{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:10px;padding:9px 11px;font-size:13px;border:1px solid transparent}
+.exp-row>div:first-child{display:grid;gap:3px;min-width:0}
+.exp-row b{font-size:15px}
+.exp-row span{color:var(--muted)}
+.exp-row small{font-size:11px;color:var(--muted)}
+.exp-row.next{border-color:#8c6be0}
+.exp-row.past{opacity:.5}
+.exp-right{margin-left:auto;display:grid;justify-items:end;gap:2px;text-align:right}
+.exp-right b{font-size:13px}
+.exp-right .soon{color:#ffb86b}
+.exp-right .run{color:#c3a8ff}
+.grade{display:inline-block;padding:1px 6px;border-radius:5px;background:#2d3640;color:#d5dce5!important;font-size:10px}
+.grade.premium{background:#4b3484;color:#eadfff!important}
+.exp-past{justify-self:start}
 
 /* ===== 인스타 느낌 덜어내기 (기능은 그대로, 모양만) ===== */
 /* 1) 피드 게시물: 화면 끝까지 붙은 정사각 사진 → 둥근 카드 */

@@ -123,3 +123,113 @@ export function mountBusStop(body, stop, {onLive} = {}) {
   const timer = setInterval(() => { if (!document.hidden) load(); }, 30000);
   return () => { alive = false; clearInterval(timer); };
 }
+
+// ---------- 고속버스: 시간표·요금(TAGO 고속버스정보) + 달리는 버스 위치(TAGO 고속버스도착정보) ----------
+export const EXP_TERMINALS = [
+  {code:'422', name:'교통대 고속버스 정류소', short:'교통대', latlng:[36.963086, 127.869625]},
+  {code:'420', name:'충주 고속버스터미널', short:'충주터미널', latlng:[36.982041, 127.914885]},
+];
+const EXP_NAMES = {'021':'센트럴시티', '030':'동서울', '116':'고양백석', '420':'충주터미널', '422':'교통대'};
+// API에서 운행이 확인된 노선 (터미널 코드). 동서울→충주는 이 API에 없어요.
+const EXP_ROUTES = {
+  '420': {out:['021', '030', '116'], inn:['021', '116']},
+  '422': {out:['021', '030'], inn:['021']},
+};
+const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
+const ymd = d => d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate());
+const hm = n => { const s = String(n); return s.slice(8, 10) + ':' + s.slice(10, 12); }; // 202611121610 → 16:10
+const toDate = n => { const s = String(n); return new Date(+s.slice(0, 4), +s.slice(4, 6) - 1, +s.slice(6, 8), +s.slice(8, 10), +s.slice(10, 12)); };
+const expMinutes = text => { const m = /(\d+)시간\s*(\d+)분/.exec(text || ''); return m ? +m[1] * 60 + +m[2] : null; };
+const duration = n => n <= 0 ? '곧' : ((n >= 60 ? Math.floor(n / 60) + '시간 ' : '') + (n % 60 ? (n % 60) + '분' : '')).trim();
+const timetableCache = {};
+
+function timetable(dep, arr, day) {
+  const key = `${dep}:${arr}:${day}`;
+  timetableCache[key] ??= tago('ExpBusInfo/GetStrtpntAlocFndExpbusInfo', {depTerminalId:'NAEK' + dep, arrTerminalId:'NAEK' + arr, depPlandTime:day, numOfRows:200})
+    .then(list => list.sort((a, b) => a.depPlandTime - b.depPlandTime))
+    .catch(error => { delete timetableCache[key]; throw error; });
+  return timetableCache[key];
+}
+const runningBuses = (dep, arr) => tago('ExpBusArrInfo/GetExpBusArrPrdtInfo', {depTmnCd:dep, arrTmnCd:arr}).catch(() => []);
+
+// 터미널 시트: 방향·도착지·날짜를 고르면 시간표와 달리는 버스를 보여주고 1분마다 갱신해요.
+export function mountExpress(body, terminal, {extra = ''} = {}) {
+  const routes = EXP_ROUTES[terminal.code];
+  const state = {dir:'out', arr:routes.out[0], day:0, showPast:false};
+  if (!busKey()) {
+    body.innerHTML = '<p class="transit-note">config.js 에 버스 API 키를 넣으면 고속버스 시간표와 요금이 나와요.</p>' + extra + mapLinks(terminal.name, terminal.latlng);
+    return () => {};
+  }
+  let alive = true;
+  const chip = (attr, on, label, disabled = false) => `<button type="button" class="chip" ${attr} aria-pressed="${on}" ${disabled ? 'disabled' : ''}>${esc(label)}</button>`;
+  const draw = () => {
+    const targets = state.dir === 'out' ? routes.out : routes.inn;
+    const days = [0, 1, 2].map(i => { const d = new Date(); d.setDate(d.getDate() + i); return [i, i === 0 ? '오늘' : i === 1 ? '내일' : `${d.getMonth() + 1}/${d.getDate()}`]; });
+    body.innerHTML = `<p class="transit-sub">고속버스 시간표·요금 · 달리는 버스 실시간 위치</p>
+      <div class="exp-seg">${chip('data-dir="out"', state.dir === 'out', terminal.short + '에서 출발')}${chip('data-dir="in"', state.dir === 'in', terminal.short + '(으)로 오기', !routes.inn.length)}</div>
+      <div class="exp-chips">${targets.map(code => chip(`data-arr="${code}"`, code === state.arr, (state.dir === 'out' ? '→ ' : '← ') + (EXP_NAMES[code] || code))).join('')}</div>
+      <div class="exp-chips">${days.map(([i, label]) => chip(`data-day="${i}"`, i === state.day, label)).join('')}</div>
+      <div class="exp-list"><p class="transit-note">불러오는 중…</p></div>${extra}`;
+    load();
+  };
+  const load = async () => {
+    const snap = `${state.dir}|${state.arr}|${state.day}`;
+    const dep = state.dir === 'out' ? terminal.code : state.arr;
+    const arr = state.dir === 'out' ? state.arr : terminal.code;
+    const date = new Date();
+    date.setDate(date.getDate() + state.day);
+    try {
+      const [list, live] = await Promise.all([timetable(dep, arr, ymd(date)), state.day === 0 ? runningBuses(dep, arr) : []]);
+      const box = body.querySelector('.exp-list');
+      if (!alive || !box || `${state.dir}|${state.arr}|${state.day}` !== snap) return;
+      const now = new Date();
+      // 달리는 버스는 출발 시각(HH:MM)으로 시간표 칸과 짝지어요.
+      const liveByTime = {};
+      live.forEach(bus => { (liveByTime[bus.depTm] ??= []).push(bus); });
+      const rows = list.map(item => {
+        const depTime = toDate(item.depPlandTime);
+        const bus = (liveByTime[hm(item.depPlandTime)] || []).shift();
+        const arrived = bus && (bus.curLocNm === '도착' || bus.rmnTm === '도착완료');
+        const status = bus ? (arrived ? 'done' : 'run') : depTime > now ? 'wait' : toDate(item.arrPlandTime) > now ? 'gone' : 'done';
+        return {item, bus, depTime, status};
+      });
+      const nextIndex = rows.findIndex(row => row.status === 'wait');
+      const visible = rows.filter(row => state.showPast || row.status !== 'done');
+      const hidden = rows.length - visible.length;
+      const rowHtml = row => {
+        const {item, bus, depTime, status} = row;
+        const mins = Math.round((depTime - now) / 60000);
+        let right = '<small>운행 끝</small>';
+        if (status === 'run') { const m = expMinutes(bus.rmnTm); right = `<b class="run">${m != null ? duration(m) + ' 후 도착' : esc(bus.rmnTm)}</b><small>${esc(bus.curLocNm)}</small>`; }
+        else if (status === 'wait') right = state.day === 0 ? `<b class="${mins <= 30 ? 'soon' : ''}">${mins <= 0 ? '곧 출발' : duration(mins) + ' 후 출발'}</b>` : '';
+        else if (status === 'gone') right = `<b class="run">운행 중</b><small>${hm(item.arrPlandTime)} 도착 예정</small>`;
+        const premium = /우등|프리미엄/.test(item.gradeNm || '');
+        return `<div class="exp-row${status === 'done' ? ' past' : ''}${rows.indexOf(row) === nextIndex ? ' next' : ''}">
+          <div><b>${hm(item.depPlandTime)}</b> <span>→ ${hm(item.arrPlandTime)}</span>
+            <small><span class="grade${premium ? ' premium' : ''}">${esc(item.gradeNm)}</span> ${won(item.charge)}${bus ? ' · ' + esc(bus.corpNm) : ''}</small></div>
+          <div class="exp-right">${right}</div></div>`;
+      };
+      const cheapest = list.length ? Math.min(...list.map(item => +item.charge || 1e9)) : 0;
+      box.innerHTML = !list.length ? '<p class="transit-note">이 날은 운행하는 버스가 없어요.</p>'
+        : `<p class="transit-sub">${list.length}회 운행 · ${won(cheapest)}부터 · 약 ${duration(Math.round((toDate(list[0].arrPlandTime) - toDate(list[0].depPlandTime)) / 60000))} 걸려요</p>`
+          + (hidden && !state.showPast ? `<button type="button" class="pill exp-past" data-past>지난 차 ${hidden}대 보기</button>` : '')
+          + (visible.length ? visible.map(rowHtml).join('') : '<p class="transit-note">오늘 남은 버스가 없어요. 내일 시간표를 확인해 보세요.</p>')
+          + `<p class="transit-foot">${state.day === 0 ? clock(now) + ' 기준 · 1분마다 위치 갱신 <button type="button" data-refresh>새로고침</button>' : '예매는 고속버스 예매 앱에서 해요'}</p>`;
+    } catch (error) {
+      const box = body.querySelector('.exp-list');
+      if (alive && box) box.innerHTML = `<p class="transit-note">못 불러왔어요 (${esc(error.message)})</p>`;
+    }
+  };
+  body.onclick = event => {
+    const target = event.target.closest('button');
+    if (!target || target.disabled) return;
+    if (target.dataset.dir) { state.dir = target.dataset.dir; state.arr = (state.dir === 'out' ? routes.out : routes.inn)[0]; state.showPast = false; draw(); }
+    else if (target.dataset.arr) { state.arr = target.dataset.arr; state.showPast = false; draw(); }
+    else if (target.dataset.day) { state.day = +target.dataset.day; state.showPast = false; draw(); }
+    else if ('past' in target.dataset) { state.showPast = true; load(); }
+    else if ('refresh' in target.dataset) { target.textContent = '불러오는 중…'; load(); }
+  };
+  draw();
+  const timer = setInterval(() => { if (!document.hidden && state.day === 0) load(); }, 60000);
+  return () => { alive = false; clearInterval(timer); };
+}
