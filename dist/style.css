@@ -8,30 +8,16 @@ a{color:inherit;text-decoration:none}
 button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #83b5ff;outline-offset:2px}
 h1,h2,h3,p{margin:0}
 img{display:block;width:100%;object-fit:cover}
-/* 아이폰 15 Pro 외관: 티타늄 테두리 → 검은 베젤 → 화면. 높이는 창에 맞추고 너비는 실제 비율(70.6:146.6)로 따라간다 */
-.device{--h:clamp(600px,calc(100svh - 56px),932px);position:relative;margin:auto;height:var(--h);width:calc(var(--h) * .4816);padding:12px;border-radius:64px;
-  background:#050607;
-  box-shadow:
-    inset 0 0 0 1px #000,
-    0 0 0 1.5px #3a3d42,
-    0 0 0 3px #8d9198,
-    0 0 0 4px #c9ccd1,
-    0 0 0 5.5px #6b6f76,
-    0 0 0 6.5px #2a2c30,
-    0 40px 80px -24px #1b2233aa,
-    0 18px 36px -18px #1b223377}
-/* 측면 버튼 — 왼쪽: 동작 버튼 · 음량 위 · 음량 아래 / 오른쪽: 측면 버튼 */
-.hw{position:absolute;width:4px;border-radius:2px;background:linear-gradient(90deg,#4f5359,#c3c7cc 50%,#6c7077)}
-.hw-action{left:-10px;top:18%;height:3.6%}
-.hw-up{left:-10px;top:25%;height:7%}
-.hw-down{left:-10px;top:33.5%;height:7%}
-.hw-side{right:-10px;top:28%;height:11%;transform:scaleX(-1)}
-.screen{position:relative;height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--text);border-radius:52px;isolation:isolate}
+/* 아이폰 18 Pro Max 외관: gpt-image로 만든 틀 그림(assets/iphone-frame.webp, 887×1774)을 화면 위에 덮는다.
+   그림 속 화면 구멍은 x 68~817, y 66~1709 px. 화면은 구멍보다 6px씩 크게 깔아 둥근 모서리 틈이 검은 베젤 밑에 숨게 한다. */
+.device{--h:clamp(600px,calc(100svh - 56px),932px);position:relative;margin:auto;height:var(--h);width:calc(var(--h) * .5);filter:drop-shadow(0 30px 40px #1b223355)}
+.device::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:url("assets/iphone-frame.webp") center / 100% 100% no-repeat}
+.screen{position:absolute;left:6.99%;right:7.22%;top:3.38%;bottom:3.33%;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--text);border-radius:15.5% / 7.1%;isolation:isolate}
 /* 유리 반사: 아주 옅게 */
 .screen::after{content:"";position:absolute;inset:0;z-index:700;pointer-events:none;border-radius:inherit;background:linear-gradient(118deg,#ffffff0d 0%,#ffffff05 22%,transparent 40%);box-shadow:inset 0 0 0 1px #ffffff0a}
-.status{flex:none;height:54px;position:relative;display:grid;grid-template-columns:1fr 126px 1fr;align-items:center;padding:4px 0 0;font:600 16.5px/1 -apple-system,"SF Pro Text","Guide Roboto",system-ui,sans-serif;letter-spacing:-.01em}
+.status{flex:none;height:54px;position:relative;display:grid;grid-template-columns:1fr 31% 1fr;align-items:center;padding:4px 0 0;font:600 16.5px/1 -apple-system,"SF Pro Text","Guide Roboto",system-ui,sans-serif;letter-spacing:-.01em}
 .status-time{justify-self:center;padding-left:14px}
-.island{grid-column:2;justify-self:center;align-self:start;margin-top:7px;width:124px;height:36px;border-radius:20px;background:#000;position:relative}
+.island{grid-column:2;visibility:hidden}
 .island::after{content:"";position:absolute;right:13px;top:12px;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 38% 35%,#3b5476 0,#101a2b 35%,#05070c 70%);box-shadow:0 0 0 2px #0b0d10}
 .status-icons{justify-self:center;display:flex;gap:6px;align-items:center;padding-right:14px}
 .status-icons svg{display:block;fill:currentColor}
@@ -123,9 +109,9 @@ img{display:block;width:100%;object-fit:cover}
 .toast.show{opacity:1}
 @media (max-width:520px){
   body{display:block;padding:0;background:var(--bg)}
-  .device{width:100%;height:100svh;margin:0;padding:0;border-radius:0;box-shadow:none}
-  .hw,.screen::after{display:none}
-  .screen{border-radius:0}
+  .device{width:100%;height:100svh;margin:0;filter:none}
+  .device::after,.screen::after{display:none}
+  .screen{inset:0;border-radius:0}
   .status,.gesture{display:none}
   .nav{padding-bottom:max(2px,env(safe-area-inset-bottom));height:calc(54px + env(safe-area-inset-bottom))}
 }
