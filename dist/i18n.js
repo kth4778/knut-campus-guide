@@ -212,10 +212,13 @@
   try { lang = localStorage.getItem(KEY) || 'ko'; } catch {}
   if (!LANGS.some(([code]) => code === lang)) lang = 'ko';
 
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   function word(ko) {
     if (lang === 'ko') return null;
     const i = IDX[lang];
     if (D[ko]) return D[ko][i];
+    const day = /^(\d{1,2})월 (\d{1,2})일$/.exec(ko);  // 게시물 날짜 '2월 25일'
+    if (day) return lang === 'en' ? `${MON[day[1] - 1]} ${day[2]}` : `${day[1]}月${day[2]}日`;
     for (const [re, ...out] of P) {
       const m = re.exec(ko);
       if (m) return out[i].replace(/\{(\d)\}/g, (_, n) => { const v = m[+n] ?? ''; return (v && word(v)) ?? v; });
@@ -241,6 +244,62 @@
   const ATTRS = ['aria-label', 'placeholder', 'title', 'alt'];
   const SKIP = '.chat-msg:not(.chat-intro), script, style, textarea, .lang, .leaflet-control-attribution';
 
+  // 사전에 없는 내용(가게 이름·후기·혜택 등)은 Google 번역으로 바꾸고, 이 브라우저에 기억해 둬요
+  const TL = {en: 'en', zh: 'zh-CN', ja: 'ja'};
+  const MT_KEY = 'knut-campus-guide:mt:';
+  const loadCache = l => { try { return new Map(Object.entries(JSON.parse(localStorage.getItem(MT_KEY + l)) || {})); } catch { return new Map(); } };
+  let mtCache = loadCache(lang), mtPending = new Map(), mtTimer = 0, mtSave = 0, mtOff = false;
+  function saveCache() {
+    clearTimeout(mtSave);
+    const l = lang;
+    mtSave = setTimeout(() => { try { localStorage.setItem(MT_KEY + l, JSON.stringify(Object.fromEntries([...mtCache].slice(-4000)))); } catch {} }, 1000);
+  }
+  function queueMT(text, node) {
+    if (mtOff || text.length > 1500) return;
+    let nodes = mtPending.get(text);
+    if (!nodes) mtPending.set(text, nodes = new Set());
+    nodes.add(node);
+    clearTimeout(mtTimer);
+    mtTimer = setTimeout(flushMT, 120);
+  }
+  async function translate(list, l) {
+    const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ko&tl=${TL[l]}&dt=t`, {
+      method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'}, body: 'q=' + encodeURIComponent(list.join('\n')),
+    });
+    if (!res.ok) throw new Error('translate ' + res.status);
+    const out = (await res.json())[0].map(s => s[0]).join('').split('\n');
+    if (out.length !== list.length) {                    // 줄이 어긋나면 하나씩 다시 번역
+      if (list.length === 1) return [out.join(' ')];
+      const one = [];
+      for (const t of list) one.push((await translate([t], l))[0]);
+      return one;
+    }
+    return out;
+  }
+  async function flushMT() {
+    const l = lang, jobs = mtPending;
+    mtPending = new Map();
+    const texts = [...jobs.keys()].filter(t => !mtCache.has(t));
+    const chunks = [];
+    let cur = [], size = 0;
+    for (const t of texts) {
+      const one = t.replace(/\s*\n\s*/g, ' ');
+      if (cur.length && (size + one.length > 1800 || cur.length >= 40)) { chunks.push(cur); cur = []; size = 0; }
+      cur.push(t); size += one.length + 1;
+    }
+    if (cur.length) chunks.push(cur);
+    for (const chunk of chunks) {
+      try {
+        const out = await translate(chunk.map(t => t.replace(/\s*\n\s*/g, ' ')), l);
+        if (l !== lang) return;
+        chunk.forEach((t, k) => mtCache.set(t, out[k].trim()));
+        saveCache();
+      } catch { mtOff = true; return; }               // 번역 주소가 막히면 이번 방문에서는 그만 시도해요
+      for (const t of chunk) jobs.get(t)?.forEach(node => node.isConnected && doText(node));
+    }
+    for (const [t, nodes] of jobs) if (mtCache.has(t)) nodes.forEach(node => node.isConnected && doText(node));
+  }
+
   function doText(node) {
     const el = node.parentElement;
     if (!el || el.closest(SKIP)) return;
@@ -248,7 +307,11 @@
     const orig = textOrig.get(node) ?? node.nodeValue;
     if (!HANGUL.test(orig)) return;
     const trimmed = orig.trim();
-    const t = word(trimmed);
+    let t = word(trimmed);
+    if (lang !== 'ko' && (t == null || HANGUL.test(t))) {
+      const mt = mtCache.get(trimmed);
+      if (mt != null) t = mt; else queueMT(trimmed, node);
+    }
     const next = t == null ? orig : orig.replace(trimmed, t);
     if (next !== node.nodeValue) node.nodeValue = next;
     textOut.set(node, next);
@@ -312,6 +375,7 @@
     if (pick) {
       lang = pick.dataset.lang;
       try { localStorage.setItem(KEY, lang); } catch {}
+      mtCache = loadCache(lang); mtPending = new Map();
       document.querySelector('.top.has-lang')?.classList.remove('has-lang');
       document.querySelector('.lang')?.remove();
       applyAll();
