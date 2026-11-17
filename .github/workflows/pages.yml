@@ -31,6 +31,14 @@ jobs:
           if [ -n "$BUS_API_KEY" ]; then
             printf "window.KNUT_CONFIG = { BUS_API_KEY: '%s' };\n" "$BUS_API_KEY" > dist/config.js
           fi
+      # GitHub Pages는 파일을 10분 동안 캐시해서 새로고침해도 옛 화면이 보여요.
+      # 배포할 때마다 우리 js·css·json 주소 뒤에 ?v=커밋 을 붙여 새 파일을 받게 해요 (배포본만, git 원본은 그대로)
+      - name: 캐시 무효화용 버전 붙이기
+        run: |
+          V="${GITHUB_SHA::7}"
+          sed -i -E "s#((href|src)=\")([A-Za-z0-9_-]+\.(js|css))\"#\1\3?v=$V\"#g" dist/index.html
+          sed -i -E "s#(from[[:space:]]+['\"]\./[A-Za-z0-9_-]+\.js)(['\"])#\1?v=$V\2#g; s#(fetch\(['\"]\./data/[A-Za-z0-9_-]+\.json)(['\"])#\1?v=$V\2#g" dist/*.js
+          grep -c "?v=$V" dist/index.html
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
