@@ -48,7 +48,7 @@
 - **좋아요 · 댓글 · 저장 · 글쓰기** — 각자 브라우저에 저장돼요
 - **버스** — 지도 `버스` 분류에서 학교 주변 정류장 20곳, 정류장별 실시간 도착 정보, 고른 노선(최대 4개)의 버스 위치
 - **고속버스** — 교통대 정류소·충주터미널의 서울행 시간표·요금과 달리는 버스 위치
-- **MOA** — 배달 같이 시키기 · 픽업해서 같이 먹기(N빵 계산) · 택시 같이 타기 모집글 쓰기·참여
+- **MOA** — 홈 위쪽 배너로 들어가요. 배달 같이 시키기 · 픽업해서 같이 먹기(N빵 계산) · 택시 같이 타기 모집글 쓰기·참여
 
 버스·고속버스·MOA는 누팁스(KNUTIPS) 앱에서 옮겨 온 기능이에요.
 
@@ -70,7 +70,8 @@ python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
 | `dist/app.js` | 화면 그리기, 주소(`#/...`)에 따른 화면 전환, 지도, 저장·좋아요·댓글 |
 | `dist/transit.js` | 버스 정류장·고속버스 터미널 데이터와 TAGO API 호출(도착·시간표·버스 위치) |
 | `dist/moa.js` · `dist/moa.css` | MOA 화면과 모집하기 |
-| `dist/config.example.js` | 버스 API 키 예시. `config.js`로 복사해서 써요 (git에 안 올라가요) |
+| `dist/config.js` | 버스 API 키 자리. 저장소에는 키를 비워 두고, 배포 때 Secret으로 채워요 |
+| `dist/config.example.js` | 키 넣는 방법 안내용 예시 |
 | `dist/data/bus-routes.json` | 학교 주변을 지나는 충주 시내버스 노선 (TAGO, 2026-11-12 기준) |
 | `dist/style.css` | 스타일 |
 | `dist/data/places.json` | 장소·정보 321개(좌표 있는 곳 242개). 장소 ID(`P089` 등)를 검색·상세·지도·저장이 함께 써요 |
@@ -88,7 +89,7 @@ python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
 | `#/place?id=P178` | 장소 상세 |
 | `#/my` · `#/my?tab=saved` | 프로필의 게시물·저장 격자 |
 
-하단 탭은 `홈 | MOA | 지도 | 검색 | 프로필` 순서예요. 지도는 가운데에 둬요.
+하단 탭은 `홈 | 빈칸 | 지도 | 검색 | 프로필` 순서예요. 지도는 가운데에 두고, 빈칸은 비워 둬요.
 
 ## 지도
 
@@ -100,8 +101,8 @@ python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
 
 버스·고속버스 실시간 정보는 공공데이터포털(data.go.kr)의 국토교통부 TAGO API를 써요. 키는 공개 저장소에 올리지 않아요.
 
-- **내 컴퓨터에서:** `dist/config.example.js`를 `dist/config.js`로 복사하고 `BUS_API_KEY`에 "일반 인증키(Encoding)"를 넣어요. `config.js`는 `.gitignore`에 들어 있어요.
-- **배포(GitHub Pages):** 저장소 Settings → Secrets and variables → Actions에 `BUS_API_KEY`를 넣으면 배포할 때 `config.js`를 만들어 넣어요.
+- **내 컴퓨터에서:** 먼저 `git update-index --skip-worktree dist/config.js`를 실행한 뒤, `dist/config.js`의 `BUS_API_KEY`에 "일반 인증키(Encoding)"를 넣어요. 그러면 git이 이 파일 변경을 무시해서 키가 커밋되지 않아요.
+- **배포(GitHub Pages):** 저장소 Settings → Secrets and variables → Actions에 `BUS_API_KEY`를 넣으면 배포할 때 키가 든 `config.js`로 바꿔 넣어요.
 - 키가 없으면 정류장·터미널 위치와 네이버·카카오 지도 링크만 보여요.
 - 활용신청할 API: 버스도착정보, 버스정류소정보, 버스위치정보, 고속버스정보, 고속버스도착정보
 
