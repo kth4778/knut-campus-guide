@@ -29,6 +29,7 @@ const paths = {
   book: '<path d="M3 4h6l3 2 3-2h6v15h-6l-3 2-3-2H3zm9 2v15"/>',
   spark: '<path d="M12 2c1 7 3 9 10 10-7 1-9 3-10 10-1-7-3-9-10-10 7-1 9-3 10-10z"/>',
   share: '<path d="M12 15V3m-5 5 5-5 5 5M5 12H3v9h18v-9h-2"/>',
+  menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
   bus: '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3m8-3v3M8 14.5h.01M16 14.5h.01"/>',
 };
@@ -283,7 +284,7 @@ function savedPage() {
   const empty = profileTab==='saved'
     ? `<div class="empty"><p>아직 저장한 게시물이 없어요.</p><a class="primary" href="${route('search')}">장소 찾아보기</a></div>`
     : `<div class="empty"><strong>첫 번째 게시물을 만들어보세요</strong><p>학교에서 발견한 장소를 기록해 보세요.</p><a class="primary" href="${route('compose')}">새 게시물</a></div>`;
-  return `${top('우리학교 가이드',iconLink('plus','새 게시물',route('compose')),iconLink('bookmark','저장한 게시물',route('my',{tab:'saved'})))}
+  return `${top('우리학교 가이드',iconLink('plus','새 게시물',route('compose')),iconLink('menu','설정',route('settings')))}
     <main class="scroll">
       <section class="profile">
         <div class="profile-line">${brandAvatar()}<div class="profile-info">
@@ -302,6 +303,39 @@ function savedPage() {
       </nav>
       ${items.length?gridPosts(items):empty}
     </main>`;
+}
+
+// 인스타그램 프로필의 세 줄 메뉴 자리. 이 앱에서 실제로 할 수 있는 것만 둔다.
+function settingsPage() {
+  const row = (href, symbol, label, sub = '') =>
+    `<a class="setting-row" href="${href}">${icon(symbol)}<span><strong>${label}</strong>${sub?`<small>${sub}</small>`:''}</span>${icon('arrow')}</a>`;
+  const external = (href, label, sub) =>
+    `<a class="setting-row" href="${href}" target="_blank" rel="noopener">${icon('share')}<span><strong>${label}</strong><small>${sub}</small></span>${icon('arrow')}</a>`;
+  return `${top('설정',iconLink('back','뒤로',route('my')))}
+    <main class="scroll settings">
+      <h2>내 활동</h2>
+      ${row(route('my'),'grid','내 게시물',`${localPosts.length}개`)}
+      ${row(route('my',{tab:'saved'}),'bookmark','저장한 게시물',`${saved.size}개`)}
+      <h2>기록</h2>
+      <p class="setting-note">게시물·좋아요·댓글·저장은 이 브라우저에만 저장돼요. 다른 기기나 다른 사람과 공유되지 않아요.</p>
+      <button type="button" class="setting-row danger" data-action="reset-data">${icon('close')}<span><strong>내 기록 모두 지우기</strong><small>게시물 ${localPosts.length} · 좋아요 ${likes.size} · 댓글 ${Object.values(comments).flat().length} · 저장 ${saved.size}</small></span></button>
+      <h2>정보</h2>
+      ${external('https://github.com/kth4778/knut-campus-guide','소스 코드','GitHub')}
+      <p class="setting-note">지도: 네이버 지도 (연결이 안 되면 OpenStreetMap)<br>건물 사진: Wikimedia Commons · CC BY-SA 4.0</p>
+    </main>`;
+}
+
+function resetData() {
+  if (!confirm('이 브라우저에 저장된 게시물·좋아요·댓글·저장을 모두 지울까요? 되돌릴 수 없어요.')) return;
+  for (const key of ['posts','likes','comments','saved']) {
+    try { localStorage.removeItem('knut-campus-guide:'+key); } catch {}
+  }
+  localPosts = [];
+  likes.clear();
+  for (const id of Object.keys(comments)) delete comments[id];
+  saved = new Set();
+  render();
+  toast('내 기록을 모두 지웠어요.');
 }
 
 function composePage() {
@@ -640,11 +674,12 @@ function render() {
   else if (path === 'my') {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
-  } else if (path === 'compose') app.innerHTML = composePage();
+  } else if (path === 'settings') app.innerHTML = settingsPage();
+  else if (path === 'compose') app.innerHTML = composePage();
   else if (path === 'post') app.innerHTML = localPostPage(findPost(params.get('id')));
   else if (path === 'place') app.innerHTML = placePage(place);
   else app.innerHTML = home(category);
-  renderNav(path === 'place' ? '' : path);
+  renderNav(path === 'place' ? '' : path === 'settings' ? 'my' : path);
 }
 
 function toast(message) {
@@ -696,6 +731,7 @@ app.addEventListener('click', event => {
       break;
     }
     case 'comments': openComments(control.dataset.id); break;
+    case 'reset-data': resetData(); break;
     case 'close-comments':
     case 'close-sheet': control.closest('dialog').close(); break;
     case 'copy': {
