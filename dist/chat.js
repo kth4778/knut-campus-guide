@@ -24,7 +24,7 @@ export function chatPage(header) {
       <div class="chat-log" id="chat-log" aria-live="polite">${messages.length ? messages.map(bubble).join('') : intro()}</div>
       <div class="chat-suggest">${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
       <form class="chat-form" id="chat-form">
-        <input name="q" aria-label="챗봇에게 질문" placeholder="학교생활 무엇이든 물어보세요" autocomplete="off" maxlength="300" required>
+        <input name="q" aria-label="KNUTUIDE에게 질문" placeholder="학교생활 무엇이든 물어보세요" autocomplete="off" maxlength="300" required>
         <button type="submit" class="primary" ${busy?'disabled':''}>보내기</button>
       </form>
       <details class="chat-config">
@@ -38,7 +38,7 @@ export function chatPage(header) {
 }
 
 function intro() {
-  return `<div class="chat-msg bot"><p>안녕하세요! 충주캠퍼스 맛집·숨은장소·생활꿀팁 ${getPlaces().length || ''}개를 바탕으로 답해 드려요. 무엇이 궁금하세요?</p></div>`;
+  return `<div class="chat-msg bot"><p>안녕하세요, KNUTUIDE예요! 충주캠퍼스 맛집·숨은장소·생활꿀팁 ${getPlaces().length || ''}개를 바탕으로 답해 드려요. 무엇이 궁금하세요?</p></div>`;
 }
 
 function bubble(m) {
@@ -69,7 +69,7 @@ function describe(p) {
 }
 
 function systemPrompt(found) {
-  return `너는 국립한국교통대학교 충주캠퍼스 학생을 돕는 안내 챗봇이다. 한국어 존댓말로 3~5문장 안에 짧게 답한다.
+  return `너는 KNUTIPS 앱의 안내 챗봇 KNUTUIDE이다. 국립한국교통대학교 충주캠퍼스 학생을 돕는다. 이름을 물으면 KNUTUIDE라고 답한다. 한국어 존댓말로 3~5문장 안에 짧게 답한다.
 아래 [자료]는 학생들이 직접 모은 장소·꿀팁이다. 자료에 있는 내용만 근거로 답하고, 장소 이름은 자료에 적힌 그대로 쓴다.
 자료에 없는 내용은 지어내지 말고 "가이드 자료에는 없어요"라고 말한 뒤 학교 홈페이지나 에브리타임 확인을 권한다.
 [자료]

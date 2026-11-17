@@ -314,7 +314,7 @@ function savedPage() {
           </div>
         </div></div>
         <p>한국교통대 충주캠퍼스</p>
-        <div class="profile-actions"><a class="pill" href="${route('compose')}">새 게시물</a><a class="pill" href="${route('search')}">장소 찾아보기</a><a class="pill profile-chat" href="${route('chat')}">${icon('chat')}챗봇</a></div>
+        <div class="profile-actions"><a class="pill" href="${route('compose')}">새 게시물</a><a class="pill" href="${route('search')}">장소 찾아보기</a><a class="pill profile-chat" href="${route('chat')}">${icon('chat')}KNUTUIDE</a></div>
       </section>
       <nav class="profile-tabs" aria-label="프로필 게시물">
         <a href="${route('my')}" aria-label="내 게시물" ${profileTab==='posts'?'aria-current="page"':''}>${icon('grid')}</a>
@@ -780,7 +780,7 @@ function render() {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
   } else if (path === 'chat') {
-    app.innerHTML = chatPage(top('챗봇', iconLink('back','프로필로',route('my'))));
+    app.innerHTML = chatPage(top('KNUTUIDE', iconLink('back','프로필로',route('my'))));
     scrollChat(app);
   } else if (path === 'settings') app.innerHTML = settingsPage();
   else if (path === 'compose') app.innerHTML = composePage();
