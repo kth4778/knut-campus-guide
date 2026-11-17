@@ -220,3 +220,19 @@ img{display:block;width:100%;object-fit:cover}
 .arrivals li b{min-width:52px}
 .arrivals li small{margin-left:auto;color:var(--muted);font-size:11px}
 .arrivals li .pill{min-height:28px;padding:4px 9px;background:#2d3640}
+
+/* ===== 인스타 느낌 덜어내기 (기능은 그대로, 모양만) ===== */
+/* 1) 피드 게시물: 화면 끝까지 붙은 정사각 사진 → 둥근 카드 */
+.feed-post{margin:12px 10px 0;padding:0 0 12px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#ffffff06,transparent 40%),var(--bg);overflow:hidden}
+.feed-post:last-child{margin-bottom:12px}
+.post-header{min-height:52px;padding:8px 8px 8px 12px}
+.post-cover{width:auto;margin:0 10px;border-radius:16px;aspect-ratio:16/11}
+.welcome-post .post-cover{aspect-ratio:4/3}
+.cover-art{gap:8px}
+.cover-art img,.cover-art>.icon{width:min(26vw,120px);height:min(26vw,120px)}
+.cover-credit{padding:6px 14px 0}
+.post-caption{padding:2px 14px 0}
+.post-caption>strong:first-child{display:inline-flex;align-items:center;gap:4px;margin:4px 0 6px;padding:3px 9px;border-radius:999px;background:#ffd66b1f;color:#ffd66b;font-size:11.5px}
+.post-caption>strong:first-child::before{content:"★";font-size:11px}
+.post-caption p strong{display:block;font-size:14px;margin-bottom:1px}
+.post-caption p{color:#d5dce5}
