@@ -312,10 +312,9 @@ function savedPage() {
             <span><b>0</b>팔로워</span>
             <span><b>0</b>팔로잉</span>
           </div>
-        </div>
-        <a class="profile-chat" href="${route('chat')}" aria-label="챗봇에게 물어보기">${icon('chat')}<span>챗봇</span></a></div>
+        </div></div>
         <p>한국교통대 충주캠퍼스</p>
-        <div class="profile-actions"><a class="pill" href="${route('compose')}">새 게시물</a><a class="pill" href="${route('search')}">장소 찾아보기</a></div>
+        <div class="profile-actions"><a class="pill" href="${route('compose')}">새 게시물</a><a class="pill" href="${route('search')}">장소 찾아보기</a><a class="pill profile-chat" href="${route('chat')}">${icon('chat')}챗봇</a></div>
       </section>
       <nav class="profile-tabs" aria-label="프로필 게시물">
         <a href="${route('my')}" aria-label="내 게시물" ${profileTab==='posts'?'aria-current="page"':''}>${icon('grid')}</a>
