@@ -38,7 +38,7 @@ export function chatPage(header) {
 }
 
 function intro() {
-  return `<div class="chat-msg bot"><p>안녕하세요, KNUTUIDE예요! 충주캠퍼스 맛집·숨은장소·생활꿀팁 ${getPlaces().length || ''}개를 바탕으로 답해 드려요. 무엇이 궁금하세요?</p></div>`;
+  return `<div class="chat-msg bot chat-intro"><p>안녕하세요, KNUTUIDE예요! 충주캠퍼스 맛집·숨은장소·생활꿀팁 ${getPlaces().length || ''}개를 바탕으로 답해 드려요. 무엇이 궁금하세요?</p></div>`;
 }
 
 function bubble(m) {
@@ -68,10 +68,17 @@ function describe(p) {
     p.rec && `학생 추천 ${p.rec}명`, (p.reasons ?? []).length && `학생 의견: ${p.reasons.slice(0, 3).join(' / ')}`].filter(Boolean).join('\n  ');
 }
 
+// 다국어 모드(i18n.js)에서 고른 언어로 답하게 해요
+function answerLanguage() {
+  const name = {en:'English', zh:'简体中文', ja:'日本語'}[window.knutLang?.()];
+  return name ? `
+답변은 반드시 ${name}로 쓴다. 장소 이름은 자료의 한국어 그대로 쓴다.` : '';
+}
+
 function systemPrompt(found) {
   return `너는 KNUTIPS 앱의 안내 챗봇 KNUTUIDE이다. 국립한국교통대학교 충주캠퍼스 학생을 돕는다. 이름을 물으면 KNUTUIDE라고 답한다. 한국어 존댓말로 3~5문장 안에 짧게 답한다.
 아래 [자료]는 학생들이 직접 모은 장소·꿀팁이다. 자료에 있는 내용만 근거로 답하고, 장소 이름은 자료에 적힌 그대로 쓴다.
-자료에 없는 내용은 지어내지 말고 "가이드 자료에는 없어요"라고 말한 뒤 학교 홈페이지나 에브리타임 확인을 권한다.
+자료에 없는 내용은 지어내지 말고 "가이드 자료에는 없어요"라고 말한 뒤 학교 홈페이지나 에브리타임 확인을 권한다.${answerLanguage()}
 [자료]
 ${found.length ? found.map(describe).join('\n') : '(질문과 맞는 자료 없음)'}`;
 }
