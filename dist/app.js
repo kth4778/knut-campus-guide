@@ -18,7 +18,18 @@ const categories = [
 const categoryInfo = new Map(categories.map(([name, icon, asset]) => [name, {icon, asset}]));
 // 지도에만 있는 교통 분류
 const transitCategories = ['버스', '고속버스'];
-const mapCategories = [...categories.map(([name]) => name), ...transitCategories];
+// 지도에만 있는 분류(장소 핀 대신 다른 점을 보여줌). 지도 칩 순서: 전체 · 버스 · 고속버스 · 교통대 제휴 · 장소 분류들
+const mapOnlyCategories = [...transitCategories, '교통대 제휴'];
+const mapCategories = ['전체', ...mapOnlyCategories, ...categories.slice(1).map(([name]) => name)];
+// 교통대 제휴 매장 (지도에서 처음 고를 때 data/partners.json 을 받아요)
+let mapPartners = null;
+function loadMapPartners() {
+  loadMapPartners.ready ??= fetch('./data/partners.json')
+    .then(response => response.ok ? response.json() : [])
+    .then(list => { mapPartners = list.filter(partner => partner.latlng); })
+    .catch(() => { mapPartners = []; });
+  return loadMapPartners.ready;
+}
 const paths = {
   home: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/>',
   search: '<circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/>',
@@ -516,7 +527,7 @@ function placePage(place) {
 function mapPage() {
   return `${top('캠퍼스 지도',iconLink('search','지도에서 찾을 장소 검색',route('search')),iconLink('bookmark','저장한 장소',route('my')))}
     <div class="chips map-chips" aria-label="지도 카테고리">
-      ${mapCategories.map(name=>`<button class="chip${transitCategories.includes(name)?' transit-chip':''}" data-action="map-category" data-category="${escape(name)}" aria-pressed="${name===mapCategory}">${name}</button>`).join('')}
+      ${mapCategories.map(name=>`<button class="chip${transitCategories.includes(name)?' transit-chip':name==='교통대 제휴'?' partner-chip':''}" data-action="map-category" data-category="${escape(name)}" aria-pressed="${name===mapCategory}">${name}</button>`).join('')}
     </div>
     <div id="live-row" class="chips live-row" aria-label="실시간 버스 노선" hidden></div>
     <main class="map-panel" aria-label="장소 지도">
@@ -541,6 +552,10 @@ function showMapResult(place) {
     }
     if (mapCategory === '버스') {
       result.innerHTML = `<p>정류장 ${BUS_STOPS.length}곳 · 정류장을 누르면 실시간 도착 정보가 나와요.</p>`;
+      return;
+    }
+    if (mapCategory === '교통대 제휴') {
+      result.innerHTML = mapPartners ? `<p>제휴 매장 ${mapPartners.length}곳 · 핀을 누르면 혜택을 볼 수 있어요.</p>` : '<p>제휴 매장을 불러오는 중…</p>';
       return;
     }
     const count = mappedPlaces.filter(item => mapCategory==='전체'||item.category===mapCategory).length;
@@ -610,6 +625,13 @@ function addPoint(latlng, html, title, onClick, zIndex = 500) {
 }
 
 function paintTransit() {
+  if (mapCategory === '교통대 제휴') {
+    for (const partner of mapPartners ?? []) {
+      addPoint(partner.latlng, '<span class="marker transit-marker partner"><img src="assets/knut-emblem.webp" alt=""></span>', partner.name,
+        () => { location.hash = route('partner', {id:partner.id}); }, 400);
+    }
+    return;
+  }
   if (mapCategory === '전체' || mapCategory === '고속버스') {
     for (const terminal of EXP_TERMINALS) {
       addPoint(terminal.latlng, `<span class="marker transit-marker exp">${icon('bus')}</span>`, terminal.name, () => openExpressSheet(terminal), 900);
@@ -701,7 +723,7 @@ function showLiveRoute(no) {
 function paintMarkers() {
   clearMarkers();
   paintTransit();
-  if (transitCategories.includes(mapCategory) && !focusedMapPlace) return;
+  if (mapOnlyCategories.includes(mapCategory) && !focusedMapPlace) return;
   const groups = new Map();
   for (const place of mappedPlaces) {
     if (mapCategory !== '전체' && place.category!==mapCategory && place!==focusedMapPlace) continue;
@@ -729,8 +751,10 @@ function updateMap(focus, category) {
   paintMarkers();
   // 고속버스는 충주터미널이 학교에서 멀어서 두 터미널이 다 보이게 넓혀요.
   const wide = !focusedMapPlace && category === '고속버스';
-  const center = focusedMapPlace?.latlng ?? (wide ? [36.9725, 127.8925] : campus);
-  const zoom = focusedMapPlace ? 17 : wide ? 13 : 15;
+  const city = !focusedMapPlace && category === '교통대 제휴'; // 제휴 매장은 시내까지 퍼져 있어요
+  if (city && !mapPartners) loadMapPartners().then(() => { if (mapCategory === '교통대 제휴') { showMapResult(null); if (map) paintMarkers(); } });
+  const center = focusedMapPlace?.latlng ?? (wide ? [36.9725, 127.8925] : city ? [36.988, 127.905] : campus);
+  const zoom = focusedMapPlace ? 17 : wide ? 13 : city ? 12 : 15;
   if (usingNaver) {
     map.setCenter(new window.naver.maps.LatLng(...center));
     map.setZoom(zoom);
@@ -820,7 +844,7 @@ function bindMap(focus, category) {
 function render() {
   const [path, params] = readRoute();
   const requested = params.get('category');
-  const category = categoryInfo.has(requested) || (path==='map' && transitCategories.includes(requested)) ? requested : '전체';
+  const category = categoryInfo.has(requested) || (path==='map' && mapOnlyCategories.includes(requested)) ? requested : '전체';
   const place = byId.get(params.get(path==='map'?'focus':'id'));
   if (path==='map' && currentView==='map' && map) {
     updateMap(place, category);

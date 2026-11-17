@@ -28,3 +28,5 @@
 [data-theme="light"] .primary,[data-theme="light"] .moa-btn.go,[data-theme="light"] .moa-new-btn{background:var(--brand);color:#fff}
 [data-theme="light"] .nav a[aria-current="page"]{color:var(--brand)}
 [data-theme="light"] .lang-menu button[aria-pressed="true"],[data-theme="light"] .lang-menu button[aria-current="true"]{background:var(--brand);color:#fff}
+[data-theme="light"] .chip.partner-chip{border-color:#e3b7b3}
+[data-theme="light"] .chip.partner-chip[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}

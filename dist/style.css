@@ -181,9 +181,13 @@ img{display:block;width:100%;object-fit:cover}
 
 /* 버스 · 고속버스 */
 .chip.transit-chip{border:1px solid #3c5a46}
+.chip.partner-chip{border:1px solid #6b3a37}
+.chip.partner-chip[aria-pressed="true"]{background:#f4c7c3;color:#4a1210;border-color:#f4c7c3}
 .chip.transit-chip[aria-pressed="true"]{background:#bfe7c9;color:#123321;border-color:#bfe7c9}
 .transit-marker{color:#fff}
 .transit-marker.bus{background:#2f8f4e}
+.transit-marker.partner{background:#8b1a1f;overflow:hidden;width:30px;height:30px}
+.transit-marker.partner img{width:100%;height:100%;object-fit:cover}
 .transit-marker.exp{background:#6d3fd1;width:30px;height:30px}
 .transit-marker .icon{width:15px;height:15px}
 .transit-sheet{max-height:min(560px,78svh);display:flex;flex-direction:column}
