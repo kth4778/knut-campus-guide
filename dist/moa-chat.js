@@ -3,6 +3,8 @@
 // 데모라서 대화는 이 브라우저(localStorage)에만 저장되고, 같이 참여한 학우의 말은 예시로 자동 답장해요.
 // 나중에 Firebase 같은 서버를 붙이면 load/save 부분만 바꾸면 돼요.
 
+import {stickerImg, stickerButton, stickerPanel, STICKERS} from './stickers.js';
+
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORE = 'knut-campus-guide:moa-chats';
 const NICK = 'knut-campus-guide:nick';
@@ -98,7 +100,7 @@ export function chatListHtml(myFunds, route) {
   return `<div class="moa-hero chat-hero"><span>💬</span><div><b>참여자끼리 이야기해요</b><small>모집에 참여하면 그 모집의 채팅방이 열려요</small></div><p><strong>${rows.length}</strong><small>내 채팅방</small></p></div>
     ${rows.length ? `<div class="room-list">${rows.map(({fund, chat}) => {
       const last = chat.messages.at(-1);
-      const preview = last ? (last.system ? last.text : `${last.mine ? '나' : last.who}: ${last.text}`) : '';
+      const preview = last ? (last.system ? last.text : `${last.mine ? '나' : last.who}: ${last.sticker ? '(이모티콘)' : last.text}`) : '';
       return `<a class="room-row" href="${route('moa-chat', {id:fund.id})}">
         <span class="room-topic">${typeIcon(fund)}</span>
         <span class="room-text"><strong>${esc(fund.title)}</strong><small>${esc(preview)}</small></span>
@@ -111,9 +113,10 @@ export function chatListHtml(myFunds, route) {
 
 function bubble(fund, m) {
   if (m.system) return `<p class="chat-system">${esc(m.text)}</p>`;
-  if (m.mine) return `<div class="room-msg me"><p>${esc(m.text)}</p><time>${clock(m.at)}</time></div>`;
+  const body = m.sticker ? stickerImg(m.sticker) : `<p>${esc(m.text)}</p>`;
+  if (m.mine) return `<div class="room-msg me${m.sticker ? ' sticker-msg' : ''}">${body}<time>${clock(m.at)}</time></div>`;
   const [icon, color] = face(fund, m.who);
-  return `<div class="room-msg"><i style="background:${color}">${icon}</i><div><small>${esc(m.who)}</small><p>${esc(m.text)}</p></div><time>${clock(m.at)}</time></div>`;
+  return `<div class="room-msg${m.sticker ? ' sticker-msg' : ''}"><i style="background:${color}">${icon}</i><div><small>${esc(m.who)}</small>${body}</div><time>${clock(m.at)}</time></div>`;
 }
 
 // 채팅방 화면. header(title) 는 app.js 의 위쪽 막대를 만들어 줘요
@@ -131,7 +134,8 @@ export function moaChatPage(fund, header, route) {
       <p class="room-members">👥 참여자 ${(fund.participantUids || []).length}명 · ${esc(names)}</p>
       <div class="room-panels">${accountHtml(fund)}${isDelivery(fund) ? ordersHtml(fund, chat) : ''}</div>
       <div class="room-log" id="room-log">${chat.messages.map(m => bubble(fund, m)).join('')}</div>
-      <form class="room-form" id="room-form"><input name="text" placeholder="${fund.type === 'taxi' ? '만날 시간·장소를 이야기해 보세요' : '주문·받을 곳을 이야기해 보세요'}" autocomplete="off" maxlength="300" required><button type="submit" class="primary">보내기</button></form>
+      ${stickerPanel()}
+      <form class="room-form" id="room-form">${stickerButton()}<input name="text" placeholder="${fund.type === 'taxi' ? '만날 시간·장소를 이야기해 보세요' : '주문·받을 곳을 이야기해 보세요'}" autocomplete="off" maxlength="300" required><button type="submit" class="primary">보내기</button></form>
     </main>`;
 }
 
@@ -153,9 +157,10 @@ function repaint(fund) {
   scrollDown();
 }
 
-function send(fund, text) {
+// sticker: 누티 이모티콘 id (글 대신 이모티콘을 보낼 때)
+function send(fund, text, sticker) {
   const chat = chatOf(fund);
-  chat.messages.push({mine:true, text, at:Date.now()});
+  chat.messages.push({mine:true, text:text || '', ...(sticker ? {sticker} : {}), at:Date.now()});
   save();
   repaint(fund);
   // 같이 참여한 학우가 있으면 그중 한 명이 예시로 답장 (데모)
@@ -164,7 +169,10 @@ function send(fund, text) {
   const mate = mates[Math.floor(Math.random() * mates.length)];
   const lines = REPLIES[fund.type === 'taxi' ? 'taxi' : 'food'];
   setTimeout(() => {
-    chat.messages.push({who:mate.nick || '학우', text:lines[Math.floor(Math.random() * lines.length)], at:Date.now()});
+    // 이모티콘을 받으면 예시 학우도 가끔 이모티콘으로 답해요
+    const reply = sticker && Math.random() < 0.6 ? {sticker:STICKERS[Math.floor(Math.random() * STICKERS.length)][0], text:''}
+      : {text:lines[Math.floor(Math.random() * lines.length)]};
+    chat.messages.push({who:mate.nick || '학우', ...reply, at:Date.now()});
     save();
     repaint(fund);
   }, 1200 + Math.random() * 1200);
@@ -180,6 +188,12 @@ export function noteJoined(fund, nick, host = false) {
 export function initMoaChat(root, {fundById, toast, onChange}) {
   const fundOf = el => fundById(el.closest('.room-page')?.dataset.fund);
   root.addEventListener('click', event => {
+    const sticker = event.target.closest('.room-page [data-sticker]');
+    if (sticker) {
+      const fund = fundOf(sticker);
+      if (fund && isMember(fund)) send(fund, '', sticker.dataset.sticker);
+      return;
+    }
     const copy = event.target.closest('[data-copy-account]');
     if (copy) {
       navigator.clipboard?.writeText(copy.dataset.copyAccount).then(() => toast('계좌번호를 복사했어요.'), () => toast('복사하지 못했어요.'));
