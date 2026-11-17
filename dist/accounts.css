@@ -1,0 +1,43 @@
+/* 누팁스 계정 (accounts.js) */
+
+/* 계정 동그라미: 계정 색으로 칠한 원 + 흰 선 아이콘 */
+.acct-disc{--acct:#2a78d6;display:grid;place-items:center;border-radius:50%;background:var(--acct);color:#fff;flex:none}
+.acct-disc .icon{width:52%;height:52%}
+.acct-disc.sm{width:34px;height:34px}
+.acct-disc.md{width:100%;height:100%}
+.acct-disc.lg{width:100%;height:100%}
+
+/* 홈 맨 위 줄 — 인스타 스토리처럼, 아직 안 본 계정은 고리가 빛난다 */
+.stories{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;padding:12px 12px 11px;border-bottom:1px solid var(--line)}
+.stories::-webkit-scrollbar{display:none}
+.story{flex:none;width:66px;display:grid;justify-items:center;gap:5px;color:var(--text);font-size:11px;font-weight:650;text-align:center}
+.story-ring{width:62px;height:62px;padding:3px;border-radius:50%;background:conic-gradient(from 210deg,#ffd66b,#ff7a59,#d6409f,#7a5cff,#ffd66b);display:grid}
+.story-ring>.acct-disc{box-shadow:0 0 0 2.5px var(--bg)}
+.story.seen .story-ring{background:#3a424c}
+.story.seen{color:var(--muted)}
+.story-name{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.story:active .story-ring{transform:scale(.94)}
+
+/* 계정 화면 머리말 */
+.acct-profile .story-ring.big{width:86px;height:86px;padding:3.5px}
+.acct-profile .profile-counts b{font-size:17px}
+.acct-chips{border-bottom:1px solid var(--line)}
+.acct-chips .chip{white-space:nowrap}
+
+/* 제휴 격자 칸 */
+.partner-tile{display:grid;align-content:space-between;gap:6px;padding:9px;background:linear-gradient(160deg,#4a2226,#1d1416 85%);color:#fff}
+.partner-tile strong{font-size:13px;letter-spacing:-.03em;overflow-wrap:anywhere}
+.partner-tile small{font-size:10.5px;line-height:1.35;color:#e9c9cb;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.partner-kick{justify-self:start;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;background:#c0392b;color:#fff}
+
+/* 제휴 게시물 카드 */
+.partner-card{position:relative;width:100%;height:100%;padding:18px 20px;display:grid;align-content:end;gap:8px;background:radial-gradient(ellipse at 78% 22%,#6a2c31,#22171a 78%);color:#fff;overflow:hidden}
+.partner-card .partner-kick{position:absolute;left:18px;top:16px;font-size:11px;padding:4px 10px}
+.partner-icon{position:absolute;right:20px;top:18px;color:#ffb3a8;opacity:.9}
+.partner-card h3{font-size:24px;letter-spacing:-.045em}
+.partner-card ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.partner-card li{display:flex;gap:6px;font-size:13px;line-height:1.45;color:#f3dcdd}
+.partner-card li .icon{flex:none;margin-top:2px;color:#ff8a7a}
+.partner-meta{display:flex;gap:6px;flex-wrap:wrap}
+.partner-meta span{font-size:11px;font-weight:700;padding:3px 9px;border-radius:7px;background:#ffffff1c}
+.partner-icon .icon{width:44px;height:44px}

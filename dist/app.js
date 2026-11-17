@@ -3,6 +3,7 @@ import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
 
 import {moaPage, initMoa, openNewFund} from './moa.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
+import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -179,14 +180,6 @@ function placeRow(place, mode = 'detail', showSave = true) {
   </div>`;
 }
 
-function categoryRail(active) {
-  return `<nav class="rail" aria-label="장소 카테고리">
-    ${categories.map(([label, symbol, asset]) => `<a class="category" data-cat="${escape(label)}" href="${escape(route('', label==='전체'?{}:{category:label}))}" ${label===active?'aria-current="true"':''}>
-      <span class="category-disc">${asset?imageTag(asset):icon(symbol)}</span><span>${label}</span>
-    </a>`).join('')}
-  </nav>`;
-}
-
 function brandAvatar() {
   return '<img class="account-avatar" src="assets/profile-logo.webp" alt="" width="34" height="34">';
 }
@@ -239,7 +232,7 @@ function feedPost(post) {
   const url = route(post.local?'post':'place',{id:post.id});
   return `<article class="feed-post">
     <header class="post-header">
-      <a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>
+      ${accountAvatar(post) || `<a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>`}
       <a class="post-owner" href="${url}"><strong>${escape(post.name)}</strong><small>${escape(post.category)}${post.area && post.area!=='장소 없음'?' · '+escape(post.area):''}</small></a>
       ${iconLink('arrow','게시물 열기',url)}
     </header>
@@ -265,14 +258,16 @@ function welcomePost() {
 }
 
 function home(category) {
-  const allPosts = [...localPosts,...places];
-  const items = category === '전체' ? allPosts : allPosts.filter(post => post.category === category);
+  // 전체: 누팁스처럼 추천 많은 곳 사이사이에 제휴 혜택·오늘의 꿀팁을 섞는다
+  const items = category === '전체'
+    ? [...localPosts.map(post => ({kind:'place', post})), ...homeFeed(places)]
+    : [...localPosts, ...places].filter(post => post.category === category).map(post => ({kind:'place', post}));
   const visible = items.slice(0, homeLimit);
   return `${top('KNUTIPS', iconLink('plus','새 게시물',route('compose')), iconLink('bookmark','저장한 게시물',route('my',{tab:'saved'})), true)}
     <main class="scroll" aria-label="홈">
-      ${categoryRail(category)}
+      ${storyRail()}
       ${category==='전체'?welcomePost():''}
-      ${visible.map(feedPost).join('')}
+      ${visible.map(item => item.kind==='partner' ? partnerFeedPost(item.post) : feedPost(item.post)).join('')}
       ${items.length>visible.length?`<div class="more-row"><button class="pill" data-action="more-home">게시물 더 보기</button></div>`:''}
     </main>`;
 }
@@ -820,8 +815,10 @@ function render() {
   else if (path === 'compose') app.innerHTML = composePage();
   else if (path === 'post') app.innerHTML = localPostPage(findPost(params.get('id')));
   else if (path === 'place') app.innerHTML = placePage(place);
+  else if (path === 'account') app.innerHTML = accountPage(params.get('id'), params);
+  else if (path === 'partner') app.innerHTML = partnerPage(params.get('id'));
   else app.innerHTML = home(category);
-  renderNav(path === 'place' ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path);
+  renderNav(['place','account','partner'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path);
 }
 
 function toast(message) {
@@ -1008,6 +1005,7 @@ async function start() {
     }));
     byId = new Map(places.map(place => [place.id,place]));
     mappedPlaces = places.filter(place => place.latlng);
+    await initAccounts({escape, route, top, iconLink, postCover, getPlaces:() => places});
     window.addEventListener('hashchange', event => {
       if (['place','compose','post'].includes(readRoute()[0]) && readRoute()[0] !== currentView) {
         placeBack = new URL(event.oldURL).hash || '#/';
