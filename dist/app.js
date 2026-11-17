@@ -1,7 +1,8 @@
 import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
   LIVE_MAX, LIVE_EVERY, liveColor, routeSort, routeIndex, liveBuses, liveBusInfo} from './transit.js';
 
-import {moaPage, initMoa, openNewFund} from './moa.js';
+import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
+import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
 
@@ -862,7 +863,8 @@ function render() {
     app.innerHTML = mapPage();
     bindMap(place, category);
   } else if (path === 'search') app.innerHTML = searchPage();
-  else if (path === 'moa') app.innerHTML = moaPage(top('MOA', iconLink('back','홈으로',route('')), `<button type="button" class="ib" data-moa="new" aria-label="모집하기">${icon('plus')}</button>`));
+  else if (path === 'moa') app.innerHTML = moaPage(top('MOA', iconLink('back','홈으로',route(''))), params);
+  else if (path === 'moa-chat') app.innerHTML = moaChatPage(fundById(params.get('id')), title => top(title, iconLink('back','채팅방 목록',route('moa',{tab:'chat'}))), route);
   else if (path === 'my') {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
@@ -877,7 +879,7 @@ function render() {
   else if (path === 'account') app.innerHTML = accountPage(params.get('id'), params);
   else if (path === 'partner') app.innerHTML = partnerPage(params.get('id'));
   else app.innerHTML = home(category);
-  renderNav(['place','account','partner'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path);
+  renderNav(['place','account','partner'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
 }
 
 function toast(message) {
@@ -1082,6 +1084,7 @@ function loadConfig() {
 }
 
 initMoa(app, {toast});
+initMoaChat(app, {fundById, toast});
 initChat(app, {toast, getPlaces:() => places});
 
 async function start() {

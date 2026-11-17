@@ -55,3 +55,75 @@
 .moa-preview th:first-child,.moa-preview td:first-child{text-align:left;color:var(--muted)}
 .moa-preview tr:last-child td{color:#ffc59e;font-weight:700}
 .moa-taxi{width:100%}
+
+/* MOA 탭 (모집 · 채팅방) */
+.moa-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}
+.moa-tabs a{display:grid;place-items:center;min-height:42px;font-size:13px;font-weight:750;color:var(--muted);border-bottom:2px solid transparent}
+.moa-tabs a[aria-current="page"]{color:var(--text);border-color:var(--text)}
+.moa-btn.chat{padding:8px 10px}
+
+/* 채팅방 목록 */
+.room-list{display:grid;padding:0 12px}
+.room-row{display:flex;align-items:center;gap:11px;padding:11px 2px;border-bottom:1px solid var(--line)}
+.room-topic{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:50%;background:var(--surface);font-size:20px}
+.room-text{flex:1;min-width:0;display:grid;gap:3px}
+.room-text strong{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-text small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-meta{display:grid;justify-items:end;gap:4px;flex:none}
+.room-meta small{font-size:11px;color:var(--muted)}
+
+/* 채팅방 화면 */
+.room-page{flex:1;min-height:0;display:flex;flex-direction:column}
+.room-log{flex:1;min-height:0;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:9px}
+.room-msg{display:flex;align-items:flex-end;gap:7px;max-width:86%}
+.room-msg>i{width:30px;height:30px;flex:none;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:15px}
+.room-msg small{display:block;font-size:11px;color:var(--muted);margin:0 0 3px 2px}
+.room-msg p{background:var(--surface);border-radius:4px 14px 14px 14px;padding:8px 11px;font-size:13.5px;line-height:1.45;overflow-wrap:anywhere}
+.room-msg time{font-size:10px;color:var(--muted);flex:none}
+.room-msg.me{align-self:flex-end;flex-direction:row-reverse}
+.room-msg.me p{background:var(--brand,#3566d4);color:#fff;border-radius:14px 4px 14px 14px}
+.chat-system{align-self:center;font-size:11.5px;color:var(--muted);background:var(--surface);border-radius:999px;padding:4px 11px;text-align:center}
+.room-form{flex:none;display:flex;gap:8px;padding:8px 12px 10px;border-top:1px solid var(--line)}
+.room-form input{flex:1;min-width:0;height:38px;border:1px solid var(--line);border-radius:999px;padding:0 14px;background:var(--surface);color:var(--text);font:inherit}
+.room-form .primary{border-radius:999px;padding:0 16px}
+.room-members{flex:none;font-size:11.5px;color:var(--muted);padding:8px 14px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.room-locked span{display:block;font-size:34px;margin-bottom:8px}
+
+/* 모집하기: 지도에서 받는 곳 고르기 · 계좌 */
+.pick-map{position:relative;height:200px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.pick-map>#pick-map{position:absolute;inset:0}
+.pick-pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-100%);font-size:28px;z-index:500;pointer-events:none}
+.pick-ok{position:absolute;right:8px;bottom:8px;z-index:500}
+.moa-account{border:1px solid var(--line);border-radius:12px;padding:8px 10px 10px;display:grid;gap:6px;margin:0}
+.moa-account legend{font-size:13px;font-weight:650;padding:0 4px}
+.moa-account legend small{font-weight:400;color:var(--muted);font-size:11px}
+.moa-account input{width:100%;border:1px solid var(--line);color:var(--text);background:var(--surface);border-radius:9px;padding:9px;font:inherit}
+.account-row{display:grid;grid-template-columns:90px 1fr;gap:6px}
+
+/* 채팅방: 계좌 · 주문 모음 */
+.room-panels{flex:none;display:grid;gap:6px;padding:6px 12px 0;max-height:46%;overflow:auto}
+.room-account{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 8px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;font-size:12.5px}
+.room-account span{grid-column:1;color:var(--muted);font-size:11.5px}
+.room-account b{grid-column:1;font-size:14px}
+.room-account small{grid-column:1;color:var(--muted);font-size:11px}
+.room-account .pill{grid-column:2;grid-row:1/4;min-height:30px}
+.room-account.none{display:block;color:var(--muted)}
+.room-orders{border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.room-orders summary{font-size:12.5px;font-weight:750;cursor:pointer}
+.room-orders .moa-bar{margin-top:8px}
+.order-note{font-size:11.5px;color:var(--muted);margin-top:5px}
+.order-list{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.order-list li{display:grid;grid-template-columns:52px 1fr auto;gap:8px;align-items:start;font-size:12.5px}
+.order-list .who{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.order-list .items{color:var(--muted);line-height:1.5}
+.order-del{color:var(--muted);font-size:11px;padding:0 3px}
+.order-form{display:grid;grid-template-columns:1fr 78px auto;gap:6px;margin-top:8px}
+.order-form input{min-width:0;height:34px;border:1px solid var(--line);border-radius:9px;padding:0 9px;background:var(--surface);color:var(--text);font:inherit;font-size:13px}
+.order-form .primary{min-height:34px}
+.order-fee{font-size:12.5px;margin-top:8px;padding:7px 9px;border-radius:9px;background:var(--surface)}
+.order-list li.host .who{color:var(--brand,#3566d4)}
+.order-list .who small{display:block;font-size:10px;font-weight:600;color:var(--muted)}
+.order-list .items em{font-style:normal;opacity:.75}
+.order-list .items small{font-size:11px}
+.order-list b{display:grid;justify-items:end;font-size:13px}
+.order-list b small{font-size:10px;font-weight:500;color:var(--muted)}
