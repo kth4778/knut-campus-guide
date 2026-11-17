@@ -1,0 +1,54 @@
+/* 화이트 모드 (theme.js) — 기본은 다크, <html data-theme="light">일 때만 아래 색을 써요 */
+:root[data-theme="light"]{color-scheme:light;--bg:#ffffff;--surface:#eff1f4;--text:#0f1419;--muted:#65707d;--line:#e4e7eb;--accent:#2f5fd0;--blue:#3566d4}
+
+/* 해·달 버튼 (홈 위쪽, 지구본 옆) */
+.theme-btn{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;color:var(--text)}
+.theme-btn:hover{background:var(--surface)}
+.theme-btn .icon{width:20px;height:20px}
+
+/* style.css 에 직접 적힌 어두운 색 → 밝은 색 */
+[data-theme="light"] .gesture::after{background:#0f1419}
+[data-theme="light"] [data-cat="맛집"] .category-disc,[data-theme="light"] .place-icon[data-cat="맛집"]{background:#fde8dc;color:#8a4a28;border-color:#e7b89a}
+[data-theme="light"] [data-cat="숨은장소"] .category-disc,[data-theme="light"] .place-icon[data-cat="숨은장소"]{background:#e2f2e6;color:#2f6b42;border-color:#a9d3b4}
+[data-theme="light"] [data-cat="생활꿀팁"] .category-disc,[data-theme="light"] .place-icon[data-cat="생활꿀팁"]{background:#e3ecfd;color:#2f4f8f;border-color:#a9c0ea}
+[data-theme="light"] [data-cat="자유"] .category-disc,[data-theme="light"] .place-icon[data-cat="자유"]{background:#efe6fb;color:#5b3f86;border-color:#cdb6ea}
+[data-theme="light"] .primary{background:#3566d4;color:#fff}
+[data-theme="light"] .chip[aria-pressed="true"]{background:#0f1419;color:#fff}
+[data-theme="light"] .detail-body section p,[data-theme="light"] .detail-body li{color:#39424e}
+[data-theme="light"] .cover-art{background:radial-gradient(ellipse at 70% 25%,#eef2fb,#c9d4ee 80%)}
+[data-theme="light"] .cover-art[data-cat="맛집"]{background:radial-gradient(ellipse at 72% 25%,#fff1e7,#f0c8ab 80%)}
+[data-theme="light"] .cover-art[data-cat="숨은장소"]{background:radial-gradient(ellipse at 72% 25%,#eef8f0,#bcdcc5 80%)}
+[data-theme="light"] .cover-art[data-cat="자유"]{background:radial-gradient(ellipse at 72% 25%,#f5effc,#d3c2ea 80%)}
+[data-theme="light"] .cover-art small{color:#4b5563}
+[data-theme="light"] .account-avatar{background:#e6e9ef}
+[data-theme="light"] .compose .form-error{color:#c0304a}
+[data-theme="light"] .chip.transit-chip{border-color:#9cc9a8}
+[data-theme="light"] .chip.transit-chip[aria-pressed="true"]{background:#2f8f4e;color:#fff;border-color:#2f8f4e}
+[data-theme="light"] .arrivals li .pill,[data-theme="light"] .grade{background:#e4e7eb;color:#39424e!important}
+[data-theme="light"] .grade.premium{background:#e6dcff;color:#4b3484!important}
+[data-theme="light"] .exp-right .soon{color:#c46a10}
+[data-theme="light"] .exp-right .run{color:#6d3fd1}
+[data-theme="light"] .live-now{background:#e6f4dc;color:#2f5a1a}
+[data-theme="light"] .setting-row.danger{color:#d64545}
+[data-theme="light"] .setting-row.danger small{color:#b06a6a}
+[data-theme="light"] .comment-sheet::backdrop{background:#0006}
+
+/* MOA (moa.css) */
+[data-theme="light"] .moa-hero{background:linear-gradient(135deg,#e8eefc,#f6f8fc)}
+[data-theme="light"] .moa-type{background:#e3ecfd;color:#2f4f8f}
+[data-theme="light"] .moa-type.taxi{background:#fff1c7;color:#7a5a00}
+[data-theme="light"] .moa-type.pickup{background:#ffe6d6;color:#8a4a28}
+[data-theme="light"] .moa-time.hot{color:#d64545}
+[data-theme="light"] .moa-where{color:#39424e}
+[data-theme="light"] .moa-host,[data-theme="light"] .moa-preview tr:last-child td{color:#b5541b}
+[data-theme="light"] .moa-btn.go,[data-theme="light"] .moa-new-btn{background:#3566d4;color:#fff}
+[data-theme="light"] .moa-btn.joined{background:#dcf3e3;color:#1f7a3d}
+[data-theme="light"] .moa-pay{background:#fff1e6;color:#7a4a2a}
+[data-theme="light"] .moa-pay b{color:#c45a1a}
+[data-theme="light"] .moa-pay small{color:#9a6a4a}
+
+/* 계정 · 챗봇 · 언어 메뉴 */
+[data-theme="light"] .story.seen .story-ring{background:#d5d9de}
+[data-theme="light"] .chat-msg.error p{background:#ffe5e5;color:#b42318}
+[data-theme="light"] .lang-menu{box-shadow:0 10px 28px #0f141933}
+[data-theme="light"] .lang-menu button[aria-current="true"]{color:#fff}

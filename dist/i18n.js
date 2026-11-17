@@ -156,6 +156,8 @@
     '(도로 기준 대략 위치)': ['(approximate location by road)', '（按道路的大致位置）', '（道路基準のおおよその位置）'], '네이버 지도에서 찾기': ['Find on Naver Map', '在Naver地图中查找', 'NAVERマップで探す'], '제휴 더 보기': ['More partners', '更多合作商家', '提携をもっと見る'],
     '식당': ['Restaurant', '餐厅', '食堂'], '주점·술집': ['Pub & Bar', '酒馆·酒吧', '居酒屋・バー'], '미용·뷰티': ['Beauty', '美容', '美容'], '반려동물': ['Pets', '宠物', 'ペット'],
     '운동·레저': ['Sports & Leisure', '运动·休闲', '運動・レジャー'], '영화·문화': ['Movies & Culture', '电影·文化', '映画・文化'], '꽃·소품': ['Flowers & Gifts', '鲜花·小物', '花・雑貨'], '사진·인쇄·행사': ['Photo, Print & Events', '照片·印刷·活动', '写真・印刷・イベント'],
+    // 화이트 모드 버튼 (theme.js)
+    '화이트 모드로 바꾸기': ['Switch to light mode', '切换到浅色模式', 'ライトモードにする'], '다크 모드로 바꾸기': ['Switch to dark mode', '切换到深色模式', 'ダークモードにする'],
     // 챗봇
     'KNUTUIDE에게 질문': ['Ask KNUTUIDE', '向KNUTUIDE提问', 'KNUTUIDEに質問'], '학교생활 무엇이든 물어보세요': ['Ask anything about campus life', '关于校园生活，随便问', '学校生活のことなら何でも聞いてね'],
     '보내기': ['Send', '发送', '送信'], '주소': ['Address', '地址', 'アドレス'], '모델': ['Model', '模型', 'モデル'], '대화 지우기': ['Clear chat', '清除对话', '会話を消す'], 'LLM 연결': ['LLM connection', 'LLM连接', 'LLM接続'],
