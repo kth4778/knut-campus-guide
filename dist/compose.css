@@ -1,0 +1,40 @@
+/* 새 게시물 화면 (app.js composePage) */
+.compose{padding:14px 14px 0}
+.compose-form{display:grid;gap:16px;padding-bottom:16px}
+
+/* 사진: 큰 정사각 칸, 고르면 그 자리에 미리보기 */
+.photo-drop{position:relative;display:grid;place-items:center;aspect-ratio:4/3;border-radius:18px;border:1.5px dashed var(--line);background:var(--surface);overflow:hidden;cursor:pointer;transition:border-color .15s}
+.photo-drop:hover{border-color:var(--accent)}
+.photo-input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.photo-empty{display:grid;justify-items:center;gap:6px;color:var(--muted);pointer-events:none}
+.photo-empty .icon{width:34px;height:34px;color:var(--text);padding:10px;box-sizing:content-box;border-radius:50%;background:var(--bg)}
+.photo-empty b{font-size:15px;color:var(--text)}
+.photo-empty small{font-size:11.5px}
+.photo-preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.photo-drop.has-photo{border-style:solid;border-color:transparent}
+.photo-drop.has-photo .photo-empty{visibility:hidden}
+
+/* 카테고리: 그림이 있는 큰 선택 칸 */
+.cat-pick{border:0;margin:0;padding:0;min-width:0}
+.cat-pick legend,.compose .field>span{font-size:13px;font-weight:750;margin-bottom:8px;padding:0}
+.cat-pick>div{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.cat-pick label{display:block;cursor:pointer}
+.cat-pick input{position:absolute;opacity:0;pointer-events:none}
+.cat-pick span{display:grid;justify-items:center;gap:4px;padding:10px 4px 9px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);font-size:12px;font-weight:700;color:var(--muted);transition:border-color .15s,color .15s,transform .1s}
+.cat-pick span img{width:34px;height:34px;object-fit:contain}
+.cat-pick input:checked+span{border-color:var(--accent);color:var(--text);background:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+.cat-pick input:focus-visible+span{outline:2px solid #83b5ff;outline-offset:2px}
+.cat-pick label:active span{transform:scale(.96)}
+
+/* 제목 · 내용 */
+.compose .field{display:grid;gap:0;position:relative}
+.compose .field>span{display:block}
+.compose .field input,.compose .field textarea{width:100%;border:1.5px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);padding:12px 14px;font:inherit;font-size:14.5px;outline:none;transition:border-color .15s}
+.compose .field input:focus,.compose .field textarea:focus{border-color:var(--accent)}
+.compose .field textarea{min-height:130px;resize:vertical;line-height:1.55;padding-bottom:26px}
+.compose .count{position:absolute;right:12px;bottom:9px;font-size:11px;color:var(--muted)}
+.compose-note{font-size:12px;color:var(--muted);text-align:center;margin:-4px 0 0}
+.compose .form-error:empty{display:none}
+
+/* 게시 버튼: 화면 아래에 붙어 있음 */
+.compose-submit{position:sticky;bottom:12px;width:100%;min-height:48px;border-radius:14px;font-size:15px;font-weight:800;box-shadow:0 8px 20px #0005}

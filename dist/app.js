@@ -40,6 +40,7 @@ const paths = {
   target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
   moa: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.2a6.5 6.5 0 0 1 3.5 5.8"/>',
   chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12Z"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01"/>',
+  camera: '<path d="M4 8h3.2l1.8-2.6h6l1.8 2.6H20v11H4z"/><circle cx="12" cy="13" r="3.6"/>',
   bus: '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3m8-3v3M8 14.5h.01M16 14.5h.01"/>',
 };
 
@@ -401,17 +402,38 @@ function resetData() {
 function composePage() {
   return `${top('새 게시물',iconLink('back','뒤로',placeBack))}
     <main class="scroll compose">
-      <form id="compose-form">
-        <label>사진 <span>(선택)</span><input name="photo" type="file" accept="image/jpeg,image/png,image/webp"></label>
-        <label>카테고리 <select name="category">${categories.slice(1).map(([name])=>`<option>${name}</option>`).join('')}</select></label>
-        <label>제목 <input name="name" placeholder="장소나 기록 이름" required maxlength="60"></label>
-        <label>내용 <textarea name="caption" placeholder="문구를 입력하세요…" required maxlength="500"></textarea></label>
-        <p>게시물은 이 브라우저에 저장됩니다.</p>
-        <button class="primary" type="submit">게시</button>
+      <form id="compose-form" class="compose-form">
+        <label class="photo-drop">
+          <input class="photo-input" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+          <span class="photo-empty">${icon('camera')}<b>사진 추가</b><small>JPG · PNG · WebP (선택)</small></span>
+          <img class="photo-preview" alt="" hidden>
+        </label>
+        <fieldset class="cat-pick"><legend>카테고리</legend>
+          <div>${categories.slice(1).map(([name,,asset],i)=>`<label><input type="radio" name="category" value="${name}" ${i?'':'checked'}><span>${asset?imageTag(asset):''}${name}</span></label>`).join('')}</div>
+        </fieldset>
+        <label class="field"><span>제목</span><input name="name" placeholder="장소나 기록 이름" required maxlength="60"></label>
+        <label class="field"><span>내용</span><textarea name="caption" placeholder="문구를 입력하세요…" required maxlength="500"></textarea><small class="count">0/500</small></label>
+        <p class="compose-note">게시물은 이 브라우저에 저장됩니다.</p>
         <p class="form-error" role="status"></p>
+        <button class="primary compose-submit" type="submit">게시</button>
       </form>
     </main>`;
 }
+
+// 새 게시물: 고른 사진 미리보기, 내용 글자 수
+app.addEventListener('change', event => {
+  const input = event.target;
+  if (!input.classList?.contains('photo-input')) return;
+  const drop = input.closest('.photo-drop'), img = drop.querySelector('.photo-preview'), file = input.files?.[0];
+  if (img.src) URL.revokeObjectURL(img.src);
+  img.hidden = !file;
+  drop.classList.toggle('has-photo', !!file);
+  if (file) img.src = URL.createObjectURL(file); else img.removeAttribute('src');
+});
+app.addEventListener('input', event => {
+  const field = event.target;
+  if (field.name === 'caption' && field.form?.id === 'compose-form') field.form.querySelector('.count').textContent = `${field.value.length}/500`;
+});
 
 function findPost(id) {
   return byId.get(id) ?? localPosts.find(post => post.id===id);
