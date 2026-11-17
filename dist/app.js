@@ -235,15 +235,6 @@ function welcomePost() {
   </article>`;
 }
 
-// MOA는 하단 탭 대신 홈 위쪽 배너로 들어가요 (하단 탭 빈칸은 비워 둬요)
-function moaBanner() {
-  return `<a class="moa-banner" href="${route('moa')}">
-    <span aria-hidden="true">🛵🚕</span>
-    <span><strong>MOA 같이하기</strong><small>배달비·택시비를 같이 나눠요</small></span>
-    ${icon('arrow')}
-  </a>`;
-}
-
 function home(category) {
   const allPosts = [...localPosts,...places];
   const items = category === '전체' ? allPosts : allPosts.filter(post => post.category === category);
@@ -251,7 +242,6 @@ function home(category) {
   return `${top('KNUTIPS', iconLink('plus','새 게시물',route('compose')), iconLink('bookmark','저장한 게시물',route('my',{tab:'saved'})), true)}
     <main class="scroll" aria-label="홈">
       ${categoryRail(category)}
-      ${category==='전체'?moaBanner():''}
       ${category==='전체'?welcomePost():''}
       ${visible.map(feedPost).join('')}
       ${items.length>visible.length?`<div class="more-row"><button class="pill" data-action="more-home">게시물 더 보기</button></div>`:''}
