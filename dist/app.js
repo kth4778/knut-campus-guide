@@ -1,3 +1,5 @@
+import {BUS_STOPS, mountBusStop} from './transit.js';
+
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
 const campus = [36.969692, 127.872252];
@@ -9,6 +11,9 @@ const categories = [
   ['자유', 'spark', 'dice.webp'],
 ];
 const categoryInfo = new Map(categories.map(([name, icon, asset]) => [name, {icon, asset}]));
+// 지도에만 있는 교통 분류
+const transitCategories = ['버스'];
+const mapCategories = [...categories.map(([name]) => name), ...transitCategories];
 const paths = {
   home: '<path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/>',
   search: '<circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/>',
@@ -25,6 +30,7 @@ const paths = {
   spark: '<path d="M12 2c1 7 3 9 10 10-7 1-9 3-10 10-1-7-3-9-10-10 7-1 9-3 10-10z"/>',
   share: '<path d="M12 15V3m-5 5 5-5 5 5M5 12H3v9h18v-9h-2"/>',
   target: '<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/>',
+  bus: '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3m8-3v3M8 14.5h.01M16 14.5h.01"/>',
 };
 
 const nativeIcons = {plus:'plus', comment:'comment', heart:'heart', heartFilled:'heartFilled', bookmark:'bookmark'};
@@ -336,6 +342,24 @@ function openComments(id) {
   dialog.showModal();
 }
 
+// 아래에서 올라오는 시트. mount(body)가 돌려준 정리 함수는 닫힐 때 불러요.
+function openSheet(title, mount) {
+  app.querySelector('dialog.transit-sheet')?.close();
+  const dialog = document.createElement('dialog');
+  dialog.className = 'comment-sheet transit-sheet';
+  dialog.innerHTML = `<div class="sheet-top"><h2>${escape(title)}</h2>${button('close','닫기','close-sheet')}</div><div class="sheet-body"></div>`;
+  app.append(dialog);
+  const cleanup = mount(dialog.querySelector('.sheet-body')) || (() => {});
+  dialog.addEventListener('close', () => { cleanup(); dialog.remove(); });
+  dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+  dialog.showModal();
+  return dialog;
+}
+
+function openBusSheet(stop) {
+  openSheet(stop.name, body => mountBusStop(body, stop));
+}
+
 function placePage(place) {
   if (!place) return `${top('장소 정보',iconLink('back','뒤로',placeBack))}<main class="scroll empty">등록된 장소를 찾을 수 없어요.</main>`;
   const address = place.address && !['확인 안 됨','해당 없음'].includes(place.address) ? place.address : '';
@@ -370,7 +394,7 @@ function placePage(place) {
 function mapPage() {
   return `${top('캠퍼스 지도',iconLink('search','지도에서 찾을 장소 검색',route('search')),iconLink('bookmark','저장한 장소',route('my')))}
     <div class="chips map-chips" aria-label="지도 카테고리">
-      ${categories.map(([name])=>`<button class="chip" data-action="map-category" data-category="${escape(name)}" aria-pressed="${name===mapCategory}">${name}</button>`).join('')}
+      ${mapCategories.map(name=>`<button class="chip${transitCategories.includes(name)?' transit-chip':''}" data-action="map-category" data-category="${escape(name)}" aria-pressed="${name===mapCategory}">${name}</button>`).join('')}
     </div>
     <main class="map-panel" aria-label="장소 지도">
       <div id="map-canvas" class="map-canvas"></div>
@@ -388,6 +412,10 @@ function markerHtml(place, selected, count) {
 function showMapResult(place) {
   const result = document.getElementById('map-result');
   if (!place) {
+    if (mapCategory === '버스') {
+      result.innerHTML = `<p>정류장 ${BUS_STOPS.length}곳 · 정류장을 누르면 실시간 도착 정보가 나와요.</p>`;
+      return;
+    }
     const count = mappedPlaces.filter(item => mapCategory==='전체'||item.category===mapCategory).length;
     result.innerHTML = `<p>${count}개 위치 · 핀을 눌러 장소를 확인하세요.</p>`;
     return;
@@ -440,8 +468,31 @@ function addNaverMarker(group, place, selected, name) {
   mapMarkers.push(marker);
 }
 
+// 장소가 아닌 점(정류장 등)을 지도에 올려요.
+function addPoint(latlng, html, title, onClick, zIndex = 500) {
+  if (usingNaver) {
+    const {maps} = window.naver;
+    const marker = new maps.Marker({map, position:new maps.LatLng(...latlng), title, zIndex, icon:{content:html, anchor:new maps.Point(13,13)}});
+    maps.Event.addListener(marker, 'click', onClick);
+    mapMarkers.push(marker);
+    return;
+  }
+  L.marker(latlng, {title, alt:title, zIndexOffset:zIndex, riseOnHover:true,
+    icon:L.divIcon({className:'guide-pin', html, iconSize:[26,26], iconAnchor:[13,13]}),
+  }).on('click', onClick).addTo(mapMarkers);
+}
+
+function paintTransit() {
+  if (mapCategory !== '전체' && mapCategory !== '버스') return;
+  for (const stop of BUS_STOPS) {
+    addPoint(stop.latlng, `<span class="marker transit-marker bus">${icon('bus')}</span>`, stop.name, () => openBusSheet(stop), 300);
+  }
+}
+
 function paintMarkers() {
   clearMarkers();
+  paintTransit();
+  if (transitCategories.includes(mapCategory) && !focusedMapPlace) return;
   const groups = new Map();
   for (const place of mappedPlaces) {
     if (mapCategory !== '전체' && place.category!==mapCategory && place!==focusedMapPlace) continue;
@@ -556,13 +607,14 @@ function bindMap(focus, category) {
 function render() {
   const [path, params] = readRoute();
   const requested = params.get('category');
-  const category = categoryInfo.has(requested) ? requested : '전체';
+  const category = categoryInfo.has(requested) || (path==='map' && transitCategories.includes(requested)) ? requested : '전체';
   const place = byId.get(params.get(path==='map'?'focus':'id'));
   if (path==='map' && currentView==='map' && map) {
     updateMap(place, category);
     return;
   }
   destroyMap();
+  app.querySelector('dialog.transit-sheet')?.close();
   if (path !== currentView) {
     homeLimit = 16;
     searchLimit = 35;
@@ -631,7 +683,8 @@ app.addEventListener('click', event => {
       break;
     }
     case 'comments': openComments(control.dataset.id); break;
-    case 'close-comments': control.closest('dialog').close(); break;
+    case 'close-comments':
+    case 'close-sheet': control.closest('dialog').close(); break;
     case 'copy': {
       const url = new URL(route('place',{id:control.dataset.id}),location.href);
       if (!navigator.clipboard) { toast('링크를 복사하지 못했어요.'); break; }

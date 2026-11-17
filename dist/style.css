@@ -199,3 +199,24 @@ img{display:block;width:100%;object-fit:cover}
 .comment-sheet form{display:flex;align-items:center;gap:8px;padding:9px;border-top:1px solid var(--line)}
 .comment-sheet form button{flex:none;padding:5px;color:var(--accent);font-weight:700}
 @media(max-width:520px){.comment-sheet{inset:auto 0 0;width:100%;max-width:none;padding-bottom:env(safe-area-inset-bottom)}}
+
+/* 버스 · 고속버스 */
+.chip.transit-chip{border:1px solid #3c5a46}
+.chip.transit-chip[aria-pressed="true"]{background:#bfe7c9;color:#123321;border-color:#bfe7c9}
+.transit-marker{color:#fff}
+.transit-marker.bus{background:#2f8f4e}
+.transit-marker.exp{background:#6d3fd1;width:30px;height:30px}
+.transit-marker .icon{width:15px;height:15px}
+.transit-sheet{max-height:min(560px,78svh);display:flex;flex-direction:column}
+.transit-sheet[open]{display:flex}
+.sheet-body{overflow:auto;padding:10px 14px 16px;display:grid;gap:10px;align-content:start}
+.transit-sub{font-size:12px;color:var(--muted)}
+.transit-note{font-size:13px;color:var(--muted);line-height:1.55;padding:6px 0}
+.transit-foot{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.transit-foot button{margin-left:auto;color:var(--accent);font-weight:700;font-size:12px}
+.transit-links{display:flex;gap:6px;flex-wrap:wrap}
+.arrivals{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.arrivals li{display:flex;align-items:center;gap:10px;background:var(--surface);border-radius:10px;padding:9px 11px;font-size:13px}
+.arrivals li b{min-width:52px}
+.arrivals li small{margin-left:auto;color:var(--muted);font-size:11px}
+.arrivals li .pill{min-height:28px;padding:4px 9px;background:#2d3640}
