@@ -1,7 +1,7 @@
 import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
   LIVE_MAX, LIVE_EVERY, liveColor, routeSort, routeIndex, liveBuses, liveBusInfo} from './transit.js';
 
-import {moaPage, initMoa} from './moa.js';
+import {moaPage, initMoa, openNewFund} from './moa.js';
 
 const app = document.getElementById('app');
 const nav = document.getElementById('nav');
@@ -401,7 +401,9 @@ function openBusSheet(stop) {
 }
 
 function openExpressSheet(terminal) {
-  openSheet(terminal.name, body => mountExpress(body, terminal));
+  // 충주터미널은 학교에서 멀어서 택시 같이 타기를 바로 모집할 수 있게 해요.
+  const extra = terminal.code === '420' ? '<button type="button" class="primary moa-taxi" data-action="moa-taxi">🚕 터미널까지 택시 같이 타기</button>' : '';
+  openSheet(terminal.name, body => mountExpress(body, terminal, {extra}));
 }
 
 function placePage(place) {
@@ -649,8 +651,10 @@ function updateMap(focus, category) {
   else liveStop();
   if (!map) return;
   paintMarkers();
-  const center = focusedMapPlace?.latlng ?? campus;
-  const zoom = focusedMapPlace ? 17 : 15;
+  // 고속버스는 충주터미널이 학교에서 멀어서 두 터미널이 다 보이게 넓혀요.
+  const wide = !focusedMapPlace && category === '고속버스';
+  const center = focusedMapPlace?.latlng ?? (wide ? [36.9725, 127.8925] : campus);
+  const zoom = focusedMapPlace ? 17 : wide ? 13 : 15;
   if (usingNaver) {
     map.setCenter(new window.naver.maps.LatLng(...center));
     map.setZoom(zoom);
@@ -758,7 +762,7 @@ function render() {
     app.innerHTML = mapPage();
     bindMap(place, category);
   } else if (path === 'search') app.innerHTML = searchPage();
-  else if (path === 'moa') app.innerHTML = moaPage(top('MOA'));
+  else if (path === 'moa') app.innerHTML = moaPage(top('MOA', '', `<button type="button" class="ib" data-moa="new" aria-label="모집하기">${icon('plus')}</button>`));
   else if (path === 'my') {
     profileTab = params.get('tab')==='saved' ? 'saved' : 'posts';
     app.innerHTML = savedPage();
@@ -850,6 +854,12 @@ app.addEventListener('click', event => {
       location.hash=route('map',control.dataset.category==='전체'?{}:{category:control.dataset.category});
       break;
     case 'live-route': toggleLiveRoute(control.dataset.no); break;
+    case 'moa-taxi':
+      control.closest('dialog').close();
+      // 화면이 MOA로 바뀐 뒤에 모집 창을 열어요 (먼저 열면 화면을 다시 그릴 때 사라져요)
+      window.addEventListener('hashchange', () => openNewFund(toast, {type:'taxi', place:'정문', dest:'충주터미널', title:'충주터미널 같이 가요'}), {once:true});
+      location.hash = route('moa');
+      break;
     case 'campus':
       updateMap(null,mapCategory);
       history.replaceState(history.state,'',route('map',mapCategory==='전체'?{}:{category:mapCategory}));

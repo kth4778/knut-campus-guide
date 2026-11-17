@@ -43,3 +43,15 @@
 .moa-pay small{color:#d9a684}
 .moa-actions{display:flex;gap:8px}
 .moa-actions>*{flex:1}
+.moa-new-btn{margin:2px 12px 10px;width:calc(100% - 24px);min-height:42px;border-radius:12px;background:#a4c2ff;color:#0c2142;font-weight:800;font-size:14px}
+.moa-new{gap:9px}
+.moa-new>label{margin-top:4px}
+.moa-seg{display:flex;flex-wrap:wrap;gap:6px}
+.moa-help{font-size:12px;color:var(--muted);line-height:1.5}
+.moa-preview{background:var(--surface);border-radius:10px;padding:10px 12px;font-size:12px}
+.moa-preview small{color:var(--muted)}
+.moa-preview table{width:100%;border-collapse:collapse;margin-top:6px}
+.moa-preview th,.moa-preview td{padding:4px 2px;text-align:right}
+.moa-preview th:first-child,.moa-preview td:first-child{text-align:left;color:var(--muted)}
+.moa-preview tr:last-child td{color:#ffc59e;font-weight:700}
+.moa-taxi{width:100%}

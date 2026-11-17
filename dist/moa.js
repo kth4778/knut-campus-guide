@@ -120,6 +120,7 @@ function listHtml() {
   return `<div class="moa-hero"><span>🛵🚕</span><div><b>같이 시키고, 같이 타요</b><small>배달비·최소주문, 택시비를 학우들과 나눠요</small></div><p><strong>${open.length}</strong><small>모집 중</small></p></div>
     <div class="chips">${options.map(([value, label]) => `<button type="button" class="chip" data-moa="filter" data-value="${value}" aria-pressed="${filter === value}">${label} ${value === 'all' ? open.length : open.filter(f => kindOf(f) === value).length}</button>`).join('')}
       <button type="button" class="chip" data-moa="mine" aria-pressed="${mineOnly}">내 참여</button></div>
+    <button type="button" class="moa-new-btn" data-moa="new">＋ 모집하기</button>
     <div class="moa-list">${list.length ? list.map(fundCard).join('') : `<div class="empty">${mineOnly ? '참여한 모집이 없어요.' : '지금 모집 중인 글이 없어요.<br>먼저 모집해 보세요!'}</div>`}</div>
     <p class="moa-note">모집글은 이 브라우저에만 저장돼요. 다른 사람에게는 보이지 않아요.</p>`;
 }
@@ -179,6 +180,7 @@ function askJoin(f, toast) {
 export function initMoa(root, {toast}) {
   root.addEventListener('click', event => {
     const control = event.target.closest('[data-moa]');
+    if (control?.dataset.moa === 'new') { openNewFund(toast); return; }
     if (!control || !control.closest('.moa-page')) return;
     const f = funds.find(item => item.id === control.closest('.moa-card')?.dataset.id);
     switch (control.dataset.moa) {
@@ -203,4 +205,102 @@ export function initMoa(root, {toast}) {
     }
   });
   setInterval(() => { if (!document.hidden) refreshMoa(); }, 30000);
+}
+
+// ---------- 모집하기 ----------
+// preset 으로 처음 값을 정할 수 있어요. 예) {type:'taxi', place:'정문', dest:'충주터미널', title:'충주터미널 같이 가요'}
+export function openNewFund(toast, preset = {}) {
+  const st = {type:'delivery', place:'예성생활관', dest:'충주터미널', max:4, min:30, fee:5000, pfree:true, here:{}, ...preset};
+  const dialog = sheet('<div class="sheet-top"><h2>모집하기</h2></div><form class="moa-form moa-new"></form>');
+  const form = dialog.querySelector('form');
+  const seg = (name, options, current) => `<div class="moa-seg">${options.map(([value, label]) =>
+    `<button type="button" class="chip" data-seg="${name}" data-value="${esc(value)}" aria-pressed="${String(value) === String(current)}">${esc(label)}</button>`).join('')}</div>`;
+  // 정해진 곳 + 🎯 내 위치
+  const spotSeg = (key, list) => seg(key, [...list.map(label => [label, label]), ['__me', st.here[key] ? '🎯 내 위치 ✓' : '🎯 내 위치']], st[key]);
+  const placeOf = key => st[key] === '__me' && st.here[key] ? {label:'내 위치', ...st.here[key]} : spot(st[key]);
+  const keep = () => Object.fromEntries([...new FormData(form)].map(([k, v]) => [k, v]));
+  const draw = (values = {}) => {
+    const taxi = st.type === 'taxi', pickup = st.type === 'pickup';
+    form.innerHTML = `
+      <label>무엇을 같이 할까요?</label>${seg('type', [['delivery', '🛵 배달 같이 시키기'], ['pickup', '🍕 픽업해서 같이 먹기'], ['taxi', '🚕 택시 같이 타기']], st.type)}
+      ${pickup ? '<p class="moa-help">내가 가게에서 사 와서 나눠요. 음식값은 N빵, 교통비는 아래에서 정해요.</p>' : ''}
+      <label>제목<input name="title" maxlength="60" placeholder="${taxi ? '예) 충주역 같이 가요' : pickup ? '예) 파파프라이데이 피자 같이 먹어요' : '예) 치킨 같이 시켜요'}"></label>
+      ${pickup ? '<label>가게<input name="shop" maxlength="40" placeholder="예) 파파존스 충주점"></label>' : ''}
+      <label>${taxi ? '출발' : pickup ? '나눌 곳 (사 와서 모일 곳)' : '받는 곳'}</label>${spotSeg('place', SPOTS.slice(0, 8))}
+      ${taxi ? `<label>도착</label>${spotSeg('dest', SPOTS.slice(7))}
+        <label>예상 택시비 (원, 모르면 비워두기)<input name="money" type="number" inputmode="numeric" min="0" placeholder="예) 9800"></label>`
+      : pickup ? `<label>음식 총액 (원)<input name="food" type="number" inputmode="numeric" min="0" placeholder="예) 32000"></label>
+        <label>교통비</label>${seg('fee', [3000, 4000, 5000, 6000, 7000, 8000].map(n => [n, n / 1000 + '천원']), st.fee)}
+        <label>픽업하는 나(모집자)는</label>${seg('pfree', [['1', '교통비 면제'], ['0', '교통비 같이 부담']], st.pfree ? '1' : '0')}
+        <div class="moa-preview"></div>`
+      : `<label>배달비 (원)<input name="money" type="number" inputmode="numeric" min="0" placeholder="예) 4000"></label>
+        <label>내 주문금액 (원)<input name="amount" type="number" inputmode="numeric" min="0" placeholder="예) 9000"></label>
+        <label>최소주문금액 (원, 없으면 비워두기)<input name="minOrder" type="number" inputmode="numeric" min="0" placeholder="예) 20000"></label>
+        <p class="moa-help">👥 배달은 인원 제한 없이 누구나 참여할 수 있어요.</p>`}
+      ${st.type !== 'delivery' ? `<label>정원 (나 포함)</label>${seg('max', (pickup ? [2, 3, 4, 5, 6, 8] : [2, 3, 4, 5, 6]).map(n => [n, n + '명']), st.max)}` : ''}
+      <label>${taxi ? '출발까지' : pickup ? '픽업 출발까지' : '주문까지'}</label>${seg('min', [10, 20, 30, 60].map(n => [n, n + '분 뒤']), st.min)}
+      <label>닉네임<input name="nick" maxlength="12" placeholder="예) 치킨러버"></label>
+      <p class="moa-help">모집글은 이 브라우저에만 저장돼요.</p>
+      <div class="moa-actions"><button type="button" class="pill" data-moa="cancel">취소</button><button class="primary" type="submit">올리기</button></div>`;
+    const initial = {title:st.title ?? '', nick:myNick(), ...values};
+    for (const [name, value] of Object.entries(initial)) if (form.elements[name]) form.elements[name].value = value;
+    preview();
+  };
+  // 픽업: 사람 수별 1인 금액 미리 보기
+  const preview = () => {
+    const box = form.querySelector('.moa-preview');
+    if (!box) return;
+    const food = Math.round(+form.elements.food.value || 0);
+    const counts = [2, 3, 4, st.max].filter((n, i, all) => n <= st.max && all.indexOf(n) === i);
+    const fund = {foodTotal:food, fee:st.fee, pickerFree:st.pfree};
+    box.innerHTML = food ? `<b>사람 수별 1인 금액</b><table><tr><th></th>${counts.map(n => `<th>${n}명</th>`).join('')}</tr>
+      <tr><td>참여자</td>${counts.map(n => `<td>${won(pickSplit(fund, n).other)}</td>`).join('')}</tr>
+      <tr><td>나(픽업)</td>${counts.map(n => `<td>${won(pickSplit(fund, n).picker)}</td>`).join('')}</tr></table>`
+      : '<small>음식 총액을 적으면 사람 수별 1인 금액을 보여 드려요.</small>';
+  };
+  form.addEventListener('input', event => { if (event.target.name === 'food') preview(); });
+  form.addEventListener('click', event => {
+    const button = event.target.closest('[data-seg]');
+    if (!button) return;
+    const {seg: key, value} = button.dataset, values = keep();
+    if (value === '__me') {
+      if (!navigator.geolocation) { toast('위치를 쓸 수 없어요.'); return; }
+      navigator.geolocation.getCurrentPosition(pos => {
+        st.here[key] = {lat:+pos.coords.latitude.toFixed(6), lng:+pos.coords.longitude.toFixed(6)};
+        st[key] = '__me';
+        draw(keep());
+        toast('내 위치로 정했어요.');
+      }, () => toast('위치 권한이 필요해요.'), {enableHighAccuracy:true, timeout:8000});
+      return;
+    }
+    if (key === 'pfree') st.pfree = value === '1';
+    else st[key] = ['max', 'min', 'fee'].includes(key) ? +value : value;
+    draw(values);
+  });
+  form.addEventListener('submit', event => {
+    event.preventDefault();
+    const v = keep();
+    const title = String(v.title || '').trim().slice(0, 60), nick = String(v.nick || '').trim().slice(0, 12);
+    const money = Math.round(+v.money || 0), amount = Math.round(+v.amount || 0);
+    const shop = String(v.shop || '').trim().slice(0, 40), food = Math.round(+v.food || 0);
+    if (!title) { toast('제목을 적어 주세요.'); return; }
+    if (st.type === 'delivery' && !amount) { toast('내 주문금액을 적어 주세요.'); return; }
+    if (st.type === 'pickup' && !shop) { toast('가게 이름을 적어 주세요.'); return; }
+    if (st.type === 'pickup' && !food) { toast('음식 총액을 적어 주세요.'); return; }
+    if (!nick) { toast('닉네임을 적어 주세요.'); return; }
+    write(NICK, nick);
+    const now = Date.now();
+    const fund = {id:'u' + now, type:st.type === 'pickup' ? 'delivery' : st.type, title, status:'open', createdAt:now, deadline:now + st.min * 60000,
+      place:placeOf('place'), hostUid:ME, host:{nick}, participants:[{uid:ME, nick, amount, at:now, host:true}], participantUids:[ME],
+      maxPeople:st.type === 'delivery' ? 20 : st.max};
+    if (st.type === 'pickup') Object.assign(fund, {mode:'pickup', shop, foodTotal:food, fee:st.fee, pickerFree:st.pfree, minOrder:0});
+    else if (st.type === 'delivery') Object.assign(fund, {minOrder:Math.round(+v.minOrder || 0), fee:money});
+    else Object.assign(fund, {dest:placeOf('dest'), fare:money});
+    addFund(fund);
+    filter = 'all';
+    dialog.close();
+    refreshMoa();
+    toast('모집글을 올렸어요.');
+  });
+  draw();
 }
