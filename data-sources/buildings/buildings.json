@@ -1,0 +1,1170 @@
+{
+ "sources": [
+  "https://www.ut.ac.kr/prog/campusMap/kor/sub01_07_02/list.do?campus_code=dorm1",
+  "© OpenStreetMap contributors (ODbL) — https://www.openstreetmap.org/copyright"
+ ],
+ "collected": "2026-11-18",
+ "buildings": [
+  {
+   "code": "E1",
+   "name": "정문",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "정문",
+      "서점"
+     ]
+    }
+   ],
+   "osm": null,
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E2",
+   "name": "국원쉼터",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "북카페"
+     ]
+    }
+   ],
+   "osm": null,
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E3",
+   "name": "국원생활관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "국원생활관"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780314",
+    "name": "국원생활관 (E3)",
+    "levels": null,
+    "height": null,
+    "center": [
+     36.966918,
+     127.8732436
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E4",
+   "name": "시스템관/국원문화관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "국원문화관"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "항공",
+      "기계설계전공"
+     ]
+    },
+    {
+     "floor": "5",
+     "what": [
+      "에너지소재공학전공"
+     ]
+    },
+    {
+     "floor": "6",
+     "what": [
+      "산업경영공학전공"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780311",
+    "name": "시스템관 (E4)",
+    "levels": "6",
+    "height": "26.3",
+    "center": [
+     36.9681092,
+     127.8741236
+    ]
+   },
+   "topFloorOfficial": 6,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E5",
+   "name": "테크노관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "자동차공학전공"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "제2행정실",
+      "기계공학전공",
+      "안전공학전공"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780310",
+    "name": "테크노관 (E5)",
+    "levels": null,
+    "height": null,
+    "center": [
+     36.9678021,
+     127.8728633
+    ]
+   },
+   "topFloorOfficial": 2,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E6",
+   "name": "학생회관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "국원 휘트니스클럽(헬스장)"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "동아리연합회",
+      "전국국공립대노동조합"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "예비군연대",
+      "총학생회실",
+      "학생복지위원회",
+      "졸업준비위원회",
+      "감사위원회",
+      "공무원직장협의회"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "방송국",
+      "대학신문사",
+      "유물전시실",
+      "고시열람실"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780306",
+    "name": "학생회관 (E6)",
+    "levels": "4",
+    "height": null,
+    "center": [
+     36.9688592,
+     127.8727695
+    ]
+   },
+   "topFloorOfficial": 4,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E7",
+   "name": "경영항공관",
+   "floors": [
+    {
+     "floor": "2",
+     "what": [
+      "항공서비스학과",
+      "항공운항학과"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "경영학과"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "비행훈련원",
+      "국제통상전공",
+      "공학교육혁신센터"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780305",
+    "name": "경영항공관 (E7)",
+    "levels": "4",
+    "height": "18.9",
+    "center": [
+     36.9692824,
+     127.8738464
+    ]
+   },
+   "topFloorOfficial": 4,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E8",
+   "name": "대학본부",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "대학교육혁신원",
+      "보건실",
+      "T-SAFE사업단"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "국제회의장"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "교직원식당",
+      "글로컬대학30추진단"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "종합상황실",
+      "박물관"
+     ]
+    },
+    {
+     "floor": "5",
+     "what": [
+      "전시실"
+     ]
+    },
+    {
+     "floor": "6",
+     "what": [
+      "교무과",
+      "기획과",
+      "총무과",
+      "재무과",
+      "동문회"
+     ]
+    },
+    {
+     "floor": "7",
+     "what": [
+      "총장실",
+      "U-edu센터"
+     ]
+    },
+    {
+     "floor": "8",
+     "what": [
+      "시설과",
+      "교수회",
+      "대회의실"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780300",
+    "name": "대학본부 (E8)",
+    "levels": "7",
+    "height": "34.8",
+    "center": [
+     36.9697765,
+     127.8725654
+    ]
+   },
+   "topFloorOfficial": 8,
+   "levelsMismatch": true
+  },
+  {
+   "code": "E8-1",
+   "name": "대학본부 별관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "학생식당",
+      "편의점"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "음료광장"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "후생팀"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "창업지원단",
+      "SK청년비상사업단"
+     ]
+    }
+   ],
+   "osm": null,
+   "topFloorOfficial": 4,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E9",
+   "name": "항공,기계실습관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "항공",
+      "기계실습실"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780335",
+    "name": "항공기계실습실 (E9)",
+    "levels": "1",
+    "height": "5.5",
+    "center": [
+     36.9702093,
+     127.8743957
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E10",
+   "name": "역학시험동",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "역학시험동"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780336",
+    "name": "역학시험동 (E10)",
+    "levels": "1",
+    "height": "13.5",
+    "center": [
+     36.97034,
+     127.8747214
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E11",
+   "name": "창업생산동",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "창업생산동"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780337",
+    "name": "창업생산동 (E11)",
+    "levels": "2",
+    "height": "9.9",
+    "center": [
+     36.9704382,
+     127.8751082
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": true
+  },
+  {
+   "code": "E12",
+   "name": "건축관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "건축공학전공",
+      "건축학전공"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780297",
+    "name": "건축관 (E12)",
+    "levels": "3",
+    "height": "11.4",
+    "center": [
+     36.9712994,
+     127.8718358
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": true
+  },
+  {
+   "code": "E13",
+   "name": "건설환경관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "사회기반공학전공"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "환경공학전공"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "도시교통공학전공"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "사회복지학과"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780295",
+    "name": "건설환경관 (E13)",
+    "levels": "4",
+    "height": "20.7",
+    "center": [
+     36.9722018,
+     127.8718733
+    ]
+   },
+   "topFloorOfficial": 4,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E14",
+   "name": "인문사회관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "제3행정실",
+      "인문사회소극장",
+      "Caffee"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "영어영문학전공"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "중국어전공"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "행정정보학전공"
+     ]
+    },
+    {
+     "floor": "5",
+     "what": [
+      "행정학전공"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780289",
+    "name": "인문사회관 (E14)",
+    "levels": "5",
+    "height": "21.3",
+    "center": [
+     36.9730205,
+     127.8726751
+    ]
+   },
+   "topFloorOfficial": 5,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E15",
+   "name": "학군단",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "학군단"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780340",
+    "name": "학생군사교육단 (E15)",
+    "levels": null,
+    "height": null,
+    "center": [
+     36.9715221,
+     127.8747414
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E16",
+   "name": "대원생활관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "대원생활관"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780290",
+    "name": "대원생활관 (E16)",
+    "levels": null,
+    "height": null,
+    "center": [
+     36.9734408,
+     127.8739475
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E17",
+   "name": "스마트ICT관",
+   "floors": [
+    {
+     "floor": "2",
+     "what": [
+      "전자공학과"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780341",
+    "name": "스마트ICT관 (E17)",
+    "levels": null,
+    "height": null,
+    "center": [
+     36.9709283,
+     127.8742102
+    ]
+   },
+   "topFloorOfficial": 2,
+   "levelsMismatch": false
+  },
+  {
+   "code": "E18",
+   "name": "국제청년협력센터",
+   "floors": [
+    {
+     "floor": "3",
+     "what": [
+      "학생상담센터",
+      "인권센터",
+      "창업지원센터",
+      "현장실습지원센터",
+      "취업성공지원과",
+      "국제교류본부"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/1428898496",
+    "name": "국제청년협력센터 (E18)",
+    "levels": "4",
+    "height": null,
+    "center": [
+     36.9686309,
+     127.8736429
+    ]
+   },
+   "topFloorOfficial": 3,
+   "levelsMismatch": true
+  },
+  {
+   "code": "W1",
+   "name": "테니스장",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "테니스장"
+     ]
+    }
+   ],
+   "osm": null,
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W2",
+   "name": "아레나K",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "아레나K"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780315",
+    "name": "체육관 (W2)",
+    "levels": "2",
+    "height": "7.7",
+    "center": [
+     36.9675377,
+     127.8705301
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": true
+  },
+  {
+   "code": "W3",
+   "name": "국원노천극장",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "국원노천극장"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/844822854",
+    "name": "국원노천극장 (W3)",
+    "levels": null,
+    "height": null,
+    "center": [
+     36.9679295,
+     127.8710864
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W4",
+   "name": "대학원",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "평생교육원",
+      "장애학생지원센터"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "입학과",
+      "대학원"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "전산정보원"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780316",
+    "name": "대학원 (W4)",
+    "levels": "3",
+    "height": null,
+    "center": [
+     36.9688416,
+     127.8708603
+    ]
+   },
+   "topFloorOfficial": 3,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W5",
+   "name": "종합강의관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "학생과",
+      "학사관리과",
+      "농협",
+      "마트",
+      "우편취급국",
+      "안경점",
+      "복사실"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "교양학부",
+      "자유전공학부"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "제2행정실",
+      "스포츠의학전공"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "음악학과"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780319",
+    "name": "종합강의관 (W5)",
+    "levels": "4",
+    "height": "16.1",
+    "center": [
+     36.9693019,
+     127.8710271
+    ]
+   },
+   "topFloorOfficial": 4,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W6",
+   "name": "휴스퀘어관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "휴스퀘어관"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780302",
+    "name": "휴스퀘어 (W6)",
+    "levels": "1",
+    "height": "5.55",
+    "center": [
+     36.9698008,
+     127.8709501
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W7",
+   "name": "화학생명관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "나노화학소재전공"
+     ]
+    }
+   ],
+   "osm": null,
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W9",
+   "name": "공동실험관",
+   "floors": [
+    {
+     "floor": "2",
+     "what": [
+      "공동실험실습관 행정실"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "3D프린팅센터"
+     ]
+    },
+    {
+     "floor": "5",
+     "what": [
+      "과학문화진흥센터"
+     ]
+    },
+    {
+     "floor": "6",
+     "what": [
+      "친환경에너지 부품소재 센터(RIC)"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780296",
+    "name": "공동실험실 (W9)",
+    "levels": "6",
+    "height": "25.3",
+    "center": [
+     36.971759,
+     127.8703514
+    ]
+   },
+   "topFloorOfficial": 6,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W10",
+   "name": "중원생활관",
+   "floors": [
+    {
+     "floor": "1~9",
+     "what": [
+      "중원생활관"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780293",
+    "name": "중원생활관 (W10)",
+    "levels": "9",
+    "height": "31.5",
+    "center": [
+     36.9736044,
+     127.8716496
+    ]
+   },
+   "topFloorOfficial": null,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W11",
+   "name": "예성생활관",
+   "floors": [
+    {
+     "floor": "7~9",
+     "what": [
+      "예성생활관"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780292",
+    "name": "예성생활관 (W11)",
+    "levels": "9",
+    "height": "28",
+    "center": [
+     36.9739796,
+     127.8720136
+    ]
+   },
+   "topFloorOfficial": null,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W13",
+   "name": "예성관리동",
+   "floors": [
+    {
+     "floor": "1~2",
+     "what": [
+      "예성관리동"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780291",
+    "name": "복지관 (W13)",
+    "levels": "2",
+    "height": "9",
+    "center": [
+     36.9740068,
+     127.8726885
+    ]
+   },
+   "topFloorOfficial": null,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W15",
+   "name": "동아리관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "동아리관"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780342",
+    "name": "동아리관 (W15)",
+    "levels": "2",
+    "height": "8.65",
+    "center": [
+     36.970995,
+     127.8693496
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": true
+  },
+  {
+   "code": "W16",
+   "name": "IT관",
+   "floors": [
+    {
+     "floor": "2",
+     "what": [
+      "전기공학전공"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "유아교육학과"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780331",
+    "name": "IT관 (W16)",
+    "levels": "5",
+    "height": "24.9",
+    "center": [
+     36.9695489,
+     127.8687995
+    ]
+   },
+   "topFloorOfficial": 3,
+   "levelsMismatch": true
+  },
+  {
+   "code": "W17",
+   "name": "인터넷창업센터",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "인터넷창업센터"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780330",
+    "name": "인터넷창업센터 (W17)",
+    "levels": "2",
+    "height": "8.7",
+    "center": [
+     36.9695088,
+     127.8693879
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": true
+  },
+  {
+   "code": "W18",
+   "name": "미래융합정보관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "AI로봇공학과",
+      "바이오메디컬융합학과"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "소프트웨어학전공"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "컴퓨터공학전공"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "미디어＆콘텐츠학과"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780327",
+    "name": "중앙정보관 (W18)",
+    "levels": "4",
+    "height": null,
+    "center": [
+     36.9690365,
+     127.8696428
+    ]
+   },
+   "topFloorOfficial": 4,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W19",
+   "name": "대운동장",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "대운동장"
+     ]
+    }
+   ],
+   "osm": null,
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  },
+  {
+   "code": "W20",
+   "name": "중앙도서관/교육관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "열람실",
+      "북카페"
+     ]
+    },
+    {
+     "floor": "10",
+     "what": [
+      "교육대학원"
+     ]
+    },
+    {
+     "floor": "2",
+     "what": [
+      "도서관행정실"
+     ]
+    },
+    {
+     "floor": "3",
+     "what": [
+      "자료실",
+      "편의점"
+     ]
+    },
+    {
+     "floor": "4",
+     "what": [
+      "스포츠산업학전공"
+     ]
+    },
+    {
+     "floor": "6",
+     "what": [
+      "융합경영전공학과"
+     ]
+    },
+    {
+     "floor": "7",
+     "what": [
+      "산업디자인공학전공"
+     ]
+    },
+    {
+     "floor": "8",
+     "what": [
+      "커뮤니케이션디자인전공"
+     ]
+    },
+    {
+     "floor": "9",
+     "what": [
+      "한국어문학전공"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777780320",
+    "name": "중앙도서관 (W20)",
+    "levels": "14",
+    "height": null,
+    "center": [
+     36.9680097,
+     127.8697133
+    ]
+   },
+   "topFloorOfficial": 10,
+   "levelsMismatch": true
+  },
+  {
+   "code": "W22",
+   "name": "환경관",
+   "floors": [
+    {
+     "floor": "1",
+     "what": [
+      "환경관"
+     ]
+    }
+   ],
+   "osm": {
+    "id": "way/777787685",
+    "name": "환경관 (W22)",
+    "levels": null,
+    "height": null,
+    "center": [
+     36.9676793,
+     127.867787
+    ]
+   },
+   "topFloorOfficial": 1,
+   "levelsMismatch": false
+  }
+ ]
+}
