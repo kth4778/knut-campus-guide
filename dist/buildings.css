@@ -16,7 +16,8 @@
 .poi-label{position:absolute;left:13px;top:16px;transform:translateX(-50%);white-space:nowrap;pointer-events:none;
   font:700 11.5px/1.2 "Guide Roboto",system-ui,sans-serif;font-style:normal;letter-spacing:-.03em;color:var(--pin-c,#374151);
   text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff,0 0 4px #fff}
-.marker.poi.selected .poi-label{top:19px;font-size:12.5px;font-weight:800}
+.poi-label{background:#ffffffd6;padding:1px 5px;border-radius:6px} /* 바탕지도 글자와 겹쳐도 읽히게 */
+.marker.poi.selected .poi-label{top:20px;font-size:12.5px;font-weight:800;background:#fff;box-shadow:0 1px 4px #0f172a33}
 .marker[data-cat="맛집"]{--pin-c:#c2561a}
 .marker[data-cat="숨은장소"]{--pin-c:#15805a}
 .marker[data-cat="생활꿀팁"]{--pin-c:#2457c5}
@@ -41,6 +42,25 @@
 .bmark-text b{font-size:10.5px;font-weight:800;color:#5b6d93}
 .bmark.short .bmark-text b{font-size:10.5px}
 .bmark.dot{width:9px;height:9px;border-radius:50%;background:#6b7fa8;border:2px solid #fff;box-shadow:0 1px 3px #0005;transform:translate(9px,9px)}
+
+/* 핀을 누르면 아래에 뜨는 장소 카드 (네이버 지도 장소 카드처럼) */
+.map-card{display:grid;gap:2px}
+.mc-head{display:flex;align-items:baseline;gap:7px;color:var(--text);min-width:0}
+.mc-head b{font-size:17px;font-weight:800;letter-spacing:-.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mc-cat{font-size:12px;font-weight:600;color:var(--muted);flex:none}
+.map-card[data-cat="맛집"] .mc-cat{color:#ff9a5c}
+.map-card[data-cat="숨은장소"] .mc-cat{color:#5fd39e}
+.map-card[data-cat="생활꿀팁"] .mc-cat{color:#8fb4ff}
+.map-card[data-cat="자유"] .mc-cat{color:#c3a6ff}
+.mc-where{font-size:12.5px;color:var(--text);opacity:.85;margin-top:2px}
+.mc-addr{font-size:12px;color:var(--muted)}
+.mc-note{font-size:11px;color:var(--muted);opacity:.85}
+.mc-actions{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+.mc-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:2px 0;background:none;border:0;color:var(--text);font-family:inherit;font-size:11.5px;font-weight:600;line-height:1.2;cursor:pointer}
+.mc-btn img{width:36px;height:36px;transition:transform .15s}
+.mc-btn:active img{transform:scale(.92)}
+.mc-btn[aria-pressed="true"] span{color:var(--accent)}
+.mc-btn[aria-pressed="true"] img{filter:hue-rotate(0deg) saturate(1.6)}
 
 /* 같은 자리 목록 말풍선 (네이버·Leaflet 공통 — 바깥 틀은 지우고 이 카드가 말풍선을 그린다) */
 .map-popup{position:relative;display:block;min-width:200px;max-width:250px;max-height:none;padding:6px;margin-bottom:8px;background:#fff;border-radius:14px;

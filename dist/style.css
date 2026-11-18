@@ -94,7 +94,7 @@ img{display:block;width:100%;object-fit:cover}
 .marker.selected{width:36px;height:36px;transform:translate(-5px,-5px);background:#2356c4;color:white;box-shadow:0 0 0 5px #1d57d648,0 3px 8px #09112788}
 .marker.selected .icon{width:20px;height:20px}
 .marker-count{font-size:11px;font-weight:800}
-.map-result{flex:none;padding:10px 13px 11px;background:var(--bg);border-top:1px solid var(--line)}
+.map-result{flex:none;padding:12px 16px 12px;background:var(--bg);border-top:1px solid var(--line)}
 .map-result .place-row{padding:0;border:0;min-height:44px}
 .map-result p{font-size:12px;color:var(--muted);line-height:1.5}
 .map-result .location-note{padding-top:5px}

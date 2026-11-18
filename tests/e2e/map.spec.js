@@ -209,6 +209,32 @@ test.describe('D. 검색·지도', () => {
     await expect(page.locator('.guide-card').first()).toContainText('국원문화관');  // 처음엔 안내가 있는 가장 아래층(1층)
   });
 
+  test('D15 핀을 누르면 네이버식 장소 카드(이름·분류·위치·상세/저장/공유), 저장 버튼이 바로 바뀐다', P1, async ({ page }) => {
+    await openApp(page, '#/map?focus=P089');
+    const card = page.locator('#map-result .map-card');
+    await expect(card.locator('.mc-head b')).toHaveText('학생식당');
+    await expect(card.locator('.mc-cat')).toHaveText('맛집');
+    await expect(card.locator('.mc-where')).toContainText('대학본부별관');
+    const save = card.locator('[data-action="map-save"]');
+    await expect(save).toHaveAttribute('aria-pressed', 'false');
+    await save.click();
+    await expect(save).toHaveAttribute('aria-pressed', 'true');
+    await expect(save).toContainText('저장됨');
+    await card.locator('.mc-btn', { hasText: '상세보기' }).click();
+    await expect(page).toHaveURL(/#\/place\?id=P089$/);
+  });
+
+  test('D16 건물 화면에서 층을 바꿔도 스크롤이 맨 위로 튀지 않는다', P1, async ({ page }) => {
+    await openApp(page, '#/building?name=' + encodeURIComponent('중앙도서관') + '&floor=4');
+    const scroller = page.locator('.scroll');
+    await scroller.evaluate(el => { el.scrollTop = 260; });
+    const before = await scroller.evaluate(el => el.scrollTop);
+    expect(before).toBeGreaterThan(40);
+    await page.locator('.floor-step', { hasText: '3층' }).click();                 // 3층이 더 길어 화면이 줄어들지 않는다
+    await expect(page.locator('.floor-places h2')).toContainText('3층');
+    expect(Math.abs(await page.locator('.scroll').evaluate(el => el.scrollTop) - before)).toBeLessThan(5);
+  });
+
   test('D12 확대하면(18단계) 묶음이 풀리고 장소 핀이 하나하나 나온다', P1, async ({ page }) => {
     await openApp(page, '#/map?category=' + encodeURIComponent('맛집') + '&focus=P089');
     await expect(page.locator('.marker.selected')).toHaveCount(1);

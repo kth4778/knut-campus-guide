@@ -5,7 +5,7 @@ import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
 import {initShare, openShare} from './share.js';
-import {initBuildings, buildingOf, buildingPinHtml, buildingPage, mapBuildings, buildingMarkHtml, guideCount, shortName} from './buildings.js';
+import {initBuildings, floorOf, buildingOf, buildingPinHtml, buildingPage, mapBuildings, buildingMarkHtml, guideCount, shortName} from './buildings.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
 
 const app = document.getElementById('app');
@@ -114,6 +114,7 @@ let usingNaver = false;
 let naverFailed = false;
 let naverInfo = null;
 let mapCategory = '전체';
+let lastViewKey = ''; // 직전에 그린 화면 (같은 화면에서 주소만 바뀌면 스크롤 유지)
 let focusedMapPlace = null;
 let searchQuery = '';
 let homeLimit = 16;
@@ -588,8 +589,30 @@ function showMapResult(place) {
     result.innerHTML = `<p>${count}개 위치 · 핀을 눌러 장소를 확인하세요.</p>`;
     return;
   }
-  result.innerHTML = placeRow(place,'map') +
-    (place.location.note ? `<p class="location-note">${escape(place.location.note)}</p>` : '');
+  result.innerHTML = mapPlaceCard(place);
+}
+
+// 핀을 누르면 아래에 뜨는 장소 카드 (네이버 지도 장소 카드처럼: 이름·분류 → 위치 → 주소 → 상세·길찾기·저장·공유)
+function mapPlaceCard(place) {
+  const floor = floorOf(place);
+  const building = place.location?.building?.trim();
+  const where = [place.area, building && `${building}${floor ? ` ${floor < 0 ? `지하 ${-floor}` : floor}층` : ''}`].filter(Boolean).join(' · ');
+  const address = place.address && !['확인 안 됨','해당 없음'].includes(place.address) ? place.address : '';
+  const external = safeUrl(place.map);
+  const on = saved.has(place.id);
+  const action = (img, label, attrs) => `<${attrs.startsWith('href') ? 'a' : 'button type="button"'} class="mc-btn" ${attrs}><img src="assets/actions/${img}.webp" alt="" width="40" height="40"><span>${label}</span></${attrs.startsWith('href') ? 'a' : 'button'}>`;
+  return `<article class="map-card" data-cat="${escape(place.category)}">
+    <a class="mc-head" href="${escape(route('place', {id:place.id}))}"><b>${escape(place.name)}</b><span class="mc-cat">${escape(place.category)}</span></a>
+    ${where ? `<p class="mc-where">${escape(where)}</p>` : ''}
+    ${address ? `<p class="mc-addr">${escape(address)}</p>` : ''}
+    ${place.location?.note ? `<p class="mc-note">${escape(place.location.note)}</p>` : ''}
+    <div class="mc-actions">
+      ${action('detail', '상세보기', `href="${escape(route('place', {id:place.id}))}"`)}
+      ${external ? action('route', '네이버 지도', `href="${escape(external)}" target="_blank" rel="noopener"`) : ''}
+      ${action('save', on ? '저장됨' : '저장', `data-action="map-save" data-id="${place.id}" aria-pressed="${on}"`)}
+      ${action('share', '공유', `data-action="copy" data-id="${place.id}"`)}
+    </div>
+  </article>`;
 }
 
 // 같은 자리 여러 곳: 네이버 지도의 목록 말풍선처럼 핀 그림 + 이름 + 분류
@@ -610,7 +633,7 @@ function clearMarkers() {
 }
 
 function addLeafletMarker(group, place, selected, name) {
-  const label = claimLabel(place.latlng, group.length>1 ? `${place.name} 외 ${group.length-1}` : place.name, selected);
+  const label = claimLabel(place.latlng, place.name, selected);
   const marker = L.marker(place.latlng, {
     title:name, alt:name, zIndexOffset:selected?1000:0, riseOnHover:true,
     icon:L.divIcon({className:'guide-pin',html:markerHtml(place,selected,group.length,label),iconSize:[26,26],iconAnchor:[13,13]}),
@@ -621,7 +644,7 @@ function addLeafletMarker(group, place, selected, name) {
 
 function addNaverMarker(group, place, selected, name) {
   const {maps} = window.naver;
-  const label = claimLabel(place.latlng, group.length>1 ? `${place.name} 외 ${group.length-1}` : place.name, selected);
+  const label = claimLabel(place.latlng, place.name, selected);
   const marker = new maps.Marker({
     map, position:new maps.LatLng(...place.latlng), title:name, zIndex:selected?1000:0,
     icon:{content:markerHtml(place,selected,group.length,label), anchor:new maps.Point(13,13)},
@@ -980,6 +1003,9 @@ function render() {
     homeLimit = 16;
     searchLimit = 35;
   }
+  const viewKey = `${path}|${params.get('name') || params.get('id') || ''}`;
+  const keepScroll = viewKey === lastViewKey ? app.querySelector('.scroll')?.scrollTop : null;
+  lastViewKey = viewKey;
   currentView = path;
   if (path === 'map') {
     app.innerHTML = mapPage();
@@ -1002,6 +1028,7 @@ function render() {
   else if (path === 'partner') app.innerHTML = partnerPage(params.get('id'));
   else if (path === 'building') app.innerHTML = buildingPage(params.get('name'), params);
   else app.innerHTML = home(category);
+  if (keepScroll) { const scroller = app.querySelector('.scroll'); if (scroller) scroller.scrollTop = keepScroll; }
   renderNav(path === 'building' ? 'map' : ['place','account','partner'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
 }
 
@@ -1043,6 +1070,11 @@ app.addEventListener('click', event => {
   if (!control) return;
   switch (control.dataset.action) {
     case 'save': toggleSave(control.dataset.id); break;
+    case 'map-save':
+      toggleSave(control.dataset.id);
+      control.setAttribute('aria-pressed', saved.has(control.dataset.id));
+      control.querySelector('span').textContent = saved.has(control.dataset.id) ? '저장됨' : '저장';
+      break;
     case 'like': {
       const id = control.dataset.id;
       if (likes.has(id)) likes.delete(id);
