@@ -21,3 +21,5 @@
 .profile-actions .profile-nuti{position:relative;overflow:visible}
 .profile-nuti .nuti-en{font-weight:500;color:var(--muted)}
 .nuti-peek{position:absolute;left:50%;bottom:calc(100% - 5px);width:74px;height:auto;transform:translateX(-50%);pointer-events:none;z-index:1}
+/* 다른 언어에선 '누티'가 이미 Nuti 로 번역되니 영어 이름을 한 번만 보여요 */
+html:not([lang="ko"]) .profile-nuti .nuti-en{display:none}
