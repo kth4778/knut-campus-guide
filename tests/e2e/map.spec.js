@@ -81,8 +81,9 @@ test.describe('D. 검색·지도', () => {
     expect(cats).toEqual(['맛집']);
   });
 
-  test('D7 같은 건물 묶음 핀: 장소 목록이 뜨고 하나를 누르면 그 장소로', P1, async ({ page }) => {
-    await openApp(page, '#/map');
+  test('D7 같은 자리 묶음 핀(확대했을 때): 장소 목록이 뜨고 하나를 누르면 그 장소로', P1, async ({ page }) => {
+    // 18단계 이상에서만 장소 핀이 하나하나 펼쳐진다 → 장소 하나를 골라 확대된 지도로 연다
+    await openApp(page, '#/map?focus=P245');
     // 다른 핀(고속버스 정류소 등)에 덮이지 않은 묶음 핀을 고른다
     await expect(page.locator('.marker:has(.marker-count)').first()).toBeVisible();
     const index = await page.locator('.marker:has(.marker-count)').evaluateAll(els => els.findIndex(el => {
@@ -100,17 +101,67 @@ test.describe('D. 검색·지도', () => {
     await expect(page.locator('#map-result')).toContainText(name);
   });
 
-  test('D9 버스·고속버스 핀이 같은 자리의 장소 핀을 덮지 않는다', P1, async ({ page }) => {
+  test('D9 「전체」에는 버스·고속버스 핀이 없고, 「버스」를 고르면 정류장이 다 나온다', P1, async ({ page }) => {
     await openApp(page, '#/map');
     await expect(page.locator('.leaflet-container')).toBeVisible();
-    await expect(page.locator('.marker.transit-marker').first()).toBeVisible();
-    // 장소 핀 한가운데를 누르면 교통 핀이 아니라 그 장소 핀이 눌려야 한다
-    const covered = await page.locator('.marker:not(.transit-marker)').evaluateAll(els => els.filter(el => {
-      const r = el.getBoundingClientRect();
-      const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
-      return hit?.closest('.transit-marker');
-    }).map(el => el.closest('[title]')?.getAttribute('title')));
-    expect(covered).toEqual([]);
+    await expect(page.locator('.marker').first()).toBeVisible();
+    await expect(page.locator('.marker.transit-marker')).toHaveCount(0);
+    await page.locator('.map-chips [data-category="버스"]').click();
+    await expect(page.locator('.marker.transit-marker.bus')).toHaveCount(20);
+  });
+
+  test('D10 멀리서 보면 핀이 묶여 있고, 묶음을 누르면 확대되어 건물 핀이 나온다', P0, async ({ page }) => {
+    await openApp(page, '#/map');
+    await expect(page.locator('.cluster-pin').first()).toBeVisible();
+    // 장소 263곳이 핀 100개 이하로 정리된다
+    expect(await page.locator('.marker').count()).toBeLessThan(100);
+    const before = await page.locator('.building-pin').count();
+    const biggest = await page.locator('.cluster-pin').evaluateAll(els => els.map(el => Number(el.textContent)).reduce((m, n, i, all) => n > all[m] ? i : m, 0));
+    await page.locator('.cluster-pin').nth(biggest).click();
+    await expect.poll(() => page.locator('.building-pin').count()).toBeGreaterThan(before);
+    await expect(page.locator('.building-pin .building-name').first()).toBeVisible();
+  });
+
+  test('D11 건물 핀을 누르면 건물 화면: 3D 층 + 층을 누르면 그 층 장소 목록', P0, async ({ page }) => {
+    // 교내 장소(중앙도서관 3층 열람실)로 확대된 지도를 열고, 축소 버튼 한 번(18→17단계)이면 건물 핀이 나온다
+    await openApp(page, '#/map?focus=P150');
+    await expect(page.locator('.marker.selected')).toHaveCount(1);
+    await expect(page.locator('.building-pin')).toHaveCount(0);   // 18단계까지 확대가 끝났다
+    await page.locator('.leaflet-control-zoom-out').click();
+    await expect(page.locator('.building-pin').first()).toBeAttached();
+    await page.waitForTimeout(400); // 축소 움직임이 끝나기를 기다린다
+    // 지도 칸 안에 보이고 다른 것에 가리지 않은 건물 핀을 고른다
+    const visible = await page.locator('.building-pin').evaluateAll(els => {
+      const box = document.getElementById('map-canvas').getBoundingClientRect();
+      return els.findIndex(el => {
+        const r = el.getBoundingClientRect(), x = r.x + r.width / 2, y = r.y + r.height / 2;
+        return x > box.left && x < box.right && y > box.top && y < box.bottom && el.contains(document.elementFromPoint(x, y));
+      });
+    });
+    expect(visible).toBeGreaterThanOrEqual(0);
+    await page.locator('.building-pin').nth(visible).click();
+    await expect(page).toHaveURL(/#\/building\?name=/);
+    await expect(page.locator('#nav a[aria-current="page"]')).toHaveText('지도');
+
+    await openApp(page, '#/building?name=' + encodeURIComponent('중앙도서관'));
+    await expect(page.locator('.building-head h1')).toHaveText('중앙도서관');
+    const slabs = page.locator('.floor-slab');
+    await expect(slabs).toHaveCount(4);
+    await expect(slabs.last()).toHaveAttribute('aria-current', 'true');          // 처음엔 가장 아래층
+    await page.locator('.floor-slab[aria-label^="3층"]').click();
+    await expect(page.locator('.floor-slab[aria-label^="3층"]')).toHaveClass(/on/);
+    await expect(page.locator('.floor-places h2')).toContainText('3층');
+    await expect(page.locator('.floor-places .place-row')).toHaveCount(3);
+    await expect(page.locator('.floor-places')).toContainText('중앙도서관 3층 열람실');
+    await page.locator('.floor-unknown').click();
+    await expect(page.locator('.floor-places h2')).toContainText('층 정보 없음');
+  });
+
+  test('D12 확대하면(18단계) 묶음이 풀리고 장소 핀이 하나하나 나온다', P1, async ({ page }) => {
+    await openApp(page, '#/map?focus=P089');
+    await expect(page.locator('.marker.selected')).toHaveCount(1);
+    await expect(page.locator('.building-pin')).toHaveCount(0);
+    expect(await page.locator('.marker').count()).toBeGreaterThan(100);
   });
 
   test('D8 컴퓨터에서 칩 줄을 휠·끌기로 넘기고, 끈 뒤에는 칩이 눌리지 않는다', P1, async ({ page }) => {
