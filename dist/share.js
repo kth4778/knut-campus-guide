@@ -25,12 +25,19 @@ function deviceShare(data, fallbackMessage) {
   copy(data.url, fallbackMessage);
 }
 
+// 메일·문자 앱 열기. 페이지 주소(location.href)를 바꾸지 않고 링크를 눌러 여는 방식이라 지금 화면이 그대로 남는다
+function openApp(href) {
+  const link = document.createElement('a');
+  link.href = href;
+  link.click();
+}
+
 function go(kind, {title, text, url}) {
   const message = `${title}\n${text ? text + '\n' : ''}${url}`;
   switch (kind) {
     case 'kakao': return deviceShare({title, text, url}, '링크를 복사했어요. 카카오톡 대화방에 붙여넣어 보내세요.');
-    case 'mail': location.href = `mailto:?subject=${enc(title)}&body=${enc(message)}`; return;
-    case 'sms': location.href = `sms:${/iPhone|iPad|Mac/.test(navigator.userAgent) ? '&' : '?'}body=${enc(message)}`; return;
+    case 'mail': return openApp(`mailto:?subject=${enc(title)}&body=${enc(message)}`);
+    case 'sms': return openApp(`sms:${/iPhone|iPad|Mac/.test(navigator.userAgent) ? '&' : '?'}body=${enc(message)}`);
     case 'copy': return copy(url);
     case 'x': return window.open(`https://twitter.com/intent/tweet?text=${enc(title)}&url=${enc(url)}`, '_blank', 'noopener');
     case 'facebook': return window.open(`https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`, '_blank', 'noopener');

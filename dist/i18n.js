@@ -366,7 +366,7 @@
     const box = document.createElement('div');
     box.className = 'lang';
     const code = LANGS.find(([c]) => c === lang)[2];
-    box.innerHTML = `<button type="button" class="lang-btn" aria-label="Language" aria-haspopup="true" aria-expanded="false">${GLOBE}<b>${code}</b></button>
+    box.innerHTML = `<button type="button" class="lang-btn" aria-label="Language ${code}" aria-haspopup="true" aria-expanded="false">${GLOBE}<b>${code}</b></button>
       <div class="lang-menu" hidden>${LANGS.map(([c, label]) => `<button type="button" data-lang="${c}" ${c === lang ? 'aria-current="true"' : ''}>${label}</button>`).join('')}</div>`;
     top.classList.add('has-lang');
     right.prepend(box);
