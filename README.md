@@ -65,7 +65,15 @@ python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
 
 ## 테스트
 
-E2E 테스트 계획: [docs/E2E_TEST_PLAN.md](docs/E2E_TEST_PLAN.md) (아직 계획만 있고 테스트 코드는 없어요)
+Playwright E2E 테스트 57개가 있어요. 계획·결과: [docs/E2E_TEST_PLAN.md](docs/E2E_TEST_PLAN.md)
+
+```bash
+npm ci                 # 처음 한 번
+npm run test:p0        # push 전에: 배포를 막는 P0 테스트만
+npm run test:e2e       # 전체
+```
+
+main 에 push 하면 GitHub Actions 가 테스트를 돌리고, **통과해야만 배포**돼요.
 
 ## 누팁스 데이터 합치기
 

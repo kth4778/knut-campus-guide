@@ -1,0 +1,4 @@
+{"_note":"테스트용 고정 데이터 (실제 응답 형식을 따라 손으로 만든 것)","response":{"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE."},"body":{"items":{"item":[
+{"nodeid":"CHB272043073","nodenm":"한국교통대(시내방향)","routeid":"CHB270009990","routeno":999,"routetp":"일반버스","arrprevstationcnt":3,"vehicletp":"일반차량","arrtime":420},
+{"nodeid":"CHB272043073","nodenm":"한국교통대(시내방향)","routeid":"CHB270001200","routeno":120,"routetp":"일반버스","arrprevstationcnt":1,"vehicletp":"일반차량","arrtime":50}
+]},"numOfRows":50,"pageNo":1,"totalCount":2}}}

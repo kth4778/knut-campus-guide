@@ -1,0 +1,15 @@
+{
+  "name": "knut-campus-guide",
+  "private": true,
+  "description": "KNUTIPS 한국교통대 충주캠퍼스 가이드 — E2E 테스트용 (앱 자체는 빌드 없음)",
+  "scripts": {
+    "serve": "python3 -m http.server 5178 --bind 127.0.0.1 --directory dist",
+    "test:e2e": "playwright test --project=desktop --project=mobile",
+    "test:p0": "playwright test --project=desktop --project=mobile --grep @P0",
+    "test:deploy": "playwright test --project=deploy"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.65.1"
+  }
+}
