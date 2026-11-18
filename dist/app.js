@@ -542,10 +542,27 @@ function mapPage() {
     <div id="map-result" class="map-result" aria-live="polite"></div>`;
 }
 
-function markerHtml(place, selected, count) {
-  const label = count>1 && !selected ? `<span class="marker-count">${count}</span>`
-    : icon(selected?'pin':(categoryInfo.get(place.category)?.icon || 'pin'));
-  return `<span class="marker${selected?' selected':''}" data-cat="${escape(place.category)}">${label}</span>`;
+// 지도 핀 그림 (assets/pins/*.webp, gpt-image 로 만든 네이버 지도식 물방울 핀)
+const PIN = {'맛집':'food', '숨은장소':'spot', '생활꿀팁':'tip', '자유':'free'};
+const pinImg = category => `<img class="poi-pin" src="assets/pins/${PIN[category] || 'building'}.webp" alt="">`;
+
+// 장소 핀: 물방울 핀 + (자리가 나면) 아래에 이름. 같은 자리 여러 곳이면 오른쪽 위에 개수
+function markerHtml(place, selected, count, label = '') {
+  return `<span class="marker poi${selected?' selected':''}" data-cat="${escape(place.category)}">${pinImg(place.category)}`
+    + `${count>1 ? `<span class="marker-count">${count}</span>` : ''}${label ? `<em class="poi-label">${escape(label)}</em>` : ''}</span>`;
+}
+
+// 핀 이름표가 서로 겹치지 않게: 화면 좌표 칸을 먼저 잡은 쪽이 이름을 단다 (네이버 지도처럼 겹치면 이름만 뺀다)
+let labelSpace = [];
+function claimLabel(latlng, text, force = false) {
+  const [x, y] = toPixel(latlng);
+  const w = Math.min(text.length, 11) * 11 + 10;
+  const rect = [x - w / 2, y - 2, x + w / 2, y + 18];
+  const free = !labelSpace.some(r => rect[0] < r[2] && rect[2] > r[0] && rect[1] < r[3] && rect[3] > r[1]);
+  labelSpace.push([x - 13, y - 34, x + 13, y]); // 핀 자리
+  if (!free && !force) return '';
+  labelSpace.push(rect);
+  return text.length > 11 ? text.slice(0, 10) + '…' : text;
 }
 
 function showMapResult(place) {
@@ -575,15 +592,12 @@ function showMapResult(place) {
     (place.location.note ? `<p class="location-note">${escape(place.location.note)}</p>` : '');
 }
 
+// 같은 자리 여러 곳: 네이버 지도의 목록 말풍선처럼 핀 그림 + 이름 + 분류
 function mapGroupPopup(group) {
   const popup = document.createElement('div');
   popup.className = 'map-popup';
-  for (const place of group) {
-    const link = document.createElement('a');
-    link.href = route('map', {focus:place.id});
-    link.textContent = place.name;
-    popup.append(link);
-  }
+  popup.innerHTML = `<p class="map-popup-head">이 자리 ${group.length}곳</p>` + group.map(place =>
+    `<a href="${route('map', {focus:place.id})}">${pinImg(place.category)}<span><b>${escape(place.name)}</b><small>${escape(place.category)} · ${escape(place.area || '')}</small></span><i aria-hidden="true">›</i></a>`).join('');
   return popup;
 }
 
@@ -596,19 +610,21 @@ function clearMarkers() {
 }
 
 function addLeafletMarker(group, place, selected, name) {
+  const label = claimLabel(place.latlng, group.length>1 ? `${place.name} 외 ${group.length-1}` : place.name, selected);
   const marker = L.marker(place.latlng, {
     title:name, alt:name, zIndexOffset:selected?1000:0, riseOnHover:true,
-    icon:L.divIcon({className:'guide-pin',html:markerHtml(place,selected,group.length),iconSize:[26,26],iconAnchor:[13,13]}),
+    icon:L.divIcon({className:'guide-pin',html:markerHtml(place,selected,group.length,label),iconSize:[26,26],iconAnchor:[13,13]}),
   }).addTo(mapMarkers);
-  if (group.length>1) marker.bindPopup(() => mapGroupPopup(group), {offset:[0,-9]});
+  if (group.length>1) marker.bindPopup(() => mapGroupPopup(group), {offset:[0,-24], className:'kt-popup', closeButton:false});
   else marker.on('click', () => { location.hash = route('map',{focus:place.id}); });
 }
 
 function addNaverMarker(group, place, selected, name) {
   const {maps} = window.naver;
+  const label = claimLabel(place.latlng, group.length>1 ? `${place.name} 외 ${group.length-1}` : place.name, selected);
   const marker = new maps.Marker({
     map, position:new maps.LatLng(...place.latlng), title:name, zIndex:selected?1000:0,
-    icon:{content:markerHtml(place,selected,group.length), anchor:new maps.Point(13,13)},
+    icon:{content:markerHtml(place,selected,group.length,label), anchor:new maps.Point(13,13)},
   });
   maps.Event.addListener(marker, 'click', () => {
     if (group.length>1) {
@@ -636,7 +652,7 @@ function addPoint(latlng, html, title, onClick, zIndex = 500) {
 function paintTransit() {
   if (mapCategory === '교통대 제휴') {
     for (const partner of mapPartners ?? []) {
-      addPoint(partner.latlng, '<span class="marker transit-marker partner"><img src="assets/knut-emblem.webp" alt=""></span>', partner.name,
+      addPoint(partner.latlng, '<span class="marker transit-marker partner"><img class="poi-pin" src="assets/pins/partner.webp" alt=""></span>', partner.name,
         () => { location.hash = route('partner', {id:partner.id}); }, 400);
     }
     return;
@@ -644,12 +660,12 @@ function paintTransit() {
   // 버스 정류장·고속버스 핀은 그 칩을 골랐을 때만 (「전체」가 난잡해지지 않게)
   if (mapCategory === '고속버스') {
     for (const terminal of EXP_TERMINALS) {
-      addPoint(terminal.latlng, `<span class="marker transit-marker exp">${icon('bus')}</span>`, terminal.name, () => openExpressSheet(terminal), 900);
+      addPoint(terminal.latlng, `<span class="marker transit-marker exp"><img class="poi-pin" src="assets/pins/express.webp" alt=""><em class="poi-label">${escape(terminal.name)}</em></span>`, terminal.name, () => openExpressSheet(terminal), 900);
     }
   }
   if (mapCategory !== '버스') return;
   for (const stop of BUS_STOPS) {
-    addPoint(stop.latlng, `<span class="marker transit-marker bus">${icon('bus')}</span>`, stop.name, () => openBusSheet(stop), 300);
+    addPoint(stop.latlng, `<span class="marker transit-marker bus"><img class="poi-pin" src="assets/pins/bus.webp" alt=""></span>`, stop.name, () => openBusSheet(stop), 300);
   }
   if (!live.on) return;
   for (const bus of live.buses) {
@@ -777,14 +793,14 @@ function paintOverview(shown, zoom) {
   for (const list of cells.values()) {
     if (list.length === 1) {
       const [item] = list;
-      if (item.building) addPoint(item.building.latlng, buildingPinHtml(item.building, item.count, zoom >= 16), item.building.name,
+      if (item.building) addPoint(item.building.latlng, buildingPinHtml(item.building, item.count, zoom >= 16, pinImg(mapCategory)), item.building.name,
         () => { location.hash = route('building', {name:item.building.name}); }, 200);
       else (usingNaver ? addNaverMarker : addLeafletMarker)([item.place], item.place, false, item.place.name);
       continue;
     }
     const total = list.reduce((sum, item) => sum + item.count, 0);
     const center = [0, 1].map(k => list.reduce((sum, item) => sum + item.latlng[k] * item.count, 0) / total);
-    addPoint(center, `<span class="marker cluster-pin"><b>${total}</b></span>`, `장소 ${total}곳`,
+    addPoint(center, `<span class="marker cluster-pin">${pinImg(mapCategory)}<b>${total}</b></span>`, `${mapCategory} ${total}곳`,
       () => zoomInto(center, Math.min(DETAIL_ZOOM - 1, zoom + 2)), 100);
   }
   if (focusedMapPlace) (usingNaver ? addNaverMarker : addLeafletMarker)([focusedMapPlace], focusedMapPlace, true, focusedMapPlace.name);
@@ -802,9 +818,8 @@ function paintBuildings(zoom) {
     const point = toPixel(building.latlng);
     const code = building.official.code.length;
     const sizes = [
-      zoom >= 16 && ['full', 40 + code * 7.5 + shortName(building).length * 11.5, 30],
-      ['short', 36 + code * 7.5, 30],
-      ['code', 12 + code * 7.5, 20],
+      !usingNaver && zoom >= 16 && ['full', Math.max(shortName(building).length * 12, 40), 58], // 대체 지도엔 한글 건물 이름이 없어 직접 단다
+      ['short', 30, 40],
       ['dot', 10, 10],
     ].filter(Boolean);
     const [size, w, h] = sizes.find(([, w, h]) => fits(rectAt(point, w, h))) || sizes.at(-1);
@@ -817,6 +832,8 @@ function paintBuildings(zoom) {
 
 function paintMarkers() {
   clearMarkers();
+  labelSpace = [];
+  if (map && focusedMapPlace) claimLabel(focusedMapPlace.latlng, focusedMapPlace.name, true); // 고른 장소 이름이 먼저
   paintTransit();
   if (mapOnlyCategories.includes(mapCategory) && !focusedMapPlace) return;
   const zoom = mapZoom();
@@ -912,7 +929,7 @@ function startNaver() {
     zoomControl:true, zoomControlOptions:{position:maps.Position.RIGHT_BOTTOM, style:maps.ZoomControlStyle.SMALL},
   });
   mapMarkers = [];
-  naverInfo = new maps.InfoWindow({borderColor:'#c9d2e0', anchorSize:new maps.Size(10,8), pixelOffset:new maps.Point(0,-6)});
+  naverInfo = new maps.InfoWindow({borderWidth:0, backgroundColor:'transparent', disableAnchor:true, pixelOffset:new maps.Point(0,-30)}); // 말풍선 모양은 .map-popup 이 그린다
   maps.Event.addListener(map, 'click', () => naverInfo.close());
   maps.Event.addListener(map, 'zoom_changed', () => { if (map) paintMarkers(); }); // 확대·축소하면 묶음을 다시 계산
 }

@@ -1,33 +1,62 @@
 /* 교내 건물 (buildings.js) */
 
-/* 지도: 건물 핀(개수 + 이름) · 학교 밖 묶음(숫자) */
-.marker.building-pin{width:auto;min-width:30px;height:30px;padding:0 9px 0 4px;gap:6px;display:inline-flex;align-items:center;border-radius:15px;
-  background:#1f2937;color:#fff;border:2px solid #a6c8ff;box-shadow:0 3px 10px #0007;white-space:nowrap;transform:translate(-2px,-2px)}
-.marker.building-pin b{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#a6c8ff;color:#0c2142;font-size:11px;display:grid;place-items:center}
-.building-name{font-size:11.5px;font-weight:750;letter-spacing:-.02em}
-.marker.cluster-pin{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4b5563,#1f2937);color:#fff;border:2px solid #ffffffcc;
-  box-shadow:0 0 0 5px #1f293744,0 3px 10px #0007;transform:translate(-4px,-4px)}
-.marker.cluster-pin b{font-size:12px}
-[data-theme="light"] .marker.building-pin{background:#fff;color:#0f1419;border-color:#2f5fd0}
-[data-theme="light"] .marker.building-pin b{background:#2f5fd0;color:#fff}
+/* ---------- 지도 핀: 네이버 지도처럼 ----------
+   장소 = 물방울 핀(assets/pins, gpt-image) + 자리 날 때만 아래 이름(분류 색 + 흰 테두리 글자)
+   묶음·건물 묶음 = 흰 알약(핀 그림 + 개수), 건물 첫 화면 = 건물 그림 + 「이름 / W5동」 글자 */
+.marker.poi,.marker.transit-marker.bus,.marker.transit-marker.exp,.marker.transit-marker.partner{
+  position:relative;display:block;width:26px;height:26px;background:none;border:0;border-radius:0;box-shadow:none;overflow:visible}
+.poi-pin{position:absolute;left:0;top:-19px;width:26px;height:32px;object-fit:contain;filter:drop-shadow(0 2px 2px #0004);
+  transform-origin:50% 100%;transition:transform .15s}
+.marker.poi:hover .poi-pin,.marker.transit-marker:hover .poi-pin{transform:scale(1.12)}
+.marker.poi.selected{width:26px;height:26px;transform:none;background:none;box-shadow:none}
+.marker.poi.selected .poi-pin{transform:scale(1.42);filter:drop-shadow(0 5px 5px #0005)}
+.marker.poi.selected::after{content:"";position:absolute;left:6px;top:10px;width:14px;height:6px;border-radius:50%;background:#1f3b8a55}
+.marker.poi .marker-count{position:absolute;left:16px;top:-25px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#fff;color:#111;
+  font:800 10.5px/17px "Guide Roboto",system-ui,sans-serif;text-align:center;box-shadow:0 1px 3px #0005}
+.poi-label{position:absolute;left:13px;top:16px;transform:translateX(-50%);white-space:nowrap;pointer-events:none;
+  font:700 11.5px/1.2 "Guide Roboto",system-ui,sans-serif;font-style:normal;letter-spacing:-.03em;color:var(--pin-c,#374151);
+  text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff,0 0 4px #fff}
+.marker.poi.selected .poi-label{top:19px;font-size:12.5px;font-weight:800}
+.marker[data-cat="맛집"]{--pin-c:#c2561a}
+.marker[data-cat="숨은장소"]{--pin-c:#15805a}
+.marker[data-cat="생활꿀팁"]{--pin-c:#2457c5}
+.marker[data-cat="자유"]{--pin-c:#7042d3}
+.marker.transit-marker.exp{--pin-c:#4a3ec2}
 
-/* 지도 첫 화면의 학교 건물 이름표 (그림 + 건물 코드 + 이름). 점 = 겹쳐서 줄인 건물 */
-.bmark{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px 0 2px;border-radius:15px;background:#111827f0;color:#f3f6fb;
-  border:1px solid #ffffff2b;box-shadow:0 4px 14px #0009;white-space:nowrap;cursor:pointer;font-size:12px;
-  transform:translate(calc(13px - 50%),calc(13px - 50%));transition:transform .15s,box-shadow .15s}
-.bmark:hover{transform:translate(calc(13px - 50%),calc(13px - 50%)) scale(1.06);box-shadow:0 6px 18px #000a}
-.bmark img{width:30px;height:30px;margin:-8px -2px 0 -2px;filter:drop-shadow(0 2px 3px #0008)}
-.bmark b{font-size:10.5px;font-weight:850;line-height:1;padding:3px 5px;border-radius:6px;background:#a6c8ff;color:#0c2142;letter-spacing:0}
-.bmark span{font-weight:750;letter-spacing:-.03em}
-.bmark.short{padding-right:5px}
-.bmark.code{height:20px;padding:0 2px;border-radius:8px;background:#111827e6}
-.bmark.code b{font-size:10px;padding:3px 4px}
-.bmark.dot{width:11px;height:11px;padding:0;border-radius:50%;background:#a6c8ff;border:2px solid #111827;box-shadow:0 1px 4px #0008}
-[data-theme="light"] .bmark{background:#fffffff2;color:#0f1419;border-color:#0f141922;box-shadow:0 3px 10px #0f141933}
-[data-theme="light"] .bmark b{background:#2f5fd0;color:#fff}
-[data-theme="light"] .bmark.code{height:20px;padding:0 2px;border-radius:8px;background:#111827e6}
-.bmark.code b{font-size:10px;padding:3px 4px}
-.bmark.dot{background:#2f5fd0;border-color:#fff}
+/* 묶음(가까이 모인 장소) · 장소 칩에서 건물마다 묶은 핀: 흰 알약 */
+.marker.cluster-pin,.marker.building-pin{width:auto;min-width:0;height:28px;padding:0 8px 0 5px;display:inline-flex;align-items:center;gap:4px;border-radius:14px;
+  background:#fff;color:#111827;border:1px solid #0f172a1f;box-shadow:0 2px 7px #0f172a33;white-space:nowrap;transform:translate(-2px,-1px)}
+.marker.cluster-pin .poi-pin,.marker.building-pin .poi-pin{position:static;width:16px;height:20px;filter:none;transform:none}
+.marker.cluster-pin b{font-size:12.5px;font-weight:800}
+.marker.building-pin .building-name{font-size:11.5px;font-weight:750;letter-spacing:-.03em}
+.marker.building-pin b{min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#eef2f8;color:#334155;font-size:10.5px;font-weight:800;display:grid;place-items:center}
+.marker.cluster-pin:hover,.marker.building-pin:hover{box-shadow:0 3px 10px #0f172a4d}
+
+/* 지도 첫 화면: 학교 건물 (네이버 지도 캠퍼스 이름표처럼 글자 + 흰 테두리) */
+.bmark{display:inline-flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;transform:translate(calc(13px - 50%),-4px)}
+.bmark img{width:26px;height:26px;filter:drop-shadow(0 2px 2px #0f172a55);transition:transform .15s}
+.bmark:hover img{transform:translateY(-2px) scale(1.08)}
+.bmark-text{font:700 11.5px/1.18 "Guide Roboto",system-ui,sans-serif;color:#40527a;text-align:center;letter-spacing:-.03em;white-space:nowrap;
+  text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff,0 0 4px #fff}
+.bmark-text b{font-size:10.5px;font-weight:800;color:#5b6d93}
+.bmark.short .bmark-text b{font-size:10.5px}
+.bmark.dot{width:9px;height:9px;border-radius:50%;background:#6b7fa8;border:2px solid #fff;box-shadow:0 1px 3px #0005;transform:translate(9px,9px)}
+
+/* 같은 자리 목록 말풍선 (네이버·Leaflet 공통 — 바깥 틀은 지우고 이 카드가 말풍선을 그린다) */
+.map-popup{position:relative;display:block;min-width:200px;max-width:250px;max-height:none;padding:6px;margin-bottom:8px;background:#fff;border-radius:14px;
+  box-shadow:0 8px 24px #0f172a33;color:#111827;font:13px "Guide Roboto",system-ui,sans-serif;overflow:visible}
+.map-popup::after{content:"";position:absolute;left:50%;bottom:-6px;width:13px;height:13px;background:#fff;transform:translateX(-50%) rotate(45deg);border-radius:0 0 3px 0}
+.map-popup-head{font-size:11px;font-weight:700;color:#6b7280;padding:4px 8px 3px}
+.map-popup a{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:10px;color:#111827;text-decoration:none}
+.map-popup a:hover{background:#f1f5fb}
+.map-popup a .poi-pin{position:static;width:19px;height:24px;filter:none;transform:none;flex:none}
+.map-popup a span{display:flex;flex-direction:column;min-width:0;flex:1}
+.map-popup a b{font-size:13px;font-weight:750;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.map-popup a small{font-size:11px;color:#6b7280;margin-top:1px}
+.map-popup a i{font-style:normal;font-size:18px;color:#9ca3af}
+.kt-popup .leaflet-popup-content-wrapper{background:none;box-shadow:none;padding:0;border-radius:0}
+.kt-popup .leaflet-popup-content{margin:0}
+.kt-popup .leaflet-popup-tip-container{display:none}
 
 /* 건물 화면 */
 .building-photo{margin:0}

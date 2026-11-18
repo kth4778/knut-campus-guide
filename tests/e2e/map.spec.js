@@ -99,7 +99,7 @@ test.describe('D. 검색·지도', () => {
     const links = page.locator('.map-popup a');
     await expect(links.first()).toBeVisible();
     expect(await links.count()).toBeGreaterThan(1);
-    const name = (await links.nth(1).textContent()).trim();
+    const name = (await links.nth(1).locator('b').textContent()).trim();
     await links.nth(1).click();
     await expect(page).toHaveURL(/#\/map\?focus=/);
     await expect(page.locator('#map-result')).toContainText(name);
@@ -197,7 +197,7 @@ test.describe('D. 검색·지도', () => {
     });
     expect(pick).toBeGreaterThanOrEqual(0);
     const tag = page.locator('.bmark.full').nth(pick);
-    const code = (await tag.locator('b').textContent()).trim();
+    const code = (await tag.locator('b').textContent()).trim().replace(/동$/, '');
     await tag.click();
     await expect(page).toHaveURL(/#\/building\?name=/);
     await expect(page.locator('.building-code')).toHaveText(code);

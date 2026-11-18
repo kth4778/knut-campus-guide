@@ -110,19 +110,20 @@ export const mapBuildings = () => [...new Set(buildings.values())].filter(b => b
 export const guideCount = building => new Set(Object.values(building.official?.floors || {}).flat()).size;
 
 // 지도에 올릴 건물 핀 모양 (개수 + 이름) — 장소 칩을 골랐을 때 장소를 건물마다 묶은 핀
-export function buildingPinHtml(building, count, showName) {
-  return `<span class="marker building-pin" title="${ctx.escape(building.name)}"><b>${count}</b>${showName ? `<span class="building-name">${ctx.escape(building.name)}</span>` : ''}</span>`;
+export function buildingPinHtml(building, count, showName, pin = '') {
+  return `<span class="marker building-pin" title="${ctx.escape(building.name)}">${pin}${showName ? `<span class="building-name">${ctx.escape(building.name)}</span>` : ''}<b>${count}</b></span>`;
 }
 
-// 지도 첫 화면의 건물 표시. full = 그림+코드+이름, short = 그림+코드, code = 코드만, dot = 작은 점(그래도 겹칠 때)
+// 지도 첫 화면의 건물 표시 (네이버 지도 캠퍼스 이름표 모양).
+// full = 건물 그림 + 「종합강의관 / W5동」 글자, short = 건물 그림 + 「W5」, dot = 작은 점(겹칠 때)
 export const shortName = building => (building.official?.name || building.name).split('/')[0].replaceAll(',', '·');
 export function buildingMarkHtml(building, size) {
   const { escape } = ctx;
   const code = building.official?.code || '';
-  if (size === 'dot') return `<span class="bmark dot" title="${escape(code)} ${escape(building.name)}"></span>`;
-  if (size === 'code') return `<span class="bmark code" title="${escape(code)} ${escape(building.name)}"><b>${escape(code)}</b></span>`;
-  return `<span class="bmark ${size}" title="${escape(code)} ${escape(building.name)}"><img src="assets/building-types/${building.type}.webp" alt="">`
-    + `<b>${escape(code)}</b>${size === 'full' ? `<span>${escape(shortName(building))}</span>` : ''}</span>`;
+  const title = `${escape(code)} ${escape(building.name)}`;
+  if (size === 'dot') return `<span class="bmark dot" title="${title}"></span>`;
+  return `<span class="bmark ${size}" title="${title}"><img src="assets/building-types/${building.type}.webp" alt="">`
+    + `<span class="bmark-text">${size === 'full' ? `${escape(shortName(building))}<br>` : ''}<b>${escape(code)}${size === 'full' ? '동' : ''}</b></span></span>`;
 }
 
 // ---------- 건물 화면 ----------
