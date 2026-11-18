@@ -8,12 +8,26 @@
 .marker.cluster-pin{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4b5563,#1f2937);color:#fff;border:2px solid #ffffffcc;
   box-shadow:0 0 0 5px #1f293744,0 3px 10px #0007;transform:translate(-4px,-4px)}
 .marker.cluster-pin b{font-size:12px}
-.marker.building-pin.guide-only{background:#1f2937e6;border-style:dashed;border-color:#a6c8ffaa}
-.marker.building-pin.guide-only b{background:#a6c8ff33;color:#a6c8ff}
-[data-theme="light"] .marker.building-pin.guide-only{background:#ffffffe6;border-color:#2f5fd0aa}
-[data-theme="light"] .marker.building-pin.guide-only b{background:#2f5fd022;color:#2f5fd0}
 [data-theme="light"] .marker.building-pin{background:#fff;color:#0f1419;border-color:#2f5fd0}
 [data-theme="light"] .marker.building-pin b{background:#2f5fd0;color:#fff}
+
+/* 지도 첫 화면의 학교 건물 이름표 (그림 + 건물 코드 + 이름). 점 = 겹쳐서 줄인 건물 */
+.bmark{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 10px 0 2px;border-radius:15px;background:#111827f0;color:#f3f6fb;
+  border:1px solid #ffffff2b;box-shadow:0 4px 14px #0009;white-space:nowrap;cursor:pointer;font-size:12px;
+  transform:translate(calc(13px - 50%),calc(13px - 50%));transition:transform .15s,box-shadow .15s}
+.bmark:hover{transform:translate(calc(13px - 50%),calc(13px - 50%)) scale(1.06);box-shadow:0 6px 18px #000a}
+.bmark img{width:30px;height:30px;margin:-8px -2px 0 -2px;filter:drop-shadow(0 2px 3px #0008)}
+.bmark b{font-size:10.5px;font-weight:850;line-height:1;padding:3px 5px;border-radius:6px;background:#a6c8ff;color:#0c2142;letter-spacing:0}
+.bmark span{font-weight:750;letter-spacing:-.03em}
+.bmark.short{padding-right:5px}
+.bmark.code{height:20px;padding:0 2px;border-radius:8px;background:#111827e6}
+.bmark.code b{font-size:10px;padding:3px 4px}
+.bmark.dot{width:11px;height:11px;padding:0;border-radius:50%;background:#a6c8ff;border:2px solid #111827;box-shadow:0 1px 4px #0008}
+[data-theme="light"] .bmark{background:#fffffff2;color:#0f1419;border-color:#0f141922;box-shadow:0 3px 10px #0f141933}
+[data-theme="light"] .bmark b{background:#2f5fd0;color:#fff}
+[data-theme="light"] .bmark.code{height:20px;padding:0 2px;border-radius:8px;background:#111827e6}
+.bmark.code b{font-size:10px;padding:3px 4px}
+.bmark.dot{background:#2f5fd0;border-color:#fff}
 
 /* 건물 화면 */
 .building-photo{margin:0}
@@ -24,36 +38,55 @@
 .building-code{font-size:11.5px;font-weight:800;letter-spacing:0;padding:3px 8px;border-radius:7px;background:var(--accent);color:#0c2142}
 .building-head p{font-size:13px;color:var(--muted);margin-top:4px}
 
-/* 3D 층 쌓기 (아이소메트릭): 정사각 판을 60° 눕히고 45° 돌리면 마름모가 된다. 그 마름모를 층마다 위로 쌓고,
-   한 칸 아래에 어두운 마름모를 깔아 판의 두께처럼 보이게 한다. 누르는 자리는 층마다 겹치지 않는 한 줄(--h)이다.
-   층이 많은 건물(9층 이상)은 판과 간격을 줄인다 */
-.floor-stack{--h:42px;--plate:92px;--left:44px;position:relative;height:calc(var(--floors) * var(--h) + 60px);margin:16px 14px 10px;
-  background:radial-gradient(ellipse 140px 40px at 90px calc(100% - 24px),#a6c8ff22,transparent 70%)}
-.floor-stack.tall{--h:28px;--plate:76px;--left:40px}
-.floor-slab{position:absolute;left:0;right:0;bottom:calc(var(--i) * var(--h) + 28px);height:var(--h);display:block;z-index:calc(var(--i) + 1)}
-.slab-top,.slab-side{position:absolute;left:var(--left);bottom:calc(var(--h) / 2 - var(--plate) / 2);width:var(--plate);height:var(--plate);border-radius:14px;pointer-events:none;
-  transform:rotateX(60deg) rotateZ(-45deg);transition:transform .25s,background .25s,border-color .25s,box-shadow .25s}
-.slab-side{background:#05080ccc;transform:translateY(6px) rotateX(60deg) rotateZ(-45deg)}
-.slab-top{background:linear-gradient(135deg,#2a3546d9,#171f2bcc);border:1.5px solid #3c4a5e;
-  background-image:linear-gradient(135deg,#2a3546d9,#171f2bcc),repeating-linear-gradient(0deg,#ffffff0a 0 1px,transparent 1px 12px),repeating-linear-gradient(90deg,#ffffff0a 0 1px,transparent 1px 12px)}
-.floor-slab.has .slab-top{background:linear-gradient(135deg,#5d78a8f2,#2c3d5ae6);border-color:#93a9cf}
-.floor-slab:hover .slab-top{border-color:#a6c8ff}
-.floor-slab.on .slab-top{background:linear-gradient(135deg,#a6c8ff,#3d6fe0);border-color:#e3ecff;box-shadow:0 0 24px #a6c8ff88;transform:translateY(-10px) rotateX(60deg) rotateZ(-45deg)}
-.floor-slab.on .slab-side{background:#1b3a80;transform:translateY(-2px) rotateX(60deg) rotateZ(-45deg)}
-.floor-slab.on{z-index:50} /* 고른 층은 위층에 가리지 않게 맨 앞으로 */
-/* 층 이름표는 기울이지 않고 마름모 오른쪽에 세운다: 층 이름 + 그 층에 있는 곳 수 */
-.slab-tag{position:absolute;left:calc(var(--left) + var(--plate) * 1.45 + 8px);top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:6px;
-  font-size:12.5px;color:var(--muted);white-space:nowrap;padding:2px 9px 2px 10px;border-radius:999px;transition:background .2s,color .2s}
-.slab-tag b{font-weight:800;min-width:26px}
-.slab-tag small{font-size:10.5px;font-weight:800;min-width:18px;height:18px;padding:0 5px;border-radius:9px;display:grid;place-items:center;background:#a6c8ff2e;color:var(--accent)}
-.floor-stack.tall .slab-tag{font-size:11.5px}
-.floor-slab:not(.has) .slab-tag{opacity:.55}
-.floor-slab.on .slab-tag{color:#0c2142;background:var(--accent);opacity:1}
-.floor-slab.on .slab-tag small{background:#0c214226;color:#0c2142}
-[data-theme="light"] .slab-top{background:linear-gradient(135deg,#f1f4f9,#dde3ec);border-color:#c3ccd9}
-[data-theme="light"] .floor-slab.has .slab-top{background:linear-gradient(135deg,#dfe8f8,#b9c9e6);border-color:#8ea4c8}
-[data-theme="light"] .floor-slab.on .slab-top{background:linear-gradient(135deg,#8db1ff,#2f5fd0)}
-[data-theme="light"] .slab-side{background:#8796ab}
+/* 3D 건물: buildings.js 의 isoStack 이 실제 바닥 모양(OSM)으로 그린 SVG. 층마다 바닥판 + 반투명 유리벽 */
+.iso-building{margin:10px 8px 4px}
+.iso-building svg{width:100%;height:auto;display:block;overflow:visible}
+.iso-building figcaption{font-size:10.5px;color:var(--muted);text-align:center;margin-top:2px}
+.iso-building .shadow{fill:#000;opacity:.55;filter:url(#iso-blur)}
+.iso-building .plate{fill:#334155;stroke:#64748b;stroke-width:.8}
+.iso-building .edge.r{fill:#1e293b}
+.iso-building .edge.l{fill:#0f172a}
+.iso-building .glass{stroke:#a6c8ff33;stroke-width:.6}
+.iso-building .glass.r{fill:#7da2d61f}
+.iso-building .glass.l{fill:#5b7fb814}
+.iso-building .mullion{stroke:#a6c8ff2e;stroke-width:.7;fill:none}
+.iso-building .fl.on .mullion{stroke:#e3ecff88}
+[data-theme="light"] .iso-building .mullion{stroke:#2f5fd033}
+.iso-building .iso-roof{fill:#475569;stroke:#94a3b8;stroke-width:.8}
+.iso-building .fl.has .plate{fill:#4a6187;stroke:#93a9cf}
+.iso-building .fl.has .glass.r{fill:#a6c8ff30}
+.iso-building .fl.has .glass.l{fill:#a6c8ff22}
+.iso-building .fl.on .plate{fill:#a6c8ff;stroke:#e3ecff}
+.iso-building .fl.on .edge.r{fill:#3d6fe0}
+.iso-building .fl.on .edge.l{fill:#2a52b5}
+.iso-building .fl.on .glass{stroke:#cfe0ff;stroke-width:1}
+.iso-building .fl.on .glass.r{fill:#a6c8ff66}
+.iso-building .fl.on .glass.l{fill:#a6c8ff4d}
+.iso-building .fl{transition:opacity .2s}
+.iso-building .hit{fill:transparent;cursor:pointer}
+.iso-building .lead{stroke:#64748b;stroke-width:.8;stroke-dasharray:2 2}
+.iso-building .tag{fill:#ffffff10;stroke:#ffffff1f}
+.iso-building .tag-text{font-size:11px;font-weight:800;fill:var(--muted)}
+.iso-building .tag-count{fill:#a6c8ff33}
+.iso-building .tag-count-text{font-size:9.5px;font-weight:800;fill:var(--accent);text-anchor:middle}
+.iso-building .floor-slab:not(.has) .tag-text{opacity:.6}
+.iso-building .floor-slab:hover .tag{stroke:#a6c8ff88}
+.iso-building .floor-slab.on .tag{fill:var(--accent);stroke:none}
+.iso-building .floor-slab.on .tag-text{fill:#0c2142}
+.iso-building .floor-slab.on .tag-count{fill:#0c214230}
+.iso-building .floor-slab.on .tag-count-text{fill:#0c2142}
+.iso-building .floor-slab.on .lead{stroke:var(--accent);stroke-dasharray:none}
+.iso-building .floor-slab:focus-visible .tag{stroke:var(--accent);stroke-width:2}
+.iso-building .compass path{fill:var(--accent)}
+.iso-building .compass text{font-size:8px;font-weight:800;fill:var(--muted);text-anchor:middle}
+[data-theme="light"] .iso-building .shadow{opacity:.18}
+[data-theme="light"] .iso-building .plate{fill:#e2e8f0;stroke:#94a3b8}
+[data-theme="light"] .iso-building .edge.r{fill:#cbd5e1}
+[data-theme="light"] .iso-building .edge.l{fill:#94a3b8}
+[data-theme="light"] .iso-building .iso-roof{fill:#f1f5f9;stroke:#94a3b8}
+[data-theme="light"] .iso-building .fl.has .plate{fill:#c7d7f2;stroke:#6b8bc4}
+[data-theme="light"] .iso-building .fl.on .plate{fill:#8db1ff;stroke:#2f5fd0}
+[data-theme="light"] .iso-building .tag{fill:#0f14190a;stroke:#0f14191f}
 
 /* 고른 층 안내 */
 .floor-places{padding:6px 0 4px;border-top:1px solid var(--line)}
@@ -76,4 +109,4 @@
 .floor-empty p{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:4px}
 .floor-unknown{display:block;margin:10px 16px 0;font-size:13px;color:var(--accent)}
 .building-note{font-size:11px;color:var(--muted);padding:14px 16px 24px;line-height:1.55}
-@media (prefers-reduced-motion:reduce){.slab-top,.slab-side{transition:none}}
+

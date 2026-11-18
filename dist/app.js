@@ -5,7 +5,7 @@ import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
 import {initShare, openShare} from './share.js';
-import {initBuildings, buildingOf, buildingPinHtml, buildingPage, guideOnlyBuildings, guideCount} from './buildings.js';
+import {initBuildings, buildingOf, buildingPinHtml, buildingPage, mapBuildings, buildingMarkHtml, guideCount, shortName} from './buildings.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
 
 const app = document.getElementById('app');
@@ -532,7 +532,7 @@ function placePage(place) {
 function mapPage() {
   return `${top('캠퍼스 지도',iconLink('search','지도에서 찾을 장소 검색',route('search')),iconLink('bookmark','저장한 장소',route('my')))}
     <div class="chips map-chips" aria-label="지도 카테고리">
-      ${mapCategories.map(name=>`<button class="chip${transitCategories.includes(name)?' transit-chip':name==='교통대 제휴'?' partner-chip':''}" data-action="map-category" data-category="${escape(name)}" aria-pressed="${name===mapCategory}">${name}</button>`).join('')}
+      ${mapCategories.map(name=>`<button class="chip${transitCategories.includes(name)?' transit-chip':name==='교통대 제휴'?' partner-chip':''}" data-action="map-category" data-category="${escape(name)}" aria-pressed="${name===mapCategory}">${name==='전체'?'건물':name}</button>`).join('')}
     </div>
     <div id="live-row" class="chips live-row" aria-label="실시간 버스 노선" hidden></div>
     <main class="map-panel" aria-label="장소 지도">
@@ -563,7 +563,11 @@ function showMapResult(place) {
       result.innerHTML = mapPartners ? `<p>제휴 매장 ${mapPartners.length}곳 · 핀을 누르면 혜택을 볼 수 있어요.</p>` : '<p>제휴 매장을 불러오는 중…</p>';
       return;
     }
-    const count = mappedPlaces.filter(item => mapCategory==='전체'||item.category===mapCategory).length;
+    if (mapCategory === '전체') {
+      result.innerHTML = `<p>교내 건물 ${mapBuildings().length}곳 · 건물을 누르면 층별 안내가 나와요. 장소는 위 칩에서 골라 보세요.</p>`;
+      return;
+    }
+    const count = mappedPlaces.filter(item => item.category===mapCategory).length;
     result.innerHTML = `<p>${count}개 위치 · 핀을 눌러 장소를 확인하세요.</p>`;
     return;
   }
@@ -762,8 +766,6 @@ function paintOverview(shown, zoom) {
     }
     byBuilding.get(building).count++;
   }
-  // 앱 장소가 없는 공식 건물: 「전체」일 때만, 숫자는 학교 안내 수
-  if (mapCategory === '전체') for (const building of guideOnlyBuildings()) items.push({latlng:building.latlng, count:guideCount(building), building});
   // 2) 화면에서 가까운 것끼리 한 칸에 모은다
   const cells = new Map();
   for (const item of items) {
@@ -788,15 +790,39 @@ function paintOverview(shown, zoom) {
   if (focusedMapPlace) (usingNaver ? addNaverMarker : addLeafletMarker)([focusedMapPlace], focusedMapPlace, true, focusedMapPlace.name);
 }
 
+// 지도 첫 화면(칩을 고르기 전): 장소는 숨기고 학교 건물만. 네이버 지도의 건물 이름표처럼
+// 중요한 건물(안내·장소가 많은 곳)부터 자리를 잡고, 겹치면 이름을 빼고 코드만, 그래도 겹치면 작은 점으로 줄인다
+function paintBuildings(zoom) {
+  const placed = [];
+  const fits = rect => !placed.some(r => rect[0] < r[2] && rect[2] > r[0] && rect[1] < r[3] && rect[3] > r[1]);
+  const rectAt = ([x, y], w, h) => [x - w / 2 - 3, y - h / 2 - 3, x + w / 2 + 3, y + h / 2 + 3];
+  const score = b => guideCount(b) + b.places.length * 2;
+  if (focusedMapPlace) placed.push(rectAt(toPixel(focusedMapPlace.latlng), 44, 44)); // 고른 장소 핀 자리는 비워 둔다
+  for (const building of mapBuildings().sort((a, b) => score(b) - score(a))) {
+    const point = toPixel(building.latlng);
+    const code = building.official.code.length;
+    const sizes = [
+      zoom >= 16 && ['full', 40 + code * 7.5 + shortName(building).length * 11.5, 30],
+      ['short', 36 + code * 7.5, 30],
+      ['code', 12 + code * 7.5, 20],
+      ['dot', 10, 10],
+    ].filter(Boolean);
+    const [size, w, h] = sizes.find(([, w, h]) => fits(rectAt(point, w, h))) || sizes.at(-1);
+    placed.push(rectAt(point, w, h));
+    addPoint(building.latlng, buildingMarkHtml(building, size), `${building.official.code} ${building.name}`,
+      () => { location.hash = route('building', {name:building.name}); }, size === 'dot' ? 100 : 300 + score(building));
+  }
+  if (focusedMapPlace) (usingNaver ? addNaverMarker : addLeafletMarker)([focusedMapPlace], focusedMapPlace, true, focusedMapPlace.name);
+}
+
 function paintMarkers() {
   clearMarkers();
   paintTransit();
   if (mapOnlyCategories.includes(mapCategory) && !focusedMapPlace) return;
-  const shown = mappedPlaces.filter(place => mapCategory === '전체' || place.category === mapCategory || place === focusedMapPlace);
   const zoom = mapZoom();
+  if (mapCategory === '전체') { paintBuildings(zoom); return; }
+  const shown = mappedPlaces.filter(place => place.category === mapCategory || place === focusedMapPlace);
   if (zoom < DETAIL_ZOOM) { paintOverview(shown, zoom); return; }
-  if (mapCategory === '전체') for (const building of guideOnlyBuildings()) addPoint(building.latlng, buildingPinHtml(building, guideCount(building), true), building.name,
-    () => { location.hash = route('building', {name:building.name}); }, 200);
   const groups = new Map();
   for (const place of shown) {
     const key = place.latlng.map(num => num.toFixed(5)).join(',');
@@ -826,7 +852,7 @@ function updateMap(focus, category) {
   const city = !focusedMapPlace && category === '교통대 제휴'; // 제휴 매장은 시내까지 퍼져 있어요
   if (city && !mapPartners) loadMapPartners().then(() => { if (mapCategory === '교통대 제휴') { showMapResult(null); if (map) paintMarkers(); } });
   const center = focusedMapPlace?.latlng ?? (wide ? [36.9725, 127.8925] : city ? [36.988, 127.905] : campus);
-  const zoom = focusedMapPlace ? DETAIL_ZOOM : wide ? 13 : city ? 12 : 15;
+  const zoom = focusedMapPlace ? DETAIL_ZOOM : wide ? 13 : city ? 12 : category === '전체' ? 16 : 15; // 건물 이름표가 읽히게 한 단계 가깝게
   if (usingNaver) {
     map.setCenter(new window.naver.maps.LatLng(...center));
     map.setZoom(zoom);
@@ -834,7 +860,7 @@ function updateMap(focus, category) {
   }
   map.invalidateSize({pan:false});
   map.closePopup();
-  map.setView(center, zoom);
+  map.setView(center, zoom, {animate:false}); // 움직임 없이 바로 (움직이는 중에 화면을 떠나면 Leaflet 이 오류를 낸다)
 }
 
 function destroyMap() {
@@ -893,7 +919,7 @@ function startLeaflet() {
     document.getElementById('map-canvas').innerHTML = '<div class="empty"><p>지도를 불러오지 못했어요.</p><a class="primary" href="#/search">장소 검색</a></div>';
     return;
   }
-  map = L.map('map-canvas',{zoomControl:false,scrollWheelZoom:true,attributionControl:true}).setView(campus,15);
+  map = L.map('map-canvas',{zoomControl:false,scrollWheelZoom:true,attributionControl:true}).setView(campus,mapCategory === '전체' ? 16 : 15); // 처음부터 건물 보기 높이로 (확대 움직임 없이)
   map.attributionControl.setPrefix(false);
   L.control.zoom({position:'bottomright',zoomInTitle:'확대',zoomOutTitle:'축소'}).addTo(map);
   const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{

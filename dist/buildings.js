@@ -54,11 +54,32 @@ export async function initBuildings(tools, places) {
     const response = await fetch('./data/buildings.json');
     if (response.ok) ({buildings:official, collected} = await response.json());
   } catch { /* 층별 안내 없이도 건물 화면은 열린다 */ }
-  for (const building of buildings.values()) {
-    // 건물 좌표: 그 건물 장소들이 가장 많이 가리키는 점
+  // 같은 공식 건물을 앱에서 두 이름으로 부르면(「경영항공관」「경영항공관 · SPACE K」) 하나로 합친다
+  const byCode = new Map();
+  for (const [name, building] of buildings) {
+    building.official = official.find(b => b.names.some(n => squash(n) === squash(name))) || null;
+    const same = building.official && byCode.get(building.official.code);
+    if (same) {
+      same.places.push(...building.places);
+      if (squash(name) === squash(building.official.names[0])) same.name = name; // 공식 이름과 같은 쪽을 화면 이름으로
+      buildings.set(name, same);
+      continue;
+    }
+    if (building.official) byCode.set(building.official.code, building);
+  }
+  // 앱 장소가 하나도 없는 공식 건물도 층별 안내를 볼 수 있게 등록한다
+  for (const b of official) {
+    if (byCode.has(b.code) || !b.latlng) continue;
+    const name = b.name.replaceAll('/', '·').replaceAll(',', '·');
+    const building = {name, places:[], official:b};
+    buildings.set(name, building);
+    byCode.set(b.code, building);
+  }
+  for (const building of new Set(buildings.values())) {
+    // 건물 좌표: OSM 건물 외곽선의 가운데. 없으면 그 건물 장소들이 가장 많이 가리키는 점
     const votes = new Map();
     building.places.forEach(p => { const key = p.latlng.join(); votes.set(key, (votes.get(key) || 0) + 1); });
-    building.latlng = [...votes.entries()].sort((a, b) => b[1] - a[1])[0][0].split(',').map(Number);
+    building.latlng = building.official?.latlng || [...votes.entries()].sort((a, b) => b[1] - a[1])[0][0].split(',').map(Number);
     building.floors = new Map();
     for (const place of building.places) {
       const floor = floorOf(place);
@@ -66,26 +87,42 @@ export async function initBuildings(tools, places) {
       building.floors.get(floor).push(place);
     }
     building.photo = building.places.find(p => p.cover?.asset)?.cover || null;
-    building.official = official.find(b => b.names.some(n => squash(n) === squash(building.name))) || null;
-  }
-  // 앱 장소가 하나도 없는 공식 건물도 층별 안내를 볼 수 있게 OSM 가운데 좌표에 건물로 올린다
-  const linked = new Set([...buildings.values()].map(b => b.official));
-  for (const b of official) {
-    if (linked.has(b) || !b.latlng) continue;
-    const name = b.name.replaceAll('/', '·');
-    buildings.set(name, {name, places:[], latlng:b.latlng, floors:new Map(), photo:null, official:b});
+    building.type = typeOf(building.official?.name || building.name);
   }
 }
 
-export const buildingOf = place => buildings.get(place.location?.building?.trim() || '') || null;
-export const allBuildings = () => [...buildings.values()];
-// 앱 장소 없이 학교 안내만 있는 건물 (지도 「전체」에서 따로 핀을 올린다)
-export const guideOnlyBuildings = () => [...buildings.values()].filter(b => !b.places.length);
-export const guideCount = building => Object.values(building.official?.floors || {}).reduce((sum, list) => sum + list.length, 0);
+// 건물 이름 → 지도 아이콘 종류 (assets/building-types/*.webp)
+function typeOf(name) {
+  if (/도서관/.test(name)) return 'library';
+  if (/생활관|관리동/.test(name)) return 'dorm';
+  if (/본부/.test(name)) return 'admin';
+  if (/아레나|운동장|테니스/.test(name)) return 'sports';
+  if (/실험|실습|시험동|생산동|화학|창업/.test(name)) return 'lab';
+  if (/학생회관|동아리|학군단/.test(name)) return 'student';
+  if (/극장|쉼터|정문/.test(name)) return 'culture';
+  return 'lecture';
+}
 
-// 지도에 올릴 건물 핀 모양 (개수 + 이름)
+export const buildingOf = place => buildings.get(place.location?.building?.trim() || '') || null;
+// 지도 첫 화면에 올릴 건물: 학교 건물 코드(E8·W3 …)가 있고 자리를 아는 건물
+export const mapBuildings = () => [...new Set(buildings.values())].filter(b => b.official && b.latlng);
+// 학교 안내 수 (「1~9층 중원생활관」처럼 여러 층에 걸친 것은 한 번만 센다)
+export const guideCount = building => new Set(Object.values(building.official?.floors || {}).flat()).size;
+
+// 지도에 올릴 건물 핀 모양 (개수 + 이름) — 장소 칩을 골랐을 때 장소를 건물마다 묶은 핀
 export function buildingPinHtml(building, count, showName) {
-  return `<span class="marker building-pin${building.places.length ? '' : ' guide-only'}" title=""${ctx.escape(building.name)}"><b>${count}</b>${showName ? `<span class="building-name">${ctx.escape(building.name)}</span>` : ''}</span>`;
+  return `<span class="marker building-pin" title="${ctx.escape(building.name)}"><b>${count}</b>${showName ? `<span class="building-name">${ctx.escape(building.name)}</span>` : ''}</span>`;
+}
+
+// 지도 첫 화면의 건물 표시. full = 그림+코드+이름, short = 그림+코드, code = 코드만, dot = 작은 점(그래도 겹칠 때)
+export const shortName = building => (building.official?.name || building.name).split('/')[0].replaceAll(',', '·');
+export function buildingMarkHtml(building, size) {
+  const { escape } = ctx;
+  const code = building.official?.code || '';
+  if (size === 'dot') return `<span class="bmark dot" title="${escape(code)} ${escape(building.name)}"></span>`;
+  if (size === 'code') return `<span class="bmark code" title="${escape(code)} ${escape(building.name)}"><b>${escape(code)}</b></span>`;
+  return `<span class="bmark ${size}" title="${escape(code)} ${escape(building.name)}"><img src="assets/building-types/${building.type}.webp" alt="">`
+    + `<b>${escape(code)}</b>${size === 'full' ? `<span>${escape(shortName(building))}</span>` : ''}</span>`;
 }
 
 // ---------- 건물 화면 ----------
@@ -102,6 +139,79 @@ function floorRange(building) {
   const list = [];
   for (let n = top; n >= bottom; n--) if (n !== 0) list.push(n);
   return list; // 위층부터
+}
+
+// ---------- 3D 건물 (실제 바닥 모양으로 층 쌓기) ----------
+// OSM 외곽선(미터)을 비스듬히(아이소메트릭) 눕혀 층마다 쌓는다. 층 = 바닥판(진하게) + 유리벽(반투명).
+// 보는 쪽(남서쪽)을 향한 벽만 그리고, 아래층부터 그려 위층이 자연스럽게 덮는다. 외곽선이 없으면 정사각형으로
+const COS = Math.cos(Math.PI / 6), SIN = Math.sin(Math.PI / 6);
+const SQUARE = [[-15, -15], [15, -15], [15, 15], [-15, 15]];
+
+function isoStack(building, range, picked) {
+  const { escape, route } = ctx;
+  const shape = building.official?.shape || SQUARE;
+  const flat = shape.map(([x, y]) => [(x - y) * COS, -(x + y) * SIN]);
+  const xs = flat.map(p => p[0]), ys = flat.map(p => p[1]);
+  const scale = Math.min(170 / (Math.max(...xs) - Math.min(...xs)), 80 / (Math.max(...ys) - Math.min(...ys)));
+  const floors = [...range].reverse(); // 아래층부터
+  const step = floors.length > 8 ? 15 : floors.length > 5 ? 21 : 27; // 한 층 높이(px)
+  const slab = Math.max(4, step * .26);                                // 바닥판 두께
+  const left = 20 - Math.min(...xs) * scale;
+  const groundY = (Math.max(...ys) - Math.min(...ys)) * scale + floors.length * step + 26;
+  const baseY = groundY - Math.max(...ys) * scale;
+  const at = (i, lift) => flat.map(([x, y]) => [left + x * scale, baseY + y * scale - i * step - lift]);
+  const pts = list => list.map(p => p.map(n => n.toFixed(1)).join(',')).join(' ');
+  // 보는 쪽(남서)을 향한 벽: 바깥쪽 법선이 (-1,-1) 쪽이면 보인다. 먼 벽부터
+  const walls = shape.map((a, i) => [a, shape[(i + 1) % shape.length], i])
+    .filter(([a, b]) => -((b[1] - a[1]) + -(b[0] - a[0])) > 0)
+    .sort((p, q) => (q[0][0] + q[0][1] + q[1][0] + q[1][1]) - (p[0][0] + p[0][1] + p[1][0] + p[1][1]));
+  const lightSide = ([a, b]) => (b[1] - a[1]) > -(b[0] - a[0]) ? 'r' : 'l'; // 남쪽 벽 / 서쪽 벽 명암
+  const wallPoly = (i, from, to, [, , k]) => {
+    const lo = at(i, from), hi = at(i, to), j = (k + 1) % shape.length;
+    return pts([hi[k], hi[j], lo[j], lo[k]]);
+  };
+  // 유리벽의 창틀: 보이는 벽마다 약 4.5m 간격으로 세로줄
+  const project = ([x, y], i, lift) => [left + (x - y) * COS * scale, baseY - (x + y) * SIN * scale - i * step - lift];
+  const mullions = i => walls.map(([a, b]) => {
+    const n = Math.floor(Math.hypot(b[0] - a[0], b[1] - a[1]) / 4.5);
+    return Array.from({length:Math.max(0, n - 1)}, (_, k) => {
+      const t = (k + 1) / n, p = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+      const lo = project(p, i, slab), hi = project(p, i, step);
+      return `M${lo[0].toFixed(1)} ${lo[1].toFixed(1)}V${hi[1].toFixed(1)}`;
+    }).join('');
+  }).join('');
+  const right = Math.max(...flat.map(p => left + p[0] * scale));
+  const midY = ys.reduce((a, b) => a + b, 0) / ys.length;
+  const tagH = Math.min(20, step - 2);
+  const labelX = Math.max(right + 22, 214);
+  const body = floors.map((floor, i) => {
+    const count = guideOf(building, floor).length + (building.floors.get(floor)?.length || 0);
+    const cls = `fl${floor === picked ? ' on' : ''}${count ? ' has' : ''}`;
+    const glass = walls.map(w => `<polygon class="glass ${lightSide(w)}" points="${wallPoly(i, slab, step, w)}"/>`).join('');
+    const slabs = walls.map(w => `<polygon class="edge ${lightSide(w)}" points="${wallPoly(i, 0, slab, w)}"/>`).join('');
+    const labelY = baseY + midY * scale - i * step - step / 2; // 그 층 가운데 높이
+    const anchor = at(i, step / 2).reduce((best, p) => p[0] > best[0] ? p : best);
+    return `<g class="${cls}"><polygon class="plate" points="${pts(at(i, slab))}"/>${slabs}${glass}<path class="mullion" d="${mullions(i)}"/></g>
+      <a class="floor-slab${floor === picked ? ' on' : ''}${count ? ' has' : ''}" href="${route('building', {name:building.name, floor})}"
+        aria-current="${floor === picked}" aria-label="${escape(floorName(floor))} ${count}곳">
+        <rect class="hit" x="0" y="${(labelY - step / 2).toFixed(1)}" width="330" height="${step}"/>
+        <line class="lead" x1="${anchor[0].toFixed(1)}" y1="${anchor[1].toFixed(1)}" x2="${labelX - 6}" y2="${labelY.toFixed(1)}"/>
+        <rect class="tag" x="${labelX}" y="${(labelY - tagH / 2).toFixed(1)}" rx="${tagH / 2}" width="${count ? 58 : 38}" height="${tagH}"/>
+        <text class="tag-text" x="${labelX + 9}" y="${(labelY + 4).toFixed(1)}">${escape(floorLabel(floor))}</text>
+        ${count ? `<circle class="tag-count" cx="${labelX + 44}" cy="${labelY.toFixed(1)}" r="${tagH / 2 - 2}"/><text class="tag-count-text" x="${labelX + 44}" y="${(labelY + 3.5).toFixed(1)}">${count}</text>` : ''}
+      </a>`;
+  }).join('');
+  const top = floors.length;
+  const roof = `<polygon class="iso-roof" points="${pts(at(top, 0))}"/>${walls.map(w => `<polygon class="edge ${lightSide(w)}" points="${wallPoly(top, -slab, 0, w)}"/>`).join('')}`;
+  const shadow = `<polygon class="shadow" points="${pts(at(0, -4))}"/>`;
+  return `<figure class="iso-building">
+    <svg viewBox="0 0 330 ${(groundY + 14).toFixed(0)}" role="group" aria-label="${escape(building.name)} 층 선택">
+      <defs><filter id="iso-blur"><feGaussianBlur stdDeviation="6"/></filter></defs>
+      ${shadow}${body.replace(/<a [\s\S]*?<\/a>/g, '')}${roof}${(body.match(/<a [\s\S]*?<\/a>/g) || []).join('')}
+      <g class="compass" transform="translate(300 ${(groundY - 10).toFixed(0)})"><path d="M0-11 4 0 0-3-4 0Z"/><text y="11">N</text></g>
+    </svg>
+    <figcaption>${building.official?.shape ? '바닥 모양: OpenStreetMap 건물 외곽선' : '바닥 모양 정보가 없어 사각형으로 그렸어요'} · 층을 누르면 그 층 안내</figcaption>
+  </figure>`;
 }
 
 function guideCard(what) {
@@ -143,16 +253,7 @@ export function buildingPage(name, params) {
     ? `<figure class="building-photo"><img src="assets/${escape(building.photo.asset)}" alt="${escape(building.name)} 사진">
         <figcaption>${escape(building.photo.note || '')} · ${escape(building.photo.author || '')} / Wikimedia Commons · CC BY-SA 4.0</figcaption></figure>`
     : '';
-  // 3D 층 쌓기: 층마다 얇은 판을 비스듬히 눕혀 위로 쌓는다. 안내·장소가 있는 층은 밝게, 없는 층은 흐리게
-  const stack = range.length ? `<div class="floor-stack${range.length > 8 ? ' tall' : ''}" style="--floors:${range.length}" role="group" aria-label="${escape(building.name)} 층 선택">
-      ${range.map((floor, i) => {
-        const count = guideOf(building, floor).length + (building.floors.get(floor)?.length || 0);
-        return `<a class="floor-slab${floor === picked ? ' on' : ''}${count ? ' has' : ''}" style="--i:${range.length - 1 - i}"
-          href="${route('building', {name, floor})}" aria-current="${floor === picked}" aria-label="${escape(floorName(floor))} ${count}곳">
-          <span class="slab-side"></span><span class="slab-top"></span>
-          <span class="slab-tag"><b>${escape(floorLabel(floor))}</b>${count ? `<small>${count}</small>` : ''}</span></a>`;
-      }).join('')}
-    </div>` : '';
+  const stack = range.length ? isoStack(building, range, picked) : '';
   const facts = [range[0] > 0 && `지상 ${range[0]}층`, range.at(-1) < 0 && `지하 ${-range.at(-1)}층`, guideTotal && `학교 안내 ${guideTotal}곳`, building.places.length && `누팁스 장소 ${building.places.length}곳`].filter(Boolean).join(' · ');
   return `${top(building.name, iconLink('back', '지도로', route('map')), building.places.length ? iconLink('pin', '지도에서 보기', route('map', {focus:building.places[0].id})) : '')}
     <main class="scroll building-page">
