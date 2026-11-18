@@ -37,6 +37,9 @@ const test = base.extend({
       const text = message.text();
       // 네이버 지도를 막았을 때 나는 로드 실패는 의도한 것
       if (!naver && /oapi\.map\.naver\.com|net::ERR_FAILED/.test(text + message.location().url)) return;
+      // 네이버 지도 배경 그림 서버(map.naver.net)가 가끔 CORS 헤더 없이 답해 나는 오류는 우리가 고칠 수 없다.
+      // 인증 실패는 D3·K3 이 지도 칸의 auth_fail 표시로 따로 잡는다
+      if (naver && /map\.naver\.net|pstatic\.net|net::ERR_FAILED/.test(text + message.location().url)) return;
       errors.push('console: ' + text);
     });
 

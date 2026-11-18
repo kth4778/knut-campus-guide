@@ -65,7 +65,7 @@ python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
 
 ## 테스트
 
-Playwright E2E 테스트 57개가 있어요. 계획·결과: [docs/E2E_TEST_PLAN.md](docs/E2E_TEST_PLAN.md)
+Playwright E2E 테스트 58개가 있어요. 계획·결과: [docs/E2E_TEST_PLAN.md](docs/E2E_TEST_PLAN.md)
 
 ```bash
 npm ci                 # 처음 한 번

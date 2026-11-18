@@ -100,6 +100,19 @@ test.describe('D. 검색·지도', () => {
     await expect(page.locator('#map-result')).toContainText(name);
   });
 
+  test('D9 버스·고속버스 핀이 같은 자리의 장소 핀을 덮지 않는다', P1, async ({ page }) => {
+    await openApp(page, '#/map');
+    await expect(page.locator('.leaflet-container')).toBeVisible();
+    await expect(page.locator('.marker.transit-marker').first()).toBeVisible();
+    // 장소 핀 한가운데를 누르면 교통 핀이 아니라 그 장소 핀이 눌려야 한다
+    const covered = await page.locator('.marker:not(.transit-marker)').evaluateAll(els => els.filter(el => {
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return hit?.closest('.transit-marker');
+    }).map(el => el.closest('[title]')?.getAttribute('title')));
+    expect(covered).toEqual([]);
+  });
+
   test('D8 컴퓨터에서 칩 줄을 휠·끌기로 넘기고, 끈 뒤에는 칩이 눌리지 않는다', P1, async ({ page }) => {
     await openApp(page, '#/map');
     const chips = page.locator('.map-chips');
