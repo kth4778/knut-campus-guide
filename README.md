@@ -63,6 +63,10 @@ python3 -m http.server 8853 --bind 127.0.0.1 --directory dist
 
 브라우저에서 http://127.0.0.1:8853 을 열고, 개발자 도구에서 모바일 화면 크기로 보세요.
 
+## 테스트
+
+E2E 테스트 계획: [docs/E2E_TEST_PLAN.md](docs/E2E_TEST_PLAN.md) (아직 계획만 있고 테스트 코드는 없어요)
+
 ## 누팁스 데이터 합치기
 
 `dist/data/places.json`은 누팁스(KNUTIPS) 앱 데이터를 합친 것이에요. 누팁스 분류(`kCat`)로 계정을 나눠요.
