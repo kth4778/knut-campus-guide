@@ -1,10 +1,14 @@
-# 교통대 충주캠퍼스 건물 데이터 (수집만, 앱에는 아직 안 씀)
+# 교통대 충주캠퍼스 건물 데이터
 
 건물 화면을 실제 정보로 채우기 위해 공개된 곳에서 모은 원자료다. 다시 모으려면:
 
 ```bash
-python3 scripts/collect_buildings.py
+python3 scripts/collect_buildings.py   # 원자료 다시 모으기
+python3 scripts/export_buildings.py    # 앱이 읽는 dist/data/buildings.json 만들기
 ```
+
+앱 건물 화면(`#/building?name=…`)은 `dist/data/buildings.json` 의 층별 안내를 아이콘 카드로 보여 준다.
+아이콘(`dist/assets/floor/*.webp`)은 디자인용 그림이라 gpt-image 로 만들었다(실제 건물 사진 아님).
 
 ## 파일
 

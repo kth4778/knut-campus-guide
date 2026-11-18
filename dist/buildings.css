@@ -16,32 +16,60 @@
 .building-photo img{width:100%;aspect-ratio:16/10;object-fit:cover}
 .building-photo figcaption{font-size:10.5px;color:var(--muted);padding:5px 14px 0}
 .building-head{padding:14px 16px 4px}
-.building-head h1{font-size:22px;letter-spacing:-.04em}
-.building-head p{font-size:13px;color:var(--muted);margin-top:3px}
+.building-head h1{font-size:22px;letter-spacing:-.04em;display:flex;align-items:center;gap:8px}
+.building-code{font-size:11.5px;font-weight:800;letter-spacing:0;padding:3px 8px;border-radius:7px;background:var(--accent);color:#0c2142}
+.building-head p{font-size:13px;color:var(--muted);margin-top:4px}
 
 /* 3D 층 쌓기 (아이소메트릭): 정사각 판을 60° 눕히고 45° 돌리면 마름모가 된다. 그 마름모를 층마다 위로 쌓고,
-   한 칸 아래에 어두운 마름모를 깔아 판의 두께처럼 보이게 한다. 누르는 자리는 층마다 겹치지 않는 한 줄(--h)이다 */
-.floor-stack{--h:46px;--plate:92px;position:relative;height:calc(var(--floors) * var(--h) + 56px);margin:14px 14px 10px}
-.floor-slab{position:absolute;left:0;right:0;bottom:calc(var(--i) * var(--h) + 26px);height:var(--h);display:block;z-index:calc(var(--i) + 1)}
-.slab-top,.slab-side{position:absolute;left:44px;bottom:calc(var(--h) / 2 - var(--plate) / 2);width:var(--plate);height:var(--plate);border-radius:16px;pointer-events:none;
-  transform:rotateX(60deg) rotateZ(-45deg);transition:transform .25s,background .25s,border-color .25s}
-.slab-side{background:#05080ccc;transform:translateY(7px) rotateX(60deg) rotateZ(-45deg)}
-.slab-top{background:linear-gradient(135deg,#3a4a62e6,#1f2a3acc);border:1.5px solid #6a7d99;color:transparent;overflow:hidden}
-.slab-top b,.slab-top small{display:none}
-/* 층 이름표는 기울이지 않고 마름모 오른쪽에 바로 세운다 */
-.floor-slab::after{content:attr(aria-label);position:absolute;left:196px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:750;color:var(--muted);white-space:nowrap;
-  padding:3px 10px;border-radius:999px;transition:background .2s,color .2s}
-.floor-slab:hover .slab-top{border-color:#7e93b3}
-.floor-slab.on .slab-top{background:linear-gradient(135deg,#8db1ff,#3d6fe0);border-color:#d5e2ff;transform:translateY(-10px) rotateX(60deg) rotateZ(-45deg)}
-.floor-slab.on .slab-side{transform:translateY(-1px) rotateX(60deg) rotateZ(-45deg)}
-.floor-slab.on::after{color:#0c2142;background:var(--accent)}
+   한 칸 아래에 어두운 마름모를 깔아 판의 두께처럼 보이게 한다. 누르는 자리는 층마다 겹치지 않는 한 줄(--h)이다.
+   층이 많은 건물(9층 이상)은 판과 간격을 줄인다 */
+.floor-stack{--h:42px;--plate:92px;--left:44px;position:relative;height:calc(var(--floors) * var(--h) + 60px);margin:16px 14px 10px;
+  background:radial-gradient(ellipse 140px 40px at 90px calc(100% - 24px),#a6c8ff22,transparent 70%)}
+.floor-stack.tall{--h:28px;--plate:76px;--left:40px}
+.floor-slab{position:absolute;left:0;right:0;bottom:calc(var(--i) * var(--h) + 28px);height:var(--h);display:block;z-index:calc(var(--i) + 1)}
+.slab-top,.slab-side{position:absolute;left:var(--left);bottom:calc(var(--h) / 2 - var(--plate) / 2);width:var(--plate);height:var(--plate);border-radius:14px;pointer-events:none;
+  transform:rotateX(60deg) rotateZ(-45deg);transition:transform .25s,background .25s,border-color .25s,box-shadow .25s}
+.slab-side{background:#05080ccc;transform:translateY(6px) rotateX(60deg) rotateZ(-45deg)}
+.slab-top{background:linear-gradient(135deg,#2a3546d9,#171f2bcc);border:1.5px solid #3c4a5e;
+  background-image:linear-gradient(135deg,#2a3546d9,#171f2bcc),repeating-linear-gradient(0deg,#ffffff0a 0 1px,transparent 1px 12px),repeating-linear-gradient(90deg,#ffffff0a 0 1px,transparent 1px 12px)}
+.floor-slab.has .slab-top{background:linear-gradient(135deg,#5d78a8f2,#2c3d5ae6);border-color:#93a9cf}
+.floor-slab:hover .slab-top{border-color:#a6c8ff}
+.floor-slab.on .slab-top{background:linear-gradient(135deg,#a6c8ff,#3d6fe0);border-color:#e3ecff;box-shadow:0 0 24px #a6c8ff88;transform:translateY(-10px) rotateX(60deg) rotateZ(-45deg)}
+.floor-slab.on .slab-side{background:#1b3a80;transform:translateY(-2px) rotateX(60deg) rotateZ(-45deg)}
 .floor-slab.on{z-index:50} /* 고른 층은 위층에 가리지 않게 맨 앞으로 */
-[data-theme="light"] .slab-top{background:linear-gradient(135deg,#eef2f8,#cdd6e3);border-color:#9aa8bd}
+/* 층 이름표는 기울이지 않고 마름모 오른쪽에 세운다: 층 이름 + 그 층에 있는 곳 수 */
+.slab-tag{position:absolute;left:calc(var(--left) + var(--plate) * 1.45 + 8px);top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:6px;
+  font-size:12.5px;color:var(--muted);white-space:nowrap;padding:2px 9px 2px 10px;border-radius:999px;transition:background .2s,color .2s}
+.slab-tag b{font-weight:800;min-width:26px}
+.slab-tag small{font-size:10.5px;font-weight:800;min-width:18px;height:18px;padding:0 5px;border-radius:9px;display:grid;place-items:center;background:#a6c8ff2e;color:var(--accent)}
+.floor-stack.tall .slab-tag{font-size:11.5px}
+.floor-slab:not(.has) .slab-tag{opacity:.55}
+.floor-slab.on .slab-tag{color:#0c2142;background:var(--accent);opacity:1}
+.floor-slab.on .slab-tag small{background:#0c214226;color:#0c2142}
+[data-theme="light"] .slab-top{background:linear-gradient(135deg,#f1f4f9,#dde3ec);border-color:#c3ccd9}
+[data-theme="light"] .floor-slab.has .slab-top{background:linear-gradient(135deg,#dfe8f8,#b9c9e6);border-color:#8ea4c8}
+[data-theme="light"] .floor-slab.on .slab-top{background:linear-gradient(135deg,#8db1ff,#2f5fd0)}
 [data-theme="light"] .slab-side{background:#8796ab}
 
-.floor-places{padding:6px 0 0;border-top:1px solid var(--line)}
-.floor-places h2{font-size:16px;padding:12px 16px 4px}
-.floor-places h2 small{font-size:12px;color:var(--muted);font-weight:600}
+/* 고른 층 안내 */
+.floor-places{padding:6px 0 4px;border-top:1px solid var(--line)}
+.floor-title{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px 4px}
+.floor-title h2{font-size:17px;padding:0}
+.floor-title h2 small{font-size:12px;color:var(--muted);font-weight:600;margin-left:4px}
+.floor-steps{display:flex;gap:6px}
+.floor-step{font-size:11.5px;font-weight:700;color:var(--accent);padding:5px 9px;border:1px solid var(--line);border-radius:999px;white-space:nowrap}
+.floor-sub{font-size:12px;color:var(--muted);font-weight:700;padding:10px 16px 6px;letter-spacing:-.01em}
+.guide-grid{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 6px;margin:0}
+.guide-card{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:14px;background:linear-gradient(160deg,#ffffff0d,#ffffff05);border:1px solid var(--line);min-width:0}
+.guide-card img{width:40px;height:40px;flex:none;filter:drop-shadow(0 3px 6px #0006)}
+.guide-card span{display:flex;flex-direction:column;min-width:0}
+.guide-card b{font-size:13px;font-weight:750;letter-spacing:-.03em;line-height:1.25;word-break:keep-all;overflow-wrap:anywhere}
+.guide-card small{font-size:10.5px;color:var(--muted);margin-top:2px}
+[data-theme="light"] .guide-card{background:#f6f8fb}
+[data-theme="light"] .guide-card img{filter:drop-shadow(0 2px 4px #0002)}
+.floor-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 24px 6px}
+.floor-empty img{width:150px;height:auto;opacity:.9}
+.floor-empty p{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:4px}
 .floor-unknown{display:block;margin:10px 16px 0;font-size:13px;color:var(--accent)}
-.building-note{font-size:11.5px;color:var(--muted);padding:12px 16px 24px;line-height:1.5}
-@media (prefers-reduced-motion:reduce){.slab-top{transition:none}}
+.building-note{font-size:11px;color:var(--muted);padding:14px 16px 24px;line-height:1.55}
+@media (prefers-reduced-motion:reduce){.slab-top,.slab-side{transition:none}}

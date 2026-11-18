@@ -144,9 +144,9 @@ test.describe('D. 검색·지도', () => {
     await expect(page.locator('#nav a[aria-current="page"]')).toHaveText('지도');
 
     await openApp(page, '#/building?name=' + encodeURIComponent('중앙도서관'));
-    await expect(page.locator('.building-head h1')).toHaveText('중앙도서관');
+    await expect(page.locator('.building-head h1')).toContainText('중앙도서관');
     const slabs = page.locator('.floor-slab');
-    await expect(slabs).toHaveCount(4);
+    await expect(slabs).toHaveCount(14);                                          // 1층~14층(OSM 층수)까지 빠짐없이
     await expect(slabs.last()).toHaveAttribute('aria-current', 'true');          // 처음엔 가장 아래층
     await page.locator('.floor-slab[aria-label^="3층"]').click();
     await expect(page.locator('.floor-slab[aria-label^="3층"]')).toHaveClass(/on/);
@@ -155,6 +155,19 @@ test.describe('D. 검색·지도', () => {
     await expect(page.locator('.floor-places')).toContainText('중앙도서관 3층 열람실');
     await page.locator('.floor-unknown').click();
     await expect(page.locator('.floor-places h2')).toContainText('층 정보 없음');
+  });
+
+  test('D13 건물 화면에 학교 공식 층별 안내가 아이콘 카드로 나온다', P1, async ({ page }) => {
+    await openApp(page, '#/building?name=' + encodeURIComponent('대학본부') + '&floor=6');
+    await expect(page.locator('.building-code')).toHaveText('E8');
+    await expect(page.locator('.floor-slab')).toHaveCount(8);
+    await expect(page.locator('.floor-places h2')).toContainText('6층');
+    const cards = page.locator('.guide-card');
+    await expect(cards).toHaveCount(5);
+    await expect(cards.filter({ hasText: '교무과' }).locator('img')).toHaveAttribute('src', 'assets/floor/office.webp');
+    await page.locator('.floor-step', { hasText: '7층' }).click();
+    await expect(page.locator('.floor-places h2')).toContainText('7층');
+    await expect(page.locator('.building-note')).toContainText('캠퍼스지도');
   });
 
   test('D12 확대하면(18단계) 묶음이 풀리고 장소 핀이 하나하나 나온다', P1, async ({ page }) => {

@@ -1171,7 +1171,7 @@ async function start() {
     }));
     byId = new Map(places.map(place => [place.id,place]));
     mappedPlaces = places.filter(place => place.latlng);
-    initBuildings({escape, route, top, iconLink, placeRow}, places);
+    await initBuildings({escape, route, top, iconLink, placeRow}, places);
     await initAccounts({escape, route, top, iconLink, postCover, getPlaces:() => places,
       isLiked:id => likes.has(id),
       likeButton:id => button(likes.has(id)?'heartFilled':'heart',likes.has(id)?'좋아요 취소':'좋아요','like',`data-id="${id}" aria-pressed="${likes.has(id)}"`)});
