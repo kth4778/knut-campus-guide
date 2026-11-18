@@ -1,0 +1,12 @@
+/* 폰 틀 안에서 여는 아래 창 (sheets.js) — 넓은 화면에서만 쓰인다 */
+.screen-backdrop{position:absolute;inset:0;z-index:640;background:#000;opacity:0;transition:opacity .2s}
+.screen-backdrop.on{opacity:.55}
+.screen dialog.in-screen{position:absolute;z-index:650;inset:auto 0 0 0;width:100%;max-width:none;max-height:86%;margin:0;
+  border:0;border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding-bottom:26px;overflow:auto;
+  box-shadow:0 -10px 30px #0006;animation:sheet-up .26s cubic-bezier(.2,.9,.3,1);transition:transform .2s}
+.screen dialog.in-screen.share-sheet{padding:8px 16px 30px}
+.screen dialog.in-screen.transit-sheet[open]{display:flex}
+@keyframes sheet-up{from{transform:translateY(100%)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){.screen dialog.in-screen{animation:none}}
+/* 폰 아래 홈 막대는 창 위에 남는다 (진짜 폰처럼) */
+.screen .gesture{position:relative;z-index:660}
