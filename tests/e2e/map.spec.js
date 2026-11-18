@@ -18,6 +18,9 @@ test.describe('D. 검색·지도', () => {
     await expect(page.locator('.leaflet-container')).toBeVisible();
     await expect(page.locator('.marker.selected')).toHaveCount(1);
     await expect(page.locator('#map-result')).toContainText('학생식당');
+    await expect(page.locator('.map-chips [data-category="맛집"]')).toHaveAttribute('aria-pressed', 'true'); // 같은 칩의 장소도 함께
+    await expect.poll(() => page.locator('.marker[data-cat="맛집"]').count()).toBeGreaterThan(20);
+    await expect(page.locator('.bmark')).toHaveCount(0);
   });
 
   test('D2 좌표 없는 항목(999번 버스)은 지도가 아니라 상세로 열린다', P0, async ({ page }) => {
@@ -34,7 +37,7 @@ test.describe('D. 검색·지도', () => {
       await expect(page.locator('.leaflet-container')).toHaveCount(0);
       await expect(page.locator('#map-canvas')).not.toHaveAttribute('style', /auth_fail/);
       await expect(page.locator('.marker.selected')).toHaveCount(1);
-      await expect.poll(() => page.locator('.bmark').count()).toBeGreaterThan(20);  // 처음엔 고른 장소 + 학교 건물만
+      await expect.poll(() => page.locator('.marker[data-cat="맛집"]').count()).toBeGreaterThan(20);  // 고른 장소와 같은 칩(맛집) 장소들
     });
   });
 
@@ -42,7 +45,7 @@ test.describe('D. 검색·지도', () => {
     await openApp(page, '#/map?focus=P089');
     await expect(page.locator('.leaflet-container')).toBeVisible();
     await expect(page.locator('.marker.selected')).toHaveCount(1);
-    await expect.poll(() => page.locator('.bmark').count()).toBeGreaterThan(20);
+    await expect.poll(() => page.locator('.marker[data-cat="맛집"]').count()).toBeGreaterThan(20);
   });
 
   test('D5 지도를 끌고 확대한 뒤에도 하단 탭·칩·헤더가 눌린다', P0, async ({ page }) => {

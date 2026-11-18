@@ -842,6 +842,10 @@ function updateMap(focus, category) {
   focusedMapPlace = focus?.latlng ? focus : null;
   const buttons = app.querySelectorAll('[data-action="map-category"]');
   buttons.forEach(button => button.setAttribute('aria-pressed', button.dataset.category===category));
+  // 고른 칩이 칩 줄 밖에 있으면 가운데로 끌어온다 (검색에서 「숨은장소」로 열렸을 때 등)
+  const pressed = [...buttons].find(button => button.dataset.category===category);
+  const row = pressed?.parentElement;
+  if (row) row.scrollLeft = Math.max(0, pressed.offsetLeft - row.offsetLeft - (row.clientWidth - pressed.offsetWidth) / 2);
   showMapResult(focusedMapPlace);
   if (category === '버스') liveStart();
   else liveStop();
@@ -944,8 +948,10 @@ function bindMap(focus, category) {
 function render() {
   const [path, params] = readRoute();
   const requested = params.get('category');
-  const category = categoryInfo.has(requested) || (path==='map' && mapOnlyCategories.includes(requested)) ? requested : '전체';
   const place = byId.get(params.get(path==='map'?'focus':'id'));
+  // 검색에서 장소를 골라 지도로 오면 그 장소의 칩(맛집 등)으로 열어 같은 종류 장소도 함께 보여 준다
+  const category = categoryInfo.has(requested) || (path==='map' && mapOnlyCategories.includes(requested)) ? requested
+    : path==='map' && place?.latlng && categoryInfo.has(place.category) ? place.category : '전체';
   if (path==='map' && currentView==='map' && map) {
     updateMap(place, category);
     return;
