@@ -1,0 +1,47 @@
+/* 교내 건물 (buildings.js) */
+
+/* 지도: 건물 핀(개수 + 이름) · 학교 밖 묶음(숫자) */
+.marker.building-pin{width:auto;min-width:30px;height:30px;padding:0 9px 0 4px;gap:6px;display:inline-flex;align-items:center;border-radius:15px;
+  background:#1f2937;color:#fff;border:2px solid #a6c8ff;box-shadow:0 3px 10px #0007;white-space:nowrap;transform:translate(-2px,-2px)}
+.marker.building-pin b{min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#a6c8ff;color:#0c2142;font-size:11px;display:grid;place-items:center}
+.building-name{font-size:11.5px;font-weight:750;letter-spacing:-.02em}
+.marker.cluster-pin{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4b5563,#1f2937);color:#fff;border:2px solid #ffffffcc;
+  box-shadow:0 0 0 5px #1f293744,0 3px 10px #0007;transform:translate(-4px,-4px)}
+.marker.cluster-pin b{font-size:12px}
+[data-theme="light"] .marker.building-pin{background:#fff;color:#0f1419;border-color:#2f5fd0}
+[data-theme="light"] .marker.building-pin b{background:#2f5fd0;color:#fff}
+
+/* 건물 화면 */
+.building-photo{margin:0}
+.building-photo img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.building-photo figcaption{font-size:10.5px;color:var(--muted);padding:5px 14px 0}
+.building-head{padding:14px 16px 4px}
+.building-head h1{font-size:22px;letter-spacing:-.04em}
+.building-head p{font-size:13px;color:var(--muted);margin-top:3px}
+
+/* 3D 층 쌓기 (아이소메트릭): 정사각 판을 60° 눕히고 45° 돌리면 마름모가 된다. 그 마름모를 층마다 위로 쌓고,
+   한 칸 아래에 어두운 마름모를 깔아 판의 두께처럼 보이게 한다. 누르는 자리는 층마다 겹치지 않는 한 줄(--h)이다 */
+.floor-stack{--h:46px;--plate:92px;position:relative;height:calc(var(--floors) * var(--h) + 56px);margin:14px 14px 10px}
+.floor-slab{position:absolute;left:0;right:0;bottom:calc(var(--i) * var(--h) + 26px);height:var(--h);display:block;z-index:calc(var(--i) + 1)}
+.slab-top,.slab-side{position:absolute;left:44px;bottom:calc(var(--h) / 2 - var(--plate) / 2);width:var(--plate);height:var(--plate);border-radius:16px;pointer-events:none;
+  transform:rotateX(60deg) rotateZ(-45deg);transition:transform .25s,background .25s,border-color .25s}
+.slab-side{background:#05080ccc;transform:translateY(7px) rotateX(60deg) rotateZ(-45deg)}
+.slab-top{background:linear-gradient(135deg,#3a4a62e6,#1f2a3acc);border:1.5px solid #6a7d99;color:transparent;overflow:hidden}
+.slab-top b,.slab-top small{display:none}
+/* 층 이름표는 기울이지 않고 마름모 오른쪽에 바로 세운다 */
+.floor-slab::after{content:attr(aria-label);position:absolute;left:196px;top:50%;transform:translateY(-50%);font-size:13px;font-weight:750;color:var(--muted);white-space:nowrap;
+  padding:3px 10px;border-radius:999px;transition:background .2s,color .2s}
+.floor-slab:hover .slab-top{border-color:#7e93b3}
+.floor-slab.on .slab-top{background:linear-gradient(135deg,#8db1ff,#3d6fe0);border-color:#d5e2ff;transform:translateY(-10px) rotateX(60deg) rotateZ(-45deg)}
+.floor-slab.on .slab-side{transform:translateY(-1px) rotateX(60deg) rotateZ(-45deg)}
+.floor-slab.on::after{color:#0c2142;background:var(--accent)}
+.floor-slab.on{z-index:50} /* 고른 층은 위층에 가리지 않게 맨 앞으로 */
+[data-theme="light"] .slab-top{background:linear-gradient(135deg,#eef2f8,#cdd6e3);border-color:#9aa8bd}
+[data-theme="light"] .slab-side{background:#8796ab}
+
+.floor-places{padding:6px 0 0;border-top:1px solid var(--line)}
+.floor-places h2{font-size:16px;padding:12px 16px 4px}
+.floor-places h2 small{font-size:12px;color:var(--muted);font-weight:600}
+.floor-unknown{display:block;margin:10px 16px 0;font-size:13px;color:var(--accent)}
+.building-note{font-size:11.5px;color:var(--muted);padding:12px 16px 24px;line-height:1.5}
+@media (prefers-reduced-motion:reduce){.slab-top{transition:none}}

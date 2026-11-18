@@ -5,6 +5,7 @@ import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
 import {initShare, openShare} from './share.js';
+import {initBuildings, buildingOf, buildingPinHtml, buildingPage} from './buildings.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
 
 const app = document.getElementById('app');
@@ -616,9 +617,6 @@ function addNaverMarker(group, place, selected, name) {
 
 // 장소가 아닌 점(정류장 등)을 지도에 올려요.
 function addPoint(latlng, html, title, onClick, zIndex = 500) {
-  // 「전체」에선 장소 핀과 교통 핀이 함께 나온다. 교통 핀이 장소 핀을 덮으면 그 장소를 못 누르므로
-  // 교통 핀을 장소 핀 아래에 깐다 (정류장을 다 보려면 「버스」·「고속버스」 칩)
-  if (mapCategory === '전체') zIndex -= 20000;
   if (usingNaver) {
     const {maps} = window.naver;
     const marker = new maps.Marker({map, position:new maps.LatLng(...latlng), title, zIndex, icon:{content:html, anchor:new maps.Point(13,13)}});
@@ -639,12 +637,13 @@ function paintTransit() {
     }
     return;
   }
-  if (mapCategory === '전체' || mapCategory === '고속버스') {
+  // 버스 정류장·고속버스 핀은 그 칩을 골랐을 때만 (「전체」가 난잡해지지 않게)
+  if (mapCategory === '고속버스') {
     for (const terminal of EXP_TERMINALS) {
       addPoint(terminal.latlng, `<span class="marker transit-marker exp">${icon('bus')}</span>`, terminal.name, () => openExpressSheet(terminal), 900);
     }
   }
-  if (mapCategory !== '전체' && mapCategory !== '버스') return;
+  if (mapCategory !== '버스') return;
   for (const stop of BUS_STOPS) {
     addPoint(stop.latlng, `<span class="marker transit-marker bus">${icon('bus')}</span>`, stop.name, () => openBusSheet(stop), 300);
   }
@@ -727,13 +726,75 @@ function showLiveRoute(no) {
   else location.hash = route('map', {category:'버스'});
 }
 
+// 지도 단계별로 핀을 정리한다
+// - 18단계 미만: 교내 장소는 건물 핀 하나로 묶는다(건물 이름 + 개수)
+// - 그래도 화면에서 겹치는 핀(건물·학교 밖 장소)은 숫자 하나로 합치고, 누르면 그 자리로 확대
+// - 18단계 이상: 장소 핀이 하나하나 펼쳐진다
+const DETAIL_ZOOM = 18;
+const CELL = 58; // 이 정도(px) 안에 모인 핀은 하나로 합친다
+const mapZoom = () => map ? map.getZoom() : 15;
+
+function toPixel(latlng) {
+  if (usingNaver) {
+    const point = map.getProjection().fromCoordToOffset(new window.naver.maps.LatLng(...latlng));
+    return [point.x, point.y];
+  }
+  const point = map.project(latlng, map.getZoom());
+  return [point.x, point.y];
+}
+
+function zoomInto(latlng, zoom) {
+  if (usingNaver) map.morph(new window.naver.maps.LatLng(...latlng), zoom);
+  else map.setView(latlng, zoom);
+}
+
+function paintOverview(shown, zoom) {
+  // 1) 교내 장소 → 건물마다 하나
+  const items = [], byBuilding = new Map();
+  for (const place of shown) {
+    if (place === focusedMapPlace) continue;
+    const building = buildingOf(place);
+    if (!building) { items.push({latlng:place.latlng, count:1, place}); continue; }
+    if (!byBuilding.has(building)) {
+      const item = {latlng:building.latlng, count:0, building};
+      byBuilding.set(building, item);
+      items.push(item);
+    }
+    byBuilding.get(building).count++;
+  }
+  // 2) 화면에서 가까운 것끼리 한 칸에 모은다
+  const cells = new Map();
+  for (const item of items) {
+    const [x, y] = toPixel(item.latlng);
+    const key = `${Math.floor(x / CELL)},${Math.floor(y / CELL)}`;
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(item);
+  }
+  for (const list of cells.values()) {
+    if (list.length === 1) {
+      const [item] = list;
+      if (item.building) addPoint(item.building.latlng, buildingPinHtml(item.building, item.count, zoom >= 16), item.building.name,
+        () => { location.hash = route('building', {name:item.building.name}); }, 200);
+      else (usingNaver ? addNaverMarker : addLeafletMarker)([item.place], item.place, false, item.place.name);
+      continue;
+    }
+    const total = list.reduce((sum, item) => sum + item.count, 0);
+    const center = [0, 1].map(k => list.reduce((sum, item) => sum + item.latlng[k] * item.count, 0) / total);
+    addPoint(center, `<span class="marker cluster-pin"><b>${total}</b></span>`, `장소 ${total}곳`,
+      () => zoomInto(center, Math.min(DETAIL_ZOOM - 1, zoom + 2)), 100);
+  }
+  if (focusedMapPlace) (usingNaver ? addNaverMarker : addLeafletMarker)([focusedMapPlace], focusedMapPlace, true, focusedMapPlace.name);
+}
+
 function paintMarkers() {
   clearMarkers();
   paintTransit();
   if (mapOnlyCategories.includes(mapCategory) && !focusedMapPlace) return;
+  const shown = mappedPlaces.filter(place => mapCategory === '전체' || place.category === mapCategory || place === focusedMapPlace);
+  const zoom = mapZoom();
+  if (zoom < DETAIL_ZOOM) { paintOverview(shown, zoom); return; }
   const groups = new Map();
-  for (const place of mappedPlaces) {
-    if (mapCategory !== '전체' && place.category!==mapCategory && place!==focusedMapPlace) continue;
+  for (const place of shown) {
     const key = place.latlng.map(num => num.toFixed(5)).join(',');
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(place);
@@ -761,7 +822,7 @@ function updateMap(focus, category) {
   const city = !focusedMapPlace && category === '교통대 제휴'; // 제휴 매장은 시내까지 퍼져 있어요
   if (city && !mapPartners) loadMapPartners().then(() => { if (mapCategory === '교통대 제휴') { showMapResult(null); if (map) paintMarkers(); } });
   const center = focusedMapPlace?.latlng ?? (wide ? [36.9725, 127.8925] : city ? [36.988, 127.905] : campus);
-  const zoom = focusedMapPlace ? 17 : wide ? 13 : city ? 12 : 15;
+  const zoom = focusedMapPlace ? DETAIL_ZOOM : wide ? 13 : city ? 12 : 15;
   if (usingNaver) {
     map.setCenter(new window.naver.maps.LatLng(...center));
     map.setZoom(zoom);
@@ -819,6 +880,7 @@ function startNaver() {
   mapMarkers = [];
   naverInfo = new maps.InfoWindow({borderColor:'#c9d2e0', anchorSize:new maps.Size(10,8), pixelOffset:new maps.Point(0,-6)});
   maps.Event.addListener(map, 'click', () => naverInfo.close());
+  maps.Event.addListener(map, 'zoom_changed', () => { if (map) paintMarkers(); }); // 확대·축소하면 묶음을 다시 계산
 }
 
 function startLeaflet() {
@@ -836,6 +898,7 @@ function startLeaflet() {
   }).addTo(map);
   tiles.on('tileerror', () => toast('배경 지도 연결이 지연되고 있어요.'));
   mapMarkers = L.layerGroup().addTo(map);
+  map.on('zoomend', () => { if (map) paintMarkers(); }); // 확대·축소하면 묶음을 다시 계산
 }
 
 function bindMap(focus, category) {
@@ -884,8 +947,9 @@ function render() {
   else if (path === 'place') app.innerHTML = placePage(place);
   else if (path === 'account') app.innerHTML = accountPage(params.get('id'), params);
   else if (path === 'partner') app.innerHTML = partnerPage(params.get('id'));
+  else if (path === 'building') app.innerHTML = buildingPage(params.get('name'), params);
   else app.innerHTML = home(category);
-  renderNav(['place','account','partner'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
+  renderNav(path === 'building' ? 'map' : ['place','account','partner'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
 }
 
 function toast(message) {
@@ -1107,6 +1171,7 @@ async function start() {
     }));
     byId = new Map(places.map(place => [place.id,place]));
     mappedPlaces = places.filter(place => place.latlng);
+    initBuildings({escape, route, top, iconLink, placeRow}, places);
     await initAccounts({escape, route, top, iconLink, postCover, getPlaces:() => places,
       isLiked:id => likes.has(id),
       likeButton:id => button(likes.has(id)?'heartFilled':'heart',likes.has(id)?'좋아요 취소':'좋아요','like',`data-id="${id}" aria-pressed="${likes.has(id)}"`)});
