@@ -76,6 +76,11 @@ npm run test:e2e       # 전체
 
 main 에 push 하면 GitHub Actions 가 테스트를 돌리고, **통과해야만 배포**돼요.
 
+## 건물 원자료 (수집만)
+
+학교 공식 층별 안내(37개 건물·134개 부서·시설)와 OpenStreetMap 건물 외곽선·층수를 모아 둔 곳: [data-sources/buildings/](data-sources/buildings/README.md).
+다시 모으기: `python3 scripts/collect_buildings.py`. 아직 앱 화면에는 쓰지 않아요.
+
 ## 누팁스 데이터 합치기
 
 `dist/data/places.json`은 누팁스(KNUTIPS) 앱 데이터를 합친 것이에요. 누팁스 분류(`kCat`)로 계정을 나눠요.
