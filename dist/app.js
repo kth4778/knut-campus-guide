@@ -616,6 +616,9 @@ function addNaverMarker(group, place, selected, name) {
 
 // 장소가 아닌 점(정류장 등)을 지도에 올려요.
 function addPoint(latlng, html, title, onClick, zIndex = 500) {
+  // 「전체」에선 장소 핀과 교통 핀이 함께 나온다. 교통 핀이 장소 핀을 덮으면 그 장소를 못 누르므로
+  // 교통 핀을 장소 핀 아래에 깐다 (정류장을 다 보려면 「버스」·「고속버스」 칩)
+  if (mapCategory === '전체') zIndex -= 20000;
   if (usingNaver) {
     const {maps} = window.naver;
     const marker = new maps.Marker({map, position:new maps.LatLng(...latlng), title, zIndex, icon:{content:html, anchor:new maps.Point(13,13)}});
