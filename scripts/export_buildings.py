@@ -3,6 +3,7 @@
 사용: python3 scripts/export_buildings.py   (collect_buildings.py 를 다시 돌린 뒤에)
 결과: dist/data/buildings.json
 - names : 앱 장소의 location.building 과 맞춰 볼 이름들 (공식 이름을 / 로 나눈 것 + 앱에서 다르게 부르는 이름)
+- latlng: 건물 가운데 좌표 (OSM 외곽선의 가운데). 없으면 null — 앱 장소가 없는 건물도 이 자리에 핀을 올린다
 - levels: 지상 층수 (OSM). 없으면 null
 - floors: {"3": ["교직원식당", ...]} — 「1~9」처럼 여러 층에 걸친 안내는 층마다 넣는다
 """
@@ -40,6 +41,7 @@ def main():
             'code': b['code'],
             'name': b['name'],
             'names': [n.strip() for n in b['name'].split('/')] + ALIASES.get(b['code'], []),
+            'latlng': osm.get('center'),
             'levels': int(levels) if levels and str(levels).isdigit() else None,
             'floors': floors_of(b['floors']),
         })

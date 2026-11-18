@@ -68,14 +68,24 @@ export async function initBuildings(tools, places) {
     building.photo = building.places.find(p => p.cover?.asset)?.cover || null;
     building.official = official.find(b => b.names.some(n => squash(n) === squash(building.name))) || null;
   }
+  // 앱 장소가 하나도 없는 공식 건물도 층별 안내를 볼 수 있게 OSM 가운데 좌표에 건물로 올린다
+  const linked = new Set([...buildings.values()].map(b => b.official));
+  for (const b of official) {
+    if (linked.has(b) || !b.latlng) continue;
+    const name = b.name.replaceAll('/', '·');
+    buildings.set(name, {name, places:[], latlng:b.latlng, floors:new Map(), photo:null, official:b});
+  }
 }
 
 export const buildingOf = place => buildings.get(place.location?.building?.trim() || '') || null;
 export const allBuildings = () => [...buildings.values()];
+// 앱 장소 없이 학교 안내만 있는 건물 (지도 「전체」에서 따로 핀을 올린다)
+export const guideOnlyBuildings = () => [...buildings.values()].filter(b => !b.places.length);
+export const guideCount = building => Object.values(building.official?.floors || {}).reduce((sum, list) => sum + list.length, 0);
 
 // 지도에 올릴 건물 핀 모양 (개수 + 이름)
 export function buildingPinHtml(building, count, showName) {
-  return `<span class="marker building-pin" title="${ctx.escape(building.name)}"><b>${count}</b>${showName ? `<span class="building-name">${ctx.escape(building.name)}</span>` : ''}</span>`;
+  return `<span class="marker building-pin${building.places.length ? '' : ' guide-only'}" title=""${ctx.escape(building.name)}"><b>${count}</b>${showName ? `<span class="building-name">${ctx.escape(building.name)}</span>` : ''}</span>`;
 }
 
 // ---------- 건물 화면 ----------
@@ -128,7 +138,7 @@ export function buildingPage(name, params) {
   const firstFloor = [...range].reverse().find(n => n > 0 && hasStuff(n)) ?? [...range].reverse().find(hasStuff) ?? range[range.length - 1] ?? null;
   const picked = params.has('floor') ? (params.get('floor') === 'none' ? null : Number(params.get('floor'))) : firstFloor;
   const official = building.official;
-  const guideTotal = official ? Object.values(official.floors).reduce((sum, list) => sum + list.length, 0) : 0;
+  const guideTotal = guideCount(building);
   const photo = building.photo
     ? `<figure class="building-photo"><img src="assets/${escape(building.photo.asset)}" alt="${escape(building.name)} 사진">
         <figcaption>${escape(building.photo.note || '')} · ${escape(building.photo.author || '')} / Wikimedia Commons · CC BY-SA 4.0</figcaption></figure>`
@@ -143,8 +153,8 @@ export function buildingPage(name, params) {
           <span class="slab-tag"><b>${escape(floorLabel(floor))}</b>${count ? `<small>${count}</small>` : ''}</span></a>`;
       }).join('')}
     </div>` : '';
-  const facts = [range[0] > 0 && `지상 ${range[0]}층`, range.at(-1) < 0 && `지하 ${-range.at(-1)}층`, guideTotal && `학교 안내 ${guideTotal}곳`, `누팁스 장소 ${building.places.length}곳`].filter(Boolean).join(' · ');
-  return `${top(building.name, iconLink('back', '지도로', route('map')), iconLink('pin', '지도에서 보기', route('map', {focus:building.places[0].id})))}
+  const facts = [range[0] > 0 && `지상 ${range[0]}층`, range.at(-1) < 0 && `지하 ${-range.at(-1)}층`, guideTotal && `학교 안내 ${guideTotal}곳`, building.places.length && `누팁스 장소 ${building.places.length}곳`].filter(Boolean).join(' · ');
+  return `${top(building.name, iconLink('back', '지도로', route('map')), building.places.length ? iconLink('pin', '지도에서 보기', route('map', {focus:building.places[0].id})) : '')}
     <main class="scroll building-page">
       ${photo}
       <section class="building-head">

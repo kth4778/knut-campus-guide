@@ -126,7 +126,7 @@ test.describe('D. 검색·지도', () => {
     // 교내 장소(중앙도서관 3층 열람실)로 확대된 지도를 열고, 축소 버튼 한 번(18→17단계)이면 건물 핀이 나온다
     await openApp(page, '#/map?focus=P150');
     await expect(page.locator('.marker.selected')).toHaveCount(1);
-    await expect(page.locator('.building-pin')).toHaveCount(0);   // 18단계까지 확대가 끝났다
+    await expect(page.locator('.building-pin:not(.guide-only)')).toHaveCount(0);   // 18단계까지 확대가 끝났다
     await page.locator('.leaflet-control-zoom-out').click();
     await expect(page.locator('.building-pin').first()).toBeAttached();
     await page.waitForTimeout(400); // 축소 움직임이 끝나기를 기다린다
@@ -170,11 +170,23 @@ test.describe('D. 검색·지도', () => {
     await expect(page.locator('.building-note')).toContainText('캠퍼스지도');
   });
 
+  test('D14 앱 장소가 없는 공식 건물도 지도 「전체」에 핀이 있고 건물 화면이 열린다', P1, async ({ page }) => {
+    await openApp(page, '#/map');
+    await expect.poll(() => page.locator('.building-pin.guide-only').count()).toBeGreaterThan(0);
+    await page.locator('[data-action="map-category"][data-category="버스"]').click();
+    await expect(page.locator('.building-pin.guide-only')).toHaveCount(0);       // 다른 칩에서는 숨긴다
+
+    await openApp(page, '#/building?name=' + encodeURIComponent('시스템관·국원문화관'));
+    await expect(page.locator('.building-code')).toHaveText('E4');
+    await expect(page.locator('.floor-slab')).toHaveCount(6);
+    await expect(page.locator('.guide-card').first()).toContainText('국원문화관');  // 처음엔 안내가 있는 가장 아래층(1층)
+  });
+
   test('D12 확대하면(18단계) 묶음이 풀리고 장소 핀이 하나하나 나온다', P1, async ({ page }) => {
     await openApp(page, '#/map?focus=P089');
     await expect(page.locator('.marker.selected')).toHaveCount(1);
-    await expect(page.locator('.building-pin')).toHaveCount(0);
-    expect(await page.locator('.marker').count()).toBeGreaterThan(100);
+    await expect(page.locator('.building-pin:not(.guide-only)')).toHaveCount(0);   // 장소 없는 공식 건물 핀만 남는다
+    await expect.poll(() => page.locator('.marker').count()).toBeGreaterThan(100);
   });
 
   test('D8 컴퓨터에서 칩 줄을 휠·끌기로 넘기고, 끈 뒤에는 칩이 눌리지 않는다', P1, async ({ page }) => {

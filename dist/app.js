@@ -5,7 +5,7 @@ import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
 import {initShare, openShare} from './share.js';
-import {initBuildings, buildingOf, buildingPinHtml, buildingPage} from './buildings.js';
+import {initBuildings, buildingOf, buildingPinHtml, buildingPage, guideOnlyBuildings, guideCount} from './buildings.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
 
 const app = document.getElementById('app');
@@ -762,6 +762,8 @@ function paintOverview(shown, zoom) {
     }
     byBuilding.get(building).count++;
   }
+  // 앱 장소가 없는 공식 건물: 「전체」일 때만, 숫자는 학교 안내 수
+  if (mapCategory === '전체') for (const building of guideOnlyBuildings()) items.push({latlng:building.latlng, count:guideCount(building), building});
   // 2) 화면에서 가까운 것끼리 한 칸에 모은다
   const cells = new Map();
   for (const item of items) {
@@ -793,6 +795,8 @@ function paintMarkers() {
   const shown = mappedPlaces.filter(place => mapCategory === '전체' || place.category === mapCategory || place === focusedMapPlace);
   const zoom = mapZoom();
   if (zoom < DETAIL_ZOOM) { paintOverview(shown, zoom); return; }
+  if (mapCategory === '전체') for (const building of guideOnlyBuildings()) addPoint(building.latlng, buildingPinHtml(building, guideCount(building), true), building.name,
+    () => { location.hash = route('building', {name:building.name}); }, 200);
   const groups = new Map();
   for (const place of shown) {
     const key = place.latlng.map(num => num.toFixed(5)).join(',');

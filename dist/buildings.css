@@ -8,6 +8,10 @@
 .marker.cluster-pin{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4b5563,#1f2937);color:#fff;border:2px solid #ffffffcc;
   box-shadow:0 0 0 5px #1f293744,0 3px 10px #0007;transform:translate(-4px,-4px)}
 .marker.cluster-pin b{font-size:12px}
+.marker.building-pin.guide-only{background:#1f2937e6;border-style:dashed;border-color:#a6c8ffaa}
+.marker.building-pin.guide-only b{background:#a6c8ff33;color:#a6c8ff}
+[data-theme="light"] .marker.building-pin.guide-only{background:#ffffffe6;border-color:#2f5fd0aa}
+[data-theme="light"] .marker.building-pin.guide-only b{background:#2f5fd022;color:#2f5fd0}
 [data-theme="light"] .marker.building-pin{background:#fff;color:#0f1419;border-color:#2f5fd0}
 [data-theme="light"] .marker.building-pin b{background:#2f5fd0;color:#fff}
 
