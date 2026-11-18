@@ -1,0 +1,16 @@
+/* 공유 창 (share.js) — 갤럭시 「공유」처럼 아래에서 올라온다. 자리·배경은 .comment-sheet 를 그대로 쓴다 */
+.share-sheet{padding:8px 16px 14px;max-height:none}
+.share-sheet[open]{animation:share-up .22s ease-out}
+@keyframes share-up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.share-grip{display:block;width:38px;height:4px;border-radius:2px;background:#4a525c;margin:2px auto 10px}
+.share-sheet h2{font-size:17px;font-weight:800;text-align:center;margin-bottom:12px}
+.share-preview{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:14px;background:var(--surface);margin-bottom:16px}
+.share-preview img{width:44px;height:44px;border-radius:12px;flex:none}
+.share-preview span{display:grid;gap:2px;min-width:0}
+.share-preview strong{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.share-preview small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.share-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px 6px;margin-bottom:16px}
+.share-grid button{display:grid;justify-items:center;gap:7px;font-size:12px;color:var(--text)}
+.share-grid img{width:52px;height:52px;border-radius:15px;transition:transform .12s}
+.share-grid button:active img{transform:scale(.9)}
+.share-cancel{width:100%;padding:12px;border-radius:12px;background:var(--surface);font-weight:700;font-size:14px}

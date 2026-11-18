@@ -112,7 +112,6 @@ img{display:block;width:100%;object-fit:cover}
   .nav{padding-bottom:max(2px,env(safe-area-inset-bottom));height:calc(54px + env(safe-area-inset-bottom))}
 }
 
-.native-icon{display:inline-block;background:currentColor;mask:var(--glyph) center / contain no-repeat}
 .account-avatar{width:33px;height:33px;flex:none;border-radius:50%;background:#252d3e}
 .feed-post{padding-bottom:12px;border-bottom:1px solid var(--line)}
 .post-header{display:flex;align-items:center;min-height:55px;gap:9px;padding:7px 8px 7px 12px}
@@ -246,10 +245,12 @@ img{display:block;width:100%;object-fit:cover}
 .post-actions{gap:0;padding:4px 4px 0}
 .post-actions .ib{min-width:42px;min-height:42px;border-radius:50%}
 .post-actions .ib:hover{background:none;opacity:.7}
-.post-actions .icon{width:25px;height:25px}
-/* 하트 그림(heart.png)은 여백이 커서 옆 아이콘보다 작아 보인다 → 크기를 맞춘다 */
-.post-actions .ib[data-action="like"] .icon{transform:scale(1.25)}
-.post-actions .ib[data-action="like"]:active .icon{transform:scale(1.05)}
+.post-actions .icon{width:26px;height:26px}
+/* 다섯 아이콘 모두 같은 크기(26px)·굵기(1.9) */
+.post-actions .icon{stroke-width:1.9}
+.post-actions .ib[data-action="like"]:active .icon{transform:scale(.85)}
+.post-actions .ib[data-action="like"][aria-pressed="true"] .icon{animation:like-pop .3s ease-out}
+@keyframes like-pop{0%{transform:scale(.7)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
 .post-actions .ib[data-action="like"][aria-pressed="true"]{color:#ff3040}
 
 /* 추천 수 · 캡션 · 댓글 · 날짜 */

@@ -4,6 +4,7 @@ import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
 import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
+import {initShare, openShare} from './share.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
 
 const app = document.getElementById('app');
@@ -56,10 +57,12 @@ const paths = {
   bus: '<rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3m8-3v3M8 14.5h.01M16 14.5h.01"/>',
 };
 
-const nativeIcons = {plus:'plus', comment:'comment', heart:'heart', heartFilled:'heartFilled', bookmark:'bookmark'};
-const icon = (name, filled = false) => nativeIcons[name] && !filled
-  ? `<span class="icon native-icon" aria-hidden="true" style="--glyph:url('assets/${nativeIcons[name]}.png')"></span>`
-  : `<svg class="icon" viewBox="0 0 24 24" fill="${filled?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
+// 하트·말풍선·+ 도 그림(png) 대신 다른 아이콘과 같은 굵기의 선으로 그린다 (크기·굵기가 맞도록)
+paths.heart = '<path d="M12 20.3s-7.6-4.5-9.3-9.3C1.5 7.5 3.7 3.9 7.3 3.9c2 0 3.6 1.1 4.7 2.7 1.1-1.6 2.7-2.7 4.7-2.7 3.6 0 5.8 3.6 4.6 7.1-1.7 4.8-9.3 9.3-9.3 9.3Z"/>';
+paths.heartFilled = paths.heart;
+paths.comment = '<path d="M20.6 16.4A9 9 0 1 0 17.2 20l4.3 1.4z"/>';
+paths.plus = '<rect x="3" y="3" width="18" height="18" rx="5.5"/><path d="M12 7.8v8.4M7.8 12h8.4"/>';
+const icon = (name, filled = false) => (filled = filled || name === 'heartFilled', `<svg class="icon" viewBox="0 0 24 24" fill="${filled?'currentColor':'none'}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`);
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[char]));
@@ -228,7 +231,7 @@ function postActions(post) {
   return `<div class="post-actions">
     ${button(on?'heartFilled':'heart',on?'좋아요 취소':'좋아요','like',`data-id="${post.id}" aria-pressed="${on}"`)}
     ${button('comment','댓글','comments',`data-id="${post.id}"`)}
-    ${post.local ? '' : button('send','게시물 링크 복사','copy',`data-id="${post.id}"`)}
+    ${post.local ? '' : button('send','공유하기','copy',`data-id="${post.id}"`)}
     ${post.latlng ? iconLink('pin','지도에서 위치 보기',route('map',{focus:post.id})) : ''}
     ${saveButton(post)}
   </div>`;
@@ -936,9 +939,10 @@ app.addEventListener('click', event => {
     case 'close-comments':
     case 'close-sheet': control.closest('dialog').close(); break;
     case 'copy': {
-      const url = new URL(route('place',{id:control.dataset.id}),location.href);
-      if (!navigator.clipboard) { toast('링크를 복사하지 못했어요.'); break; }
-      navigator.clipboard.writeText(url.href).then(()=>toast('링크를 복사했어요.')).catch(()=>toast('링크를 복사하지 못했어요.'));
+      // 갤럭시 「공유」처럼 카카오톡·메일·메시지·링크 복사… 가 있는 창을 띄운다 (share.js)
+      const post = findPost(control.dataset.id);
+      const url = new URL(route('place',{id:control.dataset.id}),location.href).href;
+      openShare(app, {title:post ? `${post.name} · KNUTIPS` : 'KNUTIPS', text:post?.reasons?.[0] ?? '', url});
       break;
     }
     case 'clear-search':
@@ -1086,6 +1090,7 @@ function loadConfig() {
 initMoa(app, {toast});
 initMoaChat(app, {fundById, toast});
 initChat(app, {toast, getPlaces:() => places});
+initShare({toast});
 
 async function start() {
   try {
