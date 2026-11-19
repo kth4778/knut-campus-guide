@@ -186,4 +186,24 @@ test.describe('H. 챗봇 누티 (가짜 AI)', () => {
     await page.locator('.chat-page .sticker-panel [data-sticker]').first().click();
     await expect(page.locator('.chat-msg.me.sticker-msg')).toHaveCount(1);
   });
+
+  test('H4 「혼밥」이라고 하면 밥친구 카드가 뜨고, AI가 고른 3명에 이유·식당·신청 버튼이 붙는다', P1, async ({ page }) => {
+    await openApp(page, '#/chat');
+    await page.route(/\/api\/chat/, route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ message: { content: JSON.stringify({ picks: ['A', 'B', 'C'].map(id => ({ id, reason: `테스트 이유 ${id}` })) }) }, done: true }),
+    }));
+    await page.locator('#chat-form input[name="q"]').fill('혼밥 싫어');
+    await page.locator('#chat-form input[name="q"]').press('Enter');
+    await expect(page.locator('.match-form')).toHaveCount(1);
+    const request = page.waitForRequest(r => r.url().includes('/api/chat'));
+    await page.locator('.match-form button[type="submit"]').click();
+    const body = JSON.parse((await request).postData());
+    expect(body.format.properties.picks).toBeTruthy();
+    expect(body.messages[0].content).toContain('혼밥');
+    await expect(page.locator('.mm-buddy')).toHaveCount(3);
+    await expect(page.locator('.mm-reason').first()).toContainText('테스트 이유 A');
+    await page.locator('.mm-apply').first().click();
+    await expect(page.locator('.mm-apply').first()).toHaveText('신청 보냄');
+  });
 });

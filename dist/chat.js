@@ -3,6 +3,7 @@
 // 대화 기록과 연결 설정은 이 브라우저(localStorage)에만 저장돼요.
 
 import {stickerImg, stickerButton, stickerPanel, stickerLabel, stickerSrc, isSticker} from './stickers.js';
+import {MATCH_RE, matchFormCard, matchResultCard, readProfile, profileSummary, runMatch, buddyName} from './meal-match.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = value => String(value ?? '').normalize('NFKC').toLowerCase();
@@ -10,6 +11,7 @@ const LOG = 'knut-campus-guide:chat';
 const CFG = 'knut-campus-guide:chat-config';
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
+const APPLIED = 'knut-campus-guide:meal-applied';
 
 const DEFAULT = {endpoint:'http://localhost:11434', model:'exaone3.5:2.4b'};
 const config = () => ({...DEFAULT, ...read(CFG, {})});
@@ -26,7 +28,7 @@ export function chatPage(header) {
     <main class="chat-page">
       <div class="chat-log" id="chat-log" aria-live="polite">${intro() + messages.map(bubble).join('')}</div>
       ${stickerPanel()}
-      <div class="chat-suggest">${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <div class="chat-suggest"><button type="button" class="chip chat-match-chip" data-chat="match">🍚 혼밥 친구 찾기</button>${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
       <form class="chat-form" id="chat-form">
         ${stickerButton()}
         <input name="q" aria-label="누티에게 질문" placeholder="학교생활 무엇이든 물어보세요" autocomplete="off" maxlength="300" required>
@@ -49,7 +51,7 @@ function intro() {
   const lines = [
     {sticker:'hello'},
     {text:`안녕하세요! 저는 한국교통대학교 친구 누티(Nuti)예요 🍎`},
-    {text:`이런 걸 도와드릴 수 있어요\n🍚 학교 앞 맛집·카페 추천\n🖨️ 프린트·복사 같은 생활꿀팁\n📚 공부하기 좋은 곳, 쉬기 좋은 곳\n🚌 버스 정류장·교통 정보\n${count ? `충주캠퍼스 장소·꿀팁 ${count}개를 보고 답해 드려요.` : ''}`},
+    {text:`이런 걸 도와드릴 수 있어요\n🍚 학교 앞 맛집·카페 추천\n🖨️ 프린트·복사 같은 생활꿀팁\n📚 공부하기 좋은 곳, 쉬기 좋은 곳\n🚌 버스 정류장·교통 정보\n🤝 혼밥러를 위한 밥친구 매칭\n${count ? `충주캠퍼스 장소·꿀팁 ${count}개를 보고 답해 드려요.` : ''}`},
     {sticker:'together'},
     {text:'궁금한 걸 물어보거나, 아래 이모티콘 버튼으로 저한테 이모티콘을 보내 보세요!'},
   ];
@@ -57,6 +59,8 @@ function intro() {
 }
 
 function bubble(m) {
+  if (m.kind === 'match-form') return matchFormCard();
+  if (m.kind === 'match-result') return matchResultCard(m, read(APPLIED, []));
   const bot = m.role !== 'user';
   if (m.sticker) return `<div class="chat-msg ${bot ? 'bot' : 'me'} sticker-msg">${bot ? NUTI_FACE : ''}${stickerImg(m.sticker)}</div>`;
   const refs = (m.refs ?? []).map(r => `<a class="chip" href="#/place?id=${esc(r.id)}">${esc(r.name)}</a>`).join('');
@@ -147,10 +151,56 @@ function paint(root) {
   if (send) send.disabled = busy;
 }
 
+// 혼밥 친구 매칭 (meal-match.js): 취향 카드를 띄우고, 고르면 LLM이 밥친구를 골라요
+function openMatch(root, said) {
+  if (busy) return;
+  messages = messages.filter(m => m.kind !== 'match-form');
+  if (said) messages.push({role:'user', content:said});
+  messages.push({role:'assistant', kind:'match-form', content:'(혼밥 친구 찾기 카드)'});
+  write(LOG, messages);
+  paint(root);
+  root.querySelector('.match-form')?.scrollIntoView({block:'start'});
+}
+
+async function findBuddies(root, form) {
+  if (busy) return;
+  const {profile, error} = readProfile(form);
+  if (error) { form.querySelector('.mm-error').textContent = error; return; }
+  messages = messages.filter(m => m.kind !== 'match-form');
+  messages.push({role:'user', content:profileSummary(profile)});
+  const result = {role:'assistant', kind:'match-result', content:'누티가 밥친구를 찾는 중…', picks:[]};
+  messages.push(result);
+  busy = true;
+  paint(root);
+  try {
+    Object.assign(result, await runMatch(profile, {...config(), places:getPlaces()}));
+  } finally {
+    busy = false;
+    messages = messages.slice(-40);
+    write(LOG, messages);
+    paint(root);
+  }
+}
+
+function applyBuddy(root, id) {
+  const applied = read(APPLIED, []);
+  if (!id || applied.includes(id)) return;
+  write(APPLIED, [...applied, id]);
+  paint(root);
+  setTimeout(() => {
+    messages.push({role:'assistant', sticker:'together', content:'(이모티콘: 같이하자!)'});
+    messages.push({role:'assistant', content:`${buddyName(id)}님에게 같이 먹자고 신청했어요! 수락하면 만날 시간과 장소를 정하면 돼요. (지금은 데모라 실제 학우에게 전달되지는 않아요)`});
+    messages = messages.slice(-40);
+    write(LOG, messages);
+    paint(root);
+  }, 600);
+}
+
 async function ask(root, question) {
   if (busy || !question.trim()) return;
+  if (MATCH_RE.test(question)) { openMatch(root, question.trim()); return; }
   const found = findPlaces(question);
-  const history = messages.filter(m => !m.error && !m.sticker).slice(-6).map(({role, content}) => ({role, content}));
+  const history = messages.filter(m => !m.error && !m.sticker && !m.kind).slice(-6).map(({role, content}) => ({role, content}));
   messages.push({role:'user', content:question.trim()});
   const answer = {role:'assistant', content:'생각하는 중…', refs:found.slice(0, 3).map(p => ({id:p.id, name:p.name}))};
   messages.push(answer);
@@ -199,6 +249,7 @@ async function ask(root, question) {
 export function initChat(root, options) {
   getPlaces = options.getPlaces;
   root.addEventListener('submit', event => {
+    if (event.target.matches('.match-form')) { event.preventDefault(); findBuddies(root, event.target); return; }
     if (event.target.id !== 'chat-form') return;
     event.preventDefault();
     const input = event.target.elements.q;
@@ -212,7 +263,9 @@ export function initChat(root, options) {
     const control = event.target.closest('[data-chat]');
     if (!control) return;
     if (control.dataset.chat === 'ask') ask(root, control.dataset.q);
-    if (control.dataset.chat === 'clear') { messages = []; write(LOG, messages); paint(root); options.toast('대화를 지웠어요.'); }
+    if (control.dataset.chat === 'match') openMatch(root);
+    if (control.dataset.chat === 'match-apply') applyBuddy(root, control.dataset.buddy);
+    if (control.dataset.chat === 'clear') { messages = []; write(LOG, messages); write(APPLIED, []); paint(root); options.toast('대화를 지웠어요.'); }
     if (control.dataset.chat === 'save-config') {
       const box = control.closest('.chat-config');
       write(CFG, {endpoint:box.querySelector('[name=endpoint]').value.trim() || DEFAULT.endpoint, model:box.querySelector('[name=model]').value.trim() || DEFAULT.model});
