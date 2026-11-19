@@ -66,10 +66,10 @@ test.describe('A. 앱 시작·공통', () => {
     await expect(menu).toHaveCount(0);
 
     // 맨 위에서 마우스로 끌어내리기 → 도는 표시 → 새로 그림
-    const box = await page.locator('.welcome-post .post-cover').boundingBox();
-    await page.mouse.move(box.x + 60, box.y + 40);
+    const box = await page.locator('.feed-post .post-header').first().boundingBox(); // 카드뉴스 위는 옆으로 넘기기라 머리 줄에서 끈다
+    await page.mouse.move(box.x + 120, box.y + 20);
     await page.mouse.down();
-    await page.mouse.move(box.x + 60, box.y + 260, { steps: 12 });
+    await page.mouse.move(box.x + 120, box.y + 240, { steps: 12 });
     await expect(page.locator('.ptr')).toHaveClass(/ready/);
     await page.mouse.up();
     await expect(page.locator('.ptr')).toHaveClass(/loading/);
@@ -136,7 +136,25 @@ test.describe('B. 홈·계정', () => {
     const grid = page.locator('#search-results .post-grid a');
     const first = await grid.count();
     await page.locator('main.scroll').evaluate(el => { el.scrollTop = el.scrollHeight; });
-    await expect.poll(() => grid.count()).toBeGreaterThan(first);
+    await expect(page.locator('.feed-sentinel.loading')).toBeVisible();               // 잠깐 도는 표시가 나온 뒤
+    await expect.poll(() => grid.count()).toBeGreaterThan(first);                    // 게시물이 더 붙는다
+  });
+
+  test('B7 홈에 KNUTIPS 안내 게시물은 없고, 새로고침할 때마다 홈·검색 순서가 바뀐다', P1, async ({ page }) => {
+    await openApp(page);
+    await expect(page.locator('.welcome-post')).toHaveCount(0);
+    const names = () => page.locator('.feed-post .post-owner strong').evaluateAll(els => els.slice(0, 8).map(e => e.textContent).join('|'));
+    const one = await names();
+    await page.waitForTimeout(5);
+    await page.reload();
+    await expect(page.locator('.feed-post').first()).toBeVisible();
+    expect(await names()).not.toBe(one);
+    await openApp(page, '#/search');
+    const grid = () => page.locator('#search-results .post-grid a').evaluateAll(els => els.slice(0, 9).map(e => e.getAttribute('href')).join('|'));
+    const g1 = await grid();
+    await page.reload();
+    await expect(page.locator('#search-results .post-grid a').first()).toBeVisible();
+    expect(await grid()).not.toBe(g1);
   });
 });
 
@@ -153,8 +171,11 @@ test.describe('C. 게시물 동작', () => {
     await expect(post.locator('[data-action="like"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(post.locator('[data-action="like"] svg')).toHaveAttribute('fill', 'currentColor');
     await expect(likes).toHaveText(`추천 ${before + 1}개`);
+    // 새로고침하면 피드 순서가 바뀌므로, 같은 게시물을 상세 화면에서 확인한다
+    const id = await post.locator('[data-action="like"]').getAttribute('data-id');
     await page.reload();
-    await expect(placePost(page).locator('[data-action="like"]')).toHaveAttribute('aria-pressed', 'true');
+    await openApp(page, '#/place?id=' + id);
+    await expect(page.locator(`[data-action="like"][data-id="${id}"]`).first()).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('C2 사진 두 번 누르기: 좋아요 + 하트 효과, 다시 두 번 눌러도 취소 안 됨, 한 번은 아무 일 없음', P0, async ({ page }) => {

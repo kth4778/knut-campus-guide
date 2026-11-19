@@ -377,22 +377,15 @@ function feedPost(post) {
   </article>`;
 }
 
-function welcomePost() {
-  return `<article class="feed-post welcome-post">
-    <header class="post-header"><a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>
-      <a class="post-owner" href="${route('map')}"><strong>KNUTIPS</strong><small>한국교통대 충주캠퍼스</small></a>
-      ${moreButton({id:'welcome', url:route('map'), mapUrl:route('map')})}
-    </header>
-    <a class="post-cover campus-cover" href="${route('map')}" aria-label="캠퍼스 지도 열기">
-      <img class="cover-image" src="assets/campus.webp" alt="충주캠퍼스 일러스트" width="900" height="675" fetchpriority="high">
-    </a>
-    <div class="post-actions">${iconLink('pin','캠퍼스 지도',route('map'))}</div>
-    <div class="post-caption"><p><strong>KNUTIPS</strong> 충주캠퍼스의 교내 시설과 학교 앞 장소를 찾아보세요.</p></div>
-  </article>`;
-}
-
 // 전체: 누팁스처럼 추천 많은 곳 사이사이에 제휴 혜택·오늘의 꿀팁을 섞는다
-let feedSeed = ''; // 끌어내려 새로고침할 때마다 바뀌어 피드 순서를 새로 섞는다
+let feedSeed = Math.random().toString(36).slice(2); // 앱을 열 때·끌어내려 새로고침할 때마다 바뀌어 홈·검색 순서를 새로 섞는다
+const seedHash = text => { let h = 0; for (const c of text) h = (h * 31 + c.charCodeAt(0)) | 0; return h; };
+let exploreCache = {seed:'', list:[]};
+// 검색 탭 첫 화면(격자)의 순서: 새로고침마다 새로 섞는다
+function explorePlaces() {
+  if (exploreCache.seed !== feedSeed) exploreCache = {seed:feedSeed, list:places.slice().sort((a, b) => seedHash(a.id + feedSeed) - seedHash(b.id + feedSeed))};
+  return exploreCache.list;
+}
 const hiddenPosts = new Set(readLocal('hiddenPosts', [])); // ⋯ → 관심 없음
 function homeItems(category) {
   const items = category === '전체'
@@ -402,6 +395,7 @@ function homeItems(category) {
 }
 const feedItem = item => item.kind==='partner' ? partnerFeedPost(item.post) : feedPost(item.post);
 // 목록 끝 표시: 여기까지 스크롤하면 다음 묶음을 이어 붙인다 (더 보기 버튼 없이 끝없이)
+const ptrBox = '<div class="ptr" aria-hidden="true"><svg class="ptr-spin" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 1-8.5 6"/></svg></div>';
 const sentinel = kind => `<div class="feed-sentinel" data-more="${kind}" aria-hidden="true"><span></span></div>`;
 
 function home(category) {
@@ -409,9 +403,8 @@ function home(category) {
   const visible = items.slice(0, homeLimit);
   return `<header class="top home-top"><div class="middle brand">KNUTIPS</div><div class="home-actions"></div></header>
     <main class="scroll" aria-label="홈">
-      <div class="ptr" aria-hidden="true"><svg class="ptr-spin" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 1-8.5 6"/></svg></div>
+      ${ptrBox}
       ${storyRail()}
-      ${category==='전체'?welcomePost():''}
       ${visible.map(feedItem).join('')}
       ${items.length>visible.length?sentinel('home'):''}
     </main>`;
@@ -428,7 +421,7 @@ function searchMatches(text) {
 function searchResults() {
   const matches = searchMatches(searchQuery);
   const query = searchQuery.trim();
-  if (!query) return gridPosts(places.slice(0,searchLimit),true) + (places.length>searchLimit?sentinel('search'):'');
+  if (!query) return ptrBox + gridPosts(explorePlaces().slice(0,searchLimit),true) + (places.length>searchLimit?sentinel('search'):'');
   if (!matches.length) return '<div class="empty">검색 결과가 없어요.<br>장소 이름이나 다른 키워드를 입력해 보세요.</div>';
   return `<div class="section-head"><h2>${query?'검색 결과':'추천 장소'}</h2><span>${matches.length}개</span></div>
     <div class="places">${matches.slice(0,searchLimit).map(place => placeRow(place,'search')).join('')}</div>
@@ -1371,9 +1364,11 @@ function updateLikeCount(id) {
 // 홈 맨 위에서 아래로 끌어내리면 새로고침 (인스타처럼). 손가락·마우스 모두.
 // 끌수록 맨 위에 도는 표시가 커지고, 64px 넘게 끌고 놓으면 피드 순서를 새로 섞어 다시 그린다
 let pull = null;
-const pullBox = () => app.querySelector('main.scroll[aria-label="홈"] .ptr');
+const PULL_AREA = 'main.scroll[aria-label="홈"], main#search-results';
+const pullBox = () => app.querySelector('main.scroll[aria-label="홈"] .ptr, main#search-results .ptr');
 function pullStart(x, y, target) {
-  const scroller = target.closest?.('main.scroll[aria-label="홈"]');
+  const scroller = target.closest?.(PULL_AREA);
+  if (scroller?.id === 'search-results' && searchQuery.trim()) return; // 검색 결과 목록은 그대로
   if (!scroller || scroller.scrollTop > 0 || target.closest('.card-track, .story-rail, dialog, input, textarea')) return;
   pull = {x, y, d:0, active:false, scroller};
 }
@@ -1402,9 +1397,11 @@ function pullEnd() {
   box.style.height = '52px';
   box.classList.add('loading');
   setTimeout(() => {
-    feedSeed = String(Date.now());
+    feedSeed = Math.random().toString(36).slice(2);
     homeLimit = 16;
+    searchLimit = 35;
     if (currentView === '') render();
+    else if (currentView === 'search') document.getElementById('search-results').innerHTML = searchResults();
     app.querySelector('main.scroll')?.scrollTo({top:0});
   }, 700);
 }
@@ -1423,19 +1420,28 @@ app.addEventListener('scroll', event => {
   const scroller = event.target;
   if (!scroller.classList?.contains('scroll')) return;
   const mark = scroller.querySelector('.feed-sentinel');
-  if (!mark || scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight > 900) return;
+  if (!mark || mark.classList.contains('loading') || scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight > 600) return;
+  mark.classList.add('loading'); // 인스타처럼 잠깐 도는 표시를 보여 준 뒤 붙인다
+  setTimeout(() => loadMore(mark), 650);
+}, true);
+
+function loadMore(mark) {
+  if (!mark.isConnected) return;
   if (mark.dataset.more === 'home') {
     const requested = readRoute()[1].get('category');
     const items = homeItems(categoryInfo.has(requested) ? requested : '전체');
     const from = homeLimit;
     homeLimit += 16;
     mark.insertAdjacentHTML('beforebegin', items.slice(from, homeLimit).map(feedItem).join(''));
+    mark.classList.remove('loading');
     if (homeLimit >= items.length) mark.remove();
   } else {
     searchLimit += 30;
-    document.getElementById('search-results').innerHTML = searchResults();
+    const box = document.getElementById('search-results'), top = box.scrollTop;
+    box.innerHTML = searchResults();
+    box.scrollTop = top;
   }
-}, true);
+}
 
 // 카드뉴스를 넘기면 1/3 숫자·점·화살표를 맞춘다
 app.addEventListener('scroll', event => {

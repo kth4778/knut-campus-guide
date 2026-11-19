@@ -87,6 +87,7 @@ test.describe('J. 폰 틀·아일랜드', () => {
 
   test('J4 화면 사진 비교 (홈·지도·프로필)', P2, async ({ page }) => {
     test.skip(!!process.env.CI, '기준 사진은 내 컴퓨터(macOS)에서 만든 것이라 CI(리눅스)와 글꼴이 달라 비교하지 않음');
+    await page.addInitScript(() => { Math.random = () => 0.42; }); // 홈 피드는 열 때마다 순서를 섞으니 사진 비교 때만 고정
     for (const [name, hash] of [['home', '#/'], ['map', '#/map'], ['profile', '#/my']]) {
       await openApp(page, hash);
       await page.waitForTimeout(600);

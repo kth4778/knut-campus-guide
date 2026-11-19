@@ -313,7 +313,8 @@ img{display:block;width:100%;object-fit:cover}
 
 /* 끝없는 목록 끝 표시 (불러오는 중 점 세 개) */
 .feed-sentinel{display:flex;justify-content:center;padding:18px 0 26px}
-.feed-sentinel span{width:6px;height:6px;border-radius:50%;background:var(--muted);box-shadow:-12px 0 0 var(--muted),12px 0 0 var(--muted);opacity:.5}
+.feed-sentinel span{width:26px;height:26px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--muted);opacity:0}
+.feed-sentinel.loading span{opacity:1;animation:ptr-spin .7s linear infinite} /* 끝까지 내리면 도는 표시 */
 
 /* 끌어내려 새로고침 표시 */
 .ptr{height:0;overflow:hidden;display:grid;place-items:center;transition:height .25s ease}
