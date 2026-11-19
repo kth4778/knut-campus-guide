@@ -148,6 +148,11 @@ const tabShapes = {
     line: '<path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
     fill: '<path fill-rule="evenodd" d="M20.6 10c0 6.5-8.6 12-8.6 12S3.4 16.5 3.4 10a8.6 8.6 0 1 1 17.2 0ZM12 7.3a2.7 2.7 0 1 0 0 5.4 2.7 2.7 0 0 0 0-5.4Z"/>',
   },
+  // 프로필: 학사모 쓴 사람 (다른 탭과 같은 1.7 굵기 선 / 고르면 같은 모양을 채움). gpt-image 시안을 보고 24칸에 다시 그림
+  profile: {
+    line: '<path d="M2.8 6.6 12 2.9l9.2 3.7L12 10.3z"/><path d="M21 6.8v3.6"/><path d="M8.7 10.9a3.4 3.4 0 1 0 6.6 0"/><path d="M5 21a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5z"/>',
+    fill: '<path d="M2.4 6.6 12 2.5l9.6 4.1L12 10.7z"/><path fill="none" stroke="currentColor" stroke-width="2.2" d="M21.2 6.9v4.1"/><path d="M8.3 10.4Q12 12.6 15.7 10.4A3.9 3.9 0 1 1 8.3 10.4Z"/><path d="M4.6 21.6a5.2 5.2 0 0 1 5.2-5.2h4.4a5.2 5.2 0 0 1 5.2 5.2.8.8 0 0 1-.8.8H5.4a.8.8 0 0 1-.8-.8Z"/>',
+  },
   search: {
     line: '<circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/>',
     fill: '<circle cx="10.5" cy="10.5" r="6.6" fill="none" stroke="currentColor" stroke-width="2.9"/><path fill="none" stroke="currentColor" stroke-width="2.9" d="m15.8 15.8 5.2 5.2"/>',
@@ -197,15 +202,14 @@ nav.addEventListener('pointercancel', endNavDrag);
 
 function renderNav(active) {
   const links = [
-    // 프로필 탭은 인스타그램처럼 내 프로필 사진(동그라미)을 보여 준다. 고르면 파란 테두리
-    ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
+    ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','profile'],
   ];
   // 렌즈(고른 탭 뒤의 유리 알)는 한 번만 만들고 계속 쓴다 → 탭을 바꾸면 이전 자리에서 새 자리로 미끄러진다
   // 바의 유리(흐림)는 따로 깐 층(.nav-glass)에만 건다 — 바 자체에 걸면 렌즈가 바의 어두운 색만 비춰 보여서
   if (!nav.querySelector('.nav-lens')) nav.innerHTML = '<span class="nav-glass" aria-hidden="true"></span><span class="nav-lens" aria-hidden="true"></span><div class="nav-tabs"></div>';
   nav.querySelector('.nav-tabs').innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
-    : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${page==='my' ? '<span class="tab-avatar"><img src="assets/knutips-logo.webp" alt="" width="26" height="26"></span>' : tabIcon(symbol, active===page)}<span>${label}</span></a>`).join('');
+    : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${tabIcon(symbol, active===page)}<span>${label}</span></a>`).join('');
   const lens = nav.querySelector('.nav-lens');
   const index = links.findIndex(([page]) => page === active);
   lens.hidden = index < 0;
