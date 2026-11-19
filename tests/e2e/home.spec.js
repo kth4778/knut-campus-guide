@@ -40,6 +40,17 @@ test.describe('A. 앱 시작·공통', () => {
       await expect(current.locator('svg')).toHaveAttribute('fill', 'currentColor');
     }
   });
+  test('A5 게시물 「더 보기」는 다른 화면으로 가지 않고 그 자리에서 글을 펼친다', { tag: '@P1' }, async ({ page }) => {
+    await openApp(page, '#/');
+    const more = page.locator('.feed-post .caption-more').first();
+    await expect(more).toBeVisible();
+    const text = more.locator('xpath=preceding-sibling::p[contains(@class,"caption-text")][1]');
+    const before = await text.evaluate(el => el.offsetHeight);
+    await more.click();
+    await expect(page).toHaveURL(/#\/$/);
+    await expect(text).toHaveClass(/open/);
+    expect(await text.evaluate(el => el.offsetHeight)).toBeGreaterThan(before);
+  });
 });
 
 test.describe('B. 홈·계정', () => {

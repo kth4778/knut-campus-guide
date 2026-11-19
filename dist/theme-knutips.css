@@ -17,7 +17,6 @@
 [data-theme="light"] .story.seen{color:#111}
 /* 계정 동그라미는 빨강으로 통일하고, 원래 계정 색은 오른쪽 아래 작은 네모로 */
 [data-theme="light"] .story .acct-disc{position:relative;background:var(--brand)}
-[data-theme="light"] .story .acct-disc::after{content:"";position:absolute;right:1px;bottom:4px;width:9px;height:9px;background:var(--acct);box-shadow:0 0 0 2px #fff}
 
 /* 제보하기: 밝은 회색 원 + 검은 카메라 + 빨간 + */
 [data-theme="light"] .report-disc{background:#f1f1ee;color:#111;box-shadow:0 0 0 2.5px #fff}

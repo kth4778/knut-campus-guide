@@ -309,7 +309,7 @@ function postCaption(post, url) {
   return `<div class="post-caption">
     <p class="post-likes" data-likes="${post.id}" ${n?'':'hidden'}>추천 ${n}개</p>
     <p class="caption-text"><a href="${url}"><strong>${escape(post.name)}</strong></a> ${escape(text)}</p>
-    ${text.length > 60 ? `<a class="caption-more" href="${url}">더 보기</a>` : ''}
+    ${text.length > 60 ? `<button type="button" class="caption-more" data-action="caption-more">더 보기</button>` : ''}
     <button data-action="comments" data-id="${post.id}">${count?'댓글 '+count+'개 모두 보기':'댓글 달기…'}</button>
     ${postedDate(post) ? `<p class="post-time">${postedDate(post)}</p>` : ''}
   </div>`;
@@ -1163,6 +1163,10 @@ app.addEventListener('click', event => {
   if (!control) return;
   switch (control.dataset.action) {
     case 'save': toggleSave(control.dataset.id); break;
+    case 'caption-more': // 인스타처럼 그 자리에서 글 전체를 펼친다
+      control.previousElementSibling?.classList.add('open');
+      control.remove();
+      break;
     case 'card-step': {
       const track = control.closest('.card-carousel').querySelector('.card-track');
       track.scrollBy({left:track.clientWidth * Number(control.dataset.step), behavior:'smooth'});

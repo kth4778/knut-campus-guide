@@ -269,7 +269,8 @@ img{display:block;width:100%;object-fit:cover}
 .post-likes{font-size:13.5px;font-weight:750;margin-bottom:3px}
 .caption-text{font-size:13.5px;line-height:1.5;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .caption-text strong{font-weight:750;margin-right:2px}
-.caption-more{display:inline-block;font-size:13px;color:var(--muted)}
+.caption-more{display:inline-block;font-size:13px;color:var(--muted);background:none;border:0;padding:0;cursor:pointer}
+.caption-text.open{display:block;-webkit-line-clamp:unset;overflow:visible}
 .post-caption button{margin-top:5px;font-size:13px}
 .post-time{margin-top:5px;font-size:11px;color:var(--muted);letter-spacing:.01em}
 
