@@ -205,7 +205,8 @@ function renderNav(active) {
     ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
   ];
   // 렌즈(고른 탭 뒤의 유리 알)는 한 번만 만들고 계속 쓴다 → 탭을 바꾸면 이전 자리에서 새 자리로 미끄러진다
-  if (!nav.querySelector('.nav-lens')) nav.innerHTML = '<span class="nav-lens" aria-hidden="true"></span><div class="nav-tabs"></div>';
+  // 바의 유리(흐림)는 따로 깐 층(.nav-glass)에만 건다 — 바 자체에 걸면 렌즈가 바의 어두운 색만 비춰 보여서
+  if (!nav.querySelector('.nav-lens')) nav.innerHTML = '<span class="nav-glass" aria-hidden="true"></span><span class="nav-lens" aria-hidden="true"></span><div class="nav-tabs"></div>';
   nav.querySelector('.nav-tabs').innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
     : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${tabIcon(page==='my'?'logo':symbol, active===page)}<span>${label}</span></a>`).join('');
