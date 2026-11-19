@@ -165,9 +165,17 @@ function renderNav(active) {
   const links = [
     ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
   ];
-  nav.innerHTML = links.map(([page,label,symbol]) => page === null
+  // 렌즈(고른 탭 뒤의 유리 알)는 한 번만 만들고 계속 쓴다 → 탭을 바꾸면 이전 자리에서 새 자리로 미끄러진다
+  if (!nav.querySelector('.nav-lens')) nav.innerHTML = '<span class="nav-lens" aria-hidden="true"></span><div class="nav-tabs"></div>';
+  nav.querySelector('.nav-tabs').innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
     : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${tabIcon(page==='my'?'logo':symbol, active===page)}<span>${label}</span></a>`).join('');
+  const lens = nav.querySelector('.nav-lens');
+  const index = links.findIndex(([page]) => page === active);
+  lens.hidden = index < 0;
+  if (index < 0 || String(index) === lens.style.getPropertyValue('--i')) return;
+  if (lens.style.getPropertyValue('--i')) { lens.classList.remove('moving'); void lens.offsetWidth; lens.classList.add('moving'); }
+  lens.style.setProperty('--i', index);
 }
 
 function placeIcon(category) {
