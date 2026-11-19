@@ -42,13 +42,16 @@ test.describe('A. 앱 시작·공통', () => {
   });
   test('A5 게시물 「더 보기」는 다른 화면으로 가지 않고 그 자리에서 글을 펼친다', { tag: '@P1' }, async ({ page }) => {
     await openApp(page, '#/');
-    const more = page.locator('.feed-post .caption-more').first();
-    await expect(more).toBeVisible();
-    const text = more.locator('xpath=preceding-sibling::p[contains(@class,"caption-text")][1]');
+    // 「더 보기」가 있는 첫 게시물을 번호로 잡아 둔다 (누르면 버튼이 사라져서)
+    const index = await page.locator('.feed-post').evaluateAll(posts => posts.findIndex(p => p.querySelector('.caption-more')));
+    expect(index).toBeGreaterThanOrEqual(0);
+    const post = page.locator('.feed-post').nth(index);
+    const text = post.locator('.caption-text');
     const before = await text.evaluate(el => el.offsetHeight);
-    await more.click();
+    await post.locator('.caption-more').click();
     await expect(page).toHaveURL(/#\/$/);
     await expect(text).toHaveClass(/open/);
+    await expect(post.locator('.caption-more')).toHaveCount(0);
     expect(await text.evaluate(el => el.offsetHeight)).toBeGreaterThan(before);
   });
 });
