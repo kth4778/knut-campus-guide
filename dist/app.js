@@ -48,6 +48,7 @@ const paths = {
   book: '<path d="M3 4h6l3 2 3-2h6v15h-6l-3 2-3-2H3zm9 2v15"/>',
   spark: '<path d="M12 2c1 7 3 9 10 10-7 1-9 3-10 10-1-7-3-9-10-10 7-1 9-3 10-10z"/>',
   share: '<path d="M12 15V3m-5 5 5-5 5 5M5 12H3v9h18v-9h-2"/>',
+  link: '<path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4l-1.1 1.1M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.1-1.1"/>',
   send: '<path d="M21.5 2.5 10.6 13.4M21.5 2.5 14.6 21l-4-7.6-7.6-4z"/>',
   more: '<circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
@@ -315,13 +316,56 @@ function postCaption(post, url) {
   </div>`;
 }
 
+// ⋯ : 인스타처럼 게시물로 가지 않고 아래 메뉴 창을 연다 (저장·공유·링크 복사 / 지도에서 보기·게시물 자세히·관심 없음)
+function moreButton({id, url, mapUrl = '', save = false}) {
+  return `<button type="button" class="ib post-more" data-action="post-menu" data-id="${escape(id)}" data-url="${escape(url)}" data-map="${escape(mapUrl)}" data-save="${save}" aria-label="옵션 더 보기">${icon('more')}</button>`;
+}
+
+function openPostMenu(control) {
+  const {id, url, map: mapUrl, save} = control.dataset;
+  app.querySelector('dialog.post-menu')?.close();
+  const dialog = document.createElement('dialog');
+  dialog.className = 'comment-sheet post-menu';
+  const on = saved.has(id);
+  const round = (action, iconName, label, extra = '') => `<button type="button" class="pm-round" data-pm="${action}" ${extra}><span>${icon(iconName, action === 'save' && on)}</span>${label}</button>`;
+  const row = (action, label, extra = '') => `<button type="button" class="pm-row${extra}" data-pm="${action}">${label}</button>`;
+  dialog.innerHTML = `<span class="share-grip" aria-hidden="true"></span>
+    <div class="pm-rounds">${save === 'true' ? round('save', 'bookmark', on ? '저장됨' : '저장') : ''}${round('share', 'share', '공유')}${round('copy', 'link', '링크 복사')}</div>
+    <div class="pm-list">
+      ${mapUrl ? row('map', '지도에서 보기') : ''}
+      ${row('open', '게시물 자세히 보기')}
+      ${id !== 'welcome' ? row('hide', '관심 없음', ' danger') : ''}
+    </div>`;
+  app.append(dialog);
+  dialog.addEventListener('close', () => dialog.remove());
+  dialog.addEventListener('click', event => {
+    if (event.target === dialog) { dialog.close(); return; }
+    const pick = event.target.closest('[data-pm]')?.dataset.pm;
+    if (!pick) return;
+    const full = new URL(url, location.href).href;
+    dialog.close();
+    if (pick === 'save') toggleSave(id);
+    else if (pick === 'share') openShare(app, {title:`${control.closest('.feed-post')?.querySelector('.post-owner strong')?.textContent || 'KNUTIPS'} · KNUTIPS`, text:'', url:full});
+    else if (pick === 'copy') navigator.clipboard?.writeText(full).then(() => toast('링크를 복사했어요'), () => toast(full));
+    else if (pick === 'map') location.hash = mapUrl;
+    else if (pick === 'open') location.hash = url;
+    else if (pick === 'hide') {
+      hiddenPosts.add(id);
+      try { writeLocal('hiddenPosts', [...hiddenPosts]); } catch {}
+      control.closest('.feed-post')?.remove();
+      toast('이 게시물을 홈에서 숨겼어요');
+    }
+  });
+  dialog.showModal();
+}
+
 function feedPost(post) {
   const url = route(post.local?'post':'place',{id:post.id});
   return `<article class="feed-post">
     <header class="post-header">
       ${accountAvatar(post) || `<a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>`}
       <a class="post-owner" href="${url}"><strong>${escape(post.name)}</strong><small>${escape(post.category)}${post.area && post.area!=='장소 없음'?' · '+escape(post.area):''}</small></a>
-      ${iconLink('more','게시물 열기',url)}
+      ${moreButton({id:post.id, url, mapUrl:post.latlng ? route('map', {focus:post.id}) : '', save:!post.local})}
     </header>
     <div class="post-cover" data-like-area="${post.id}" aria-label="${escape(post.name)} 사진 · 두 번 누르면 좋아요">${postCover(post)}<span class="like-burst" aria-hidden="true"></span></div>
     ${postActions(post)}
@@ -333,7 +377,7 @@ function welcomePost() {
   return `<article class="feed-post welcome-post">
     <header class="post-header"><a href="${route('my')}" aria-label="프로필 열기">${brandAvatar()}</a>
       <a class="post-owner" href="${route('map')}"><strong>KNUTIPS</strong><small>한국교통대 충주캠퍼스</small></a>
-      ${iconLink('more','캠퍼스 지도',route('map'))}
+      ${moreButton({id:'welcome', url:route('map'), mapUrl:route('map')})}
     </header>
     <a class="post-cover campus-cover" href="${route('map')}" aria-label="캠퍼스 지도 열기">
       <img class="cover-image" src="assets/campus.webp" alt="충주캠퍼스 일러스트" width="900" height="675" fetchpriority="high">
@@ -344,10 +388,13 @@ function welcomePost() {
 }
 
 // 전체: 누팁스처럼 추천 많은 곳 사이사이에 제휴 혜택·오늘의 꿀팁을 섞는다
+let feedSeed = ''; // 끌어내려 새로고침할 때마다 바뀌어 피드 순서를 새로 섞는다
+const hiddenPosts = new Set(readLocal('hiddenPosts', [])); // ⋯ → 관심 없음
 function homeItems(category) {
-  return category === '전체'
-    ? [...localPosts.map(post => ({kind:'place', post})), ...homeFeed(places)]
+  const items = category === '전체'
+    ? [...localPosts.map(post => ({kind:'place', post})), ...homeFeed(places, feedSeed)]
     : [...localPosts, ...places].filter(post => post.category === category).map(post => ({kind:'place', post}));
+  return items.filter(item => !hiddenPosts.has(item.post.id));
 }
 const feedItem = item => item.kind==='partner' ? partnerFeedPost(item.post) : feedPost(item.post);
 // 목록 끝 표시: 여기까지 스크롤하면 다음 묶음을 이어 붙인다 (더 보기 버튼 없이 끝없이)
@@ -358,6 +405,7 @@ function home(category) {
   const visible = items.slice(0, homeLimit);
   return `<header class="top home-top"><div class="middle brand">KNUTIPS</div><div class="home-actions"></div></header>
     <main class="scroll" aria-label="홈">
+      <div class="ptr" aria-hidden="true"><svg class="ptr-spin" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 1-8.5 6"/></svg></div>
       ${storyRail()}
       ${category==='전체'?welcomePost():''}
       ${visible.map(feedItem).join('')}
@@ -1174,6 +1222,7 @@ app.addEventListener('click', event => {
       control.previousElementSibling?.classList.add('open');
       control.remove();
       break;
+    case 'post-menu': openPostMenu(control); break;
     case 'card-step': {
       const track = control.closest('.card-carousel').querySelector('.card-track');
       track.scrollBy({left:track.clientWidth * Number(control.dataset.step), behavior:'smooth'});
@@ -1238,6 +1287,56 @@ function updateLikeCount(id) {
     line.hidden = !n;
   });
 }
+
+// 홈 맨 위에서 아래로 끌어내리면 새로고침 (인스타처럼). 손가락·마우스 모두.
+// 끌수록 맨 위에 도는 표시가 커지고, 64px 넘게 끌고 놓으면 피드 순서를 새로 섞어 다시 그린다
+let pull = null;
+const pullBox = () => app.querySelector('main.scroll[aria-label="홈"] .ptr');
+function pullStart(x, y, target) {
+  const scroller = target.closest?.('main.scroll[aria-label="홈"]');
+  if (!scroller || scroller.scrollTop > 0 || target.closest('.card-track, .story-rail, dialog, input, textarea')) return;
+  pull = {x, y, d:0, active:false, scroller};
+}
+function pullMove(x, y, event) {
+  if (!pull) return;
+  const dy = y - pull.y, dx = Math.abs(x - pull.x);
+  if (!pull.active) {
+    if (dy < 8 || dx > dy || pull.scroller.scrollTop > 0) { if (dy < -4 || dx > 12) pull = null; return; }
+    pull.active = true;
+    pullBox()?.classList.add('dragging');
+  }
+  if (event.cancelable) event.preventDefault();
+  pull.d = Math.min(90, Math.max(0, dy * 0.5));
+  const box = pullBox();
+  if (box) { box.style.height = `${pull.d}px`; box.style.setProperty('--turn', `${pull.d * 4}deg`); box.classList.toggle('ready', pull.d >= 64); }
+}
+function pullEnd() {
+  if (!pull) return;
+  const {active, d} = pull;
+  pull = null;
+  const box = pullBox();
+  if (!box || !active) return;
+  box.classList.remove('dragging', 'ready');
+  if (d < 64) { box.style.height = '0px'; return; }
+  pullClick = Date.now();
+  box.style.height = '52px';
+  box.classList.add('loading');
+  setTimeout(() => {
+    feedSeed = String(Date.now());
+    homeLimit = 16;
+    if (currentView === '') render();
+    app.querySelector('main.scroll')?.scrollTo({top:0});
+  }, 700);
+}
+let pullClick = 0;
+app.addEventListener('dragstart', e => { if (pull) e.preventDefault(); }); // 그림·링크를 잡고 끌 때 브라우저 기본 「그림 끌기」가 끼어들지 않게
+app.addEventListener('touchstart', e => pullStart(e.touches[0].clientX, e.touches[0].clientY, e.target), {passive:true});
+app.addEventListener('touchmove', e => pullMove(e.touches[0].clientX, e.touches[0].clientY, e), {passive:false});
+app.addEventListener('touchend', pullEnd);
+app.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button === 0) pullStart(e.clientX, e.clientY, e.target); });
+window.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && pull) pullMove(e.clientX, e.clientY, e); });
+window.addEventListener('pointerup', e => { if (e.pointerType === 'mouse') pullEnd(); });
+app.addEventListener('click', e => { if (Date.now() - pullClick < 400) { e.preventDefault(); e.stopPropagation(); } }, true); // 끌어 놓은 직후 클릭은 무시
 
 // 끝없는 목록: 목록 끝 표시가 화면 아래 900px 안으로 들어오면 다음 묶음을 붙인다 (홈 16개씩, 검색 30개씩)
 app.addEventListener('scroll', event => {
@@ -1387,7 +1486,7 @@ async function start() {
     byId = new Map(places.map(place => [place.id,place]));
     mappedPlaces = places.filter(place => place.latlng);
     await initBuildings({escape, route, top, iconLink, placeRow}, places);
-    await initAccounts({escape, route, top, iconLink, postCover, hasCard:id => cardList(id).length > 0, getPlaces:() => places,
+    await initAccounts({escape, route, top, iconLink, postCover, moreButton, hasCard:id => cardList(id).length > 0, getPlaces:() => places,
       isLiked:id => likes.has(id),
       likeButton:id => button(likes.has(id)?'heartFilled':'heart',likes.has(id)?'좋아요 취소':'좋아요','like',`data-id="${id}" aria-pressed="${likes.has(id)}"`)});
     window.addEventListener('hashchange', event => {

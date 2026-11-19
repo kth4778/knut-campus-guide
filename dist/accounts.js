@@ -163,7 +163,7 @@ export function partnerFeedPost(p) {
     <header class="post-header">
       <a href="${route('account', {id:'제휴'})}" aria-label="교통대 제휴 계정 열기">${disc(account, 'sm')}</a>
       <a class="post-owner" href="${route('account', {id:'제휴'})}"><strong>교통대 제휴</strong><small>${escape(p.cat)} · ${escape(shortAddr(p.addr))}</small></a>
-      ${ctx.iconLink('more', '게시물 열기', url)}
+      ${ctx.moreButton({id:p.id, url, mapUrl:p.latlng ? route('map', {category:'교통대 제휴'}) : ''})}
     </header>
     <div class="post-cover" data-like-area="${p.id}" aria-label="${escape(p.name)} 제휴 · 두 번 누르면 좋아요">${ctx.hasCard?.(p.id) ? ctx.postCover(p) : partnerCard(p)}<span class="like-burst" aria-hidden="true"></span></div>
     <div class="post-actions">${ctx.likeButton(p.id)}${ctx.iconLink('arrow', '제휴 게시물 열기', url)}</div>
@@ -199,11 +199,15 @@ export function partnerPage(id) {
 // ---------- 홈 피드: 추천 많은 곳 · 제휴 · 오늘의 꿀팁 ----------
 function dayHash(text) { let h = 0; for (const c of text) h = (h * 31 + c.charCodeAt(0)) | 0; return h; }
 
-export function homeFeed(items) {
-  const today = new Date().toISOString().slice(0, 10);
+// seed: 홈을 끌어내려 새로고침할 때마다 바뀌는 값 → 같은 날이라도 순서가 새로 섞인다 (추천 많은 곳이 위쪽인 건 유지)
+const tier = p => (p.rec || 0) >= 5 ? 2 : (p.rec || 0) >= 2 ? 1 : 0;
+export function homeFeed(items, seed = '') {
+  const today = new Date().toISOString().slice(0, 10) + seed;
   const shuffle = (list, key) => list.slice().sort((a, b) => dayHash(key(a) + today) - dayHash(key(b) + today));
   const tips = shuffle(items.filter(p => isTip(p) && p.memos?.length), p => p.id);
-  const others = items.filter(p => !tips.includes(p)).sort(byRec);
+  const others = items.filter(p => !tips.includes(p)).sort(seed
+    ? (a, b) => tier(b) - tier(a) || dayHash(a.id + today) - dayHash(b.id + today) // 추천 많음·보통·적음 세 무리 안에서 섞는다
+    : byRec);
   const deals = shuffle(partners, p => p.id);
   const feed = [];
   others.forEach((post, i) => {

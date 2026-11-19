@@ -314,3 +314,11 @@ img{display:block;width:100%;object-fit:cover}
 /* 끝없는 목록 끝 표시 (불러오는 중 점 세 개) */
 .feed-sentinel{display:flex;justify-content:center;padding:18px 0 26px}
 .feed-sentinel span{width:6px;height:6px;border-radius:50%;background:var(--muted);box-shadow:-12px 0 0 var(--muted),12px 0 0 var(--muted);opacity:.5}
+
+/* 끌어내려 새로고침 표시 */
+.ptr{height:0;overflow:hidden;display:grid;place-items:center;transition:height .25s ease}
+.ptr.dragging{transition:none}
+.ptr-spin{width:24px;height:24px;fill:none;stroke:var(--muted);stroke-width:2.2;stroke-linecap:round;transform:rotate(var(--turn,0deg));opacity:.8}
+.ptr.ready .ptr-spin{stroke:var(--text)}
+.ptr.loading .ptr-spin{animation:ptr-spin .8s linear infinite;stroke:var(--text)}
+@keyframes ptr-spin{to{transform:rotate(360deg)}}

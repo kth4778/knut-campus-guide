@@ -54,6 +54,27 @@ test.describe('A. 앱 시작·공통', () => {
     await expect(post.locator('.caption-more')).toHaveCount(0);
     expect(await text.evaluate(el => el.offsetHeight)).toBeGreaterThan(before);
   });
+  test('A6 인스타처럼: ⋯ 은 게시물로 가지 않고 아래 메뉴, 맨 위에서 끌어내리면 새로고침', { tag: '@P1' }, async ({ page }) => {
+    await openApp(page, '#/');
+    await page.locator('.feed-post:not(.welcome-post) .post-more').first().click();
+    await expect(page).toHaveURL(/#\/$/);
+    const menu = page.locator('dialog.post-menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.locator('.pm-round')).toContainText(['저장', '공유', '링크 복사']);
+    await expect(menu.locator('.pm-row', { hasText: '관심 없음' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu).toHaveCount(0);
+
+    // 맨 위에서 마우스로 끌어내리기 → 도는 표시 → 새로 그림
+    const box = await page.locator('.welcome-post .post-cover').boundingBox();
+    await page.mouse.move(box.x + 60, box.y + 40);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 60, box.y + 260, { steps: 12 });
+    await expect(page.locator('.ptr')).toHaveClass(/ready/);
+    await page.mouse.up();
+    await expect(page.locator('.ptr')).toHaveClass(/loading/);
+    await expect(page.locator('.ptr')).not.toHaveClass(/loading/, { timeout: 4000 });  // 다시 그려지면 표시가 사라진다
+  });
 });
 
 test.describe('B. 홈·계정', () => {

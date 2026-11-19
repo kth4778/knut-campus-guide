@@ -15,6 +15,7 @@ function horizontalScroller(start) {
 
 document.addEventListener('wheel', event => {
   if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return; // 트랙패드 가로 밀기·확대는 그대로
+  if (event.target.closest?.('.card-track')) return; // 카드뉴스 위에서 휠은 피드 세로 스크롤 (장 넘기기는 화살표·끌기)
   const scroller = horizontalScroller(event.target);
   if (!scroller) return;
   const max = scroller.scrollWidth - scroller.clientWidth;

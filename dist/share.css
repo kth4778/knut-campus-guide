@@ -14,3 +14,15 @@
 .share-grid img{width:52px;height:52px;border-radius:15px;transition:transform .12s}
 .share-grid button:active img{transform:scale(.9)}
 .share-cancel{width:100%;padding:12px;border-radius:12px;background:var(--surface);font-weight:700;font-size:14px}
+
+/* ⋯ 메뉴 창 (인스타 게시물 옵션처럼) */
+.post-menu{padding:8px 14px 28px}
+.pm-rounds{display:flex;justify-content:center;gap:14px;padding:10px 0 14px;border-bottom:1px solid var(--line)}
+.pm-round{flex:1;max-width:96px;display:grid;justify-items:center;gap:6px;padding:12px 4px;border:1px solid var(--line);border-radius:14px;background:none;color:var(--text);font:600 12px/1.2 inherit;font-family:inherit;cursor:pointer}
+.pm-round span{width:28px;height:28px;display:grid;place-items:center}
+.pm-round .icon{width:24px;height:24px}
+.pm-list{display:grid;padding-top:6px}
+.pm-row{text-align:left;padding:14px 4px;background:none;border:0;color:var(--text);font-size:15px;font-family:inherit;cursor:pointer}
+.pm-row+.pm-row{border-top:1px solid var(--line)}
+.pm-row.danger{color:#ed4956}
+.post-more{color:var(--text)}
