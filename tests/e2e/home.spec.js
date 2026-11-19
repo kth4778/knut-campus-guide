@@ -104,15 +104,18 @@ test.describe('B. 홈·계정', () => {
     expect(owners.filter(o => o === '교통대 제휴').length).toBeLessThan(owners.length / 2);
   });
 
-  test('B6 「게시물 더 보기」: 게시물이 늘고 스크롤 위치는 그대로', P1, async ({ page }) => {
+  test('B6 홈·검색은 「더 보기」 버튼 없이 끝까지 내리면 게시물이 계속 이어진다', P1, async ({ page }) => {
     await openApp(page);
+    await expect(page.getByRole('button', { name: /더 보기/ }).filter({ hasText: '게시물' })).toHaveCount(0);
     const before = await page.locator('.feed-post').count();
-    const more = page.getByRole('button', { name: '게시물 더 보기' });
-    await more.scrollIntoViewIfNeeded();
-    const scroll = await page.locator('main.scroll').evaluate(el => el.scrollTop);
-    await more.click();
+    await page.locator('main.scroll').evaluate(el => { el.scrollTop = el.scrollHeight; });
     await expect.poll(() => page.locator('.feed-post').count()).toBeGreaterThan(before);
-    expect(await page.locator('main.scroll').evaluate(el => el.scrollTop)).toBeCloseTo(scroll, -1);
+
+    await openApp(page, '#/search');
+    const grid = page.locator('#search-results .post-grid a');
+    const first = await grid.count();
+    await page.locator('main.scroll').evaluate(el => { el.scrollTop = el.scrollHeight; });
+    await expect.poll(() => grid.count()).toBeGreaterThan(first);
   });
 });
 

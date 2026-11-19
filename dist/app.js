@@ -343,18 +343,25 @@ function welcomePost() {
   </article>`;
 }
 
-function home(category) {
-  // 전체: 누팁스처럼 추천 많은 곳 사이사이에 제휴 혜택·오늘의 꿀팁을 섞는다
-  const items = category === '전체'
+// 전체: 누팁스처럼 추천 많은 곳 사이사이에 제휴 혜택·오늘의 꿀팁을 섞는다
+function homeItems(category) {
+  return category === '전체'
     ? [...localPosts.map(post => ({kind:'place', post})), ...homeFeed(places)]
     : [...localPosts, ...places].filter(post => post.category === category).map(post => ({kind:'place', post}));
+}
+const feedItem = item => item.kind==='partner' ? partnerFeedPost(item.post) : feedPost(item.post);
+// 목록 끝 표시: 여기까지 스크롤하면 다음 묶음을 이어 붙인다 (더 보기 버튼 없이 끝없이)
+const sentinel = kind => `<div class="feed-sentinel" data-more="${kind}" aria-hidden="true"><span></span></div>`;
+
+function home(category) {
+  const items = homeItems(category);
   const visible = items.slice(0, homeLimit);
   return `<header class="top home-top"><div class="middle brand">KNUTIPS</div><div class="home-actions"></div></header>
     <main class="scroll" aria-label="홈">
       ${storyRail()}
       ${category==='전체'?welcomePost():''}
-      ${visible.map(item => item.kind==='partner' ? partnerFeedPost(item.post) : feedPost(item.post)).join('')}
-      ${items.length>visible.length?`<div class="more-row"><button class="pill" data-action="more-home">게시물 더 보기</button></div>`:''}
+      ${visible.map(feedItem).join('')}
+      ${items.length>visible.length?sentinel('home'):''}
     </main>`;
 }
 
@@ -369,11 +376,11 @@ function searchMatches(text) {
 function searchResults() {
   const matches = searchMatches(searchQuery);
   const query = searchQuery.trim();
-  if (!query) return gridPosts(places.slice(0,30),true);
+  if (!query) return gridPosts(places.slice(0,searchLimit),true) + (places.length>searchLimit?sentinel('search'):'');
   if (!matches.length) return '<div class="empty">검색 결과가 없어요.<br>장소 이름이나 다른 키워드를 입력해 보세요.</div>';
   return `<div class="section-head"><h2>${query?'검색 결과':'추천 장소'}</h2><span>${matches.length}개</span></div>
     <div class="places">${matches.slice(0,searchLimit).map(place => placeRow(place,'search')).join('')}</div>
-    ${matches.length>searchLimit?`<div class="more-row"><button class="pill" data-action="more-search">더 보기</button></div>`:''}`;
+    ${matches.length>searchLimit?sentinel('search'):''}`;
 }
 
 function searchPage() {
@@ -1206,17 +1213,6 @@ app.addEventListener('click', event => {
       document.getElementById('search-results').innerHTML=searchResults();
       document.getElementById('place-search').focus({preventScroll:true});
       break;
-    case 'more-home': {
-      const scroll = app.querySelector('.scroll').scrollTop;
-      homeLimit+=16;
-      render();
-      app.querySelector('.scroll').scrollTop=scroll;
-      break;
-    }
-    case 'more-search':
-      searchLimit+=35;
-      document.getElementById('search-results').innerHTML=searchResults();
-      break;
     case 'map-category':
       location.hash=route('map',control.dataset.category==='전체'?{}:{category:control.dataset.category});
       break;
@@ -1242,6 +1238,25 @@ function updateLikeCount(id) {
     line.hidden = !n;
   });
 }
+
+// 끝없는 목록: 목록 끝 표시가 화면 아래 900px 안으로 들어오면 다음 묶음을 붙인다 (홈 16개씩, 검색 30개씩)
+app.addEventListener('scroll', event => {
+  const scroller = event.target;
+  if (!scroller.classList?.contains('scroll')) return;
+  const mark = scroller.querySelector('.feed-sentinel');
+  if (!mark || scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight > 900) return;
+  if (mark.dataset.more === 'home') {
+    const requested = readRoute()[1].get('category');
+    const items = homeItems(categoryInfo.has(requested) ? requested : '전체');
+    const from = homeLimit;
+    homeLimit += 16;
+    mark.insertAdjacentHTML('beforebegin', items.slice(from, homeLimit).map(feedItem).join(''));
+    if (homeLimit >= items.length) mark.remove();
+  } else {
+    searchLimit += 30;
+    document.getElementById('search-results').innerHTML = searchResults();
+  }
+}, true);
 
 // 카드뉴스를 넘기면 1/3 숫자·점·화살표를 맞춘다
 app.addEventListener('scroll', event => {

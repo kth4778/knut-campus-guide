@@ -310,3 +310,7 @@ img{display:block;width:100%;object-fit:cover}
 .compose-form .tip-agree input{width:auto;margin-top:2px;flex:none}
 .tip-cta{display:inline-block;margin-top:10px}
 .compose-note a{color:var(--accent);text-decoration:underline}
+
+/* 끝없는 목록 끝 표시 (불러오는 중 점 세 개) */
+.feed-sentinel{display:flex;justify-content:center;padding:18px 0 26px}
+.feed-sentinel span{width:6px;height:6px;border-radius:50%;background:var(--muted);box-shadow:-12px 0 0 var(--muted),12px 0 0 var(--muted);opacity:.5}
