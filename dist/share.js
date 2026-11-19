@@ -53,7 +53,7 @@ export function openShare(host, data) {
   dialog.innerHTML = `<span class="share-grip" aria-hidden="true"></span>
     <h2>공유</h2>
     <div class="share-preview">
-      <img src="assets/profile-logo.webp" alt="" width="44" height="44">
+      <img src="assets/knutips-logo.webp" alt="" width="44" height="44">
       <span><strong>${esc(data.title)}</strong><small>${esc(data.url.replace(/^https?:\/\//, ''))}</small></span>
     </div>
     <div class="share-grid">${TARGETS.map(([kind, label]) => `<button type="button" data-share="${kind}">

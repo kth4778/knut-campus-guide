@@ -37,7 +37,8 @@ test.describe('A. 앱 시작·공통', () => {
       await expect(page).toHaveURL(new RegExp(hash.replace(/[/#]/g, '\\$&') + '$'));
       const current = page.locator('#nav a[aria-current="page"]');
       await expect(current).toHaveText(label);
-      await expect(current.locator('svg')).toHaveAttribute('fill', 'currentColor');
+      if (label === '프로필') await expect(current.locator('.tab-avatar img')).toHaveAttribute('src', /knutips-logo/); // 프로필은 내 사진
+      else await expect(current.locator('svg')).toHaveAttribute('fill', 'currentColor');
     }
   });
 });

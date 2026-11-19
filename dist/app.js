@@ -152,11 +152,6 @@ const tabShapes = {
     line: '<circle cx="10.5" cy="10.5" r="7"/><path d="m16 16 5 5"/>',
     fill: '<circle cx="10.5" cy="10.5" r="6.6" fill="none" stroke="currentColor" stroke-width="2.9"/><path fill="none" stroke="currentColor" stroke-width="2.9" d="m15.8 15.8 5.2 5.2"/>',
   },
-  // 프로필 로고(학사모 쓴 지도 핀)를 다른 탭과 같은 선 아이콘으로
-  logo: {
-    line: '<path d="M3.5 6.2 12 2.5l8.5 3.7L12 9.9z"/><path d="M20.5 6.2v3.6"/><path d="M17.4 15.6c0 4-5.4 7-5.4 7s-5.4-3-5.4-7a5.4 5.4 0 0 1 10.8 0Z"/><circle cx="12" cy="15.6" r="1.9"/>',
-    fill: '<path d="M2.8 6.2 12 2.1l9.2 4.1L12 10.3z"/><path fill="none" stroke="currentColor" stroke-width="2.2" d="M20.9 6.4v3.8"/><path fill-rule="evenodd" d="M18 15.6c0 4.4-6 7.6-6 7.6s-6-3.2-6-7.6a6 6 0 0 1 12 0ZM12 13.6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>',
-  },
 };
 const tabIcon = (name, on) =>
   `<svg class="icon tab-icon" viewBox="0 0 24 24" fill="${on?'currentColor':'none'}" stroke="${on?'none':'currentColor'}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${tabShapes[name][on?'fill':'line']}</svg>`;
@@ -202,6 +197,7 @@ nav.addEventListener('pointercancel', endNavDrag);
 
 function renderNav(active) {
   const links = [
+    // 프로필 탭은 인스타그램처럼 내 프로필 사진(동그라미)을 보여 준다. 고르면 파란 테두리
     ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
   ];
   // 렌즈(고른 탭 뒤의 유리 알)는 한 번만 만들고 계속 쓴다 → 탭을 바꾸면 이전 자리에서 새 자리로 미끄러진다
@@ -209,7 +205,7 @@ function renderNav(active) {
   if (!nav.querySelector('.nav-lens')) nav.innerHTML = '<span class="nav-glass" aria-hidden="true"></span><span class="nav-lens" aria-hidden="true"></span><div class="nav-tabs"></div>';
   nav.querySelector('.nav-tabs').innerHTML = links.map(([page,label,symbol]) => page === null
     ? '<span aria-hidden="true"></span>'
-    : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${tabIcon(page==='my'?'logo':symbol, active===page)}<span>${label}</span></a>`).join('');
+    : `<a href="${route(page)}" data-tab="${page || 'home'}" ${active===page?'aria-current="page"':''}>${page==='my' ? '<span class="tab-avatar"><img src="assets/knutips-logo.webp" alt="" width="26" height="26"></span>' : tabIcon(symbol, active===page)}<span>${label}</span></a>`).join('');
   const lens = nav.querySelector('.nav-lens');
   const index = links.findIndex(([page]) => page === active);
   lens.hidden = index < 0;
@@ -249,7 +245,7 @@ function placeRow(place, mode = 'detail', showSave = true) {
 }
 
 function brandAvatar() {
-  return '<img class="account-avatar" src="assets/profile-logo.webp" alt="" width="34" height="34">';
+  return '<img class="account-avatar" src="assets/knutips-logo.webp" alt="" width="34" height="34">';
 }
 
 function postCover(post, grid = false) {
