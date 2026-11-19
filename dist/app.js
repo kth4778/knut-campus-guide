@@ -252,9 +252,15 @@ function brandAvatar() {
   return '<img class="account-avatar" src="assets/knutips-logo.webp" alt="" width="34" height="34">';
 }
 
+// 팁 게시물 카드 그림 (data/cards.json: 게시물 id → assets/cards/*.webp, 게시물 글을 gpt-image 로 카드로 만든 것)
+let cards = {};
+
 function postCover(post, grid = false) {
   if (post.local && post.image) {
     return `<img class="cover-image" src="${escape(post.image)}" alt="" loading="lazy">`;
+  }
+  if (cards[post.id]) {
+    return `<img class="cover-image card-image" src="assets/${escape(cards[post.id])}" alt="${escape(post.name)} 정리 카드" loading="lazy">`;
   }
   if (post.cover) {
     return `<img class="cover-image" src="assets/${escape(post.cover.asset)}" alt="${escape(post.cover.note)}" loading="lazy">`;
@@ -1298,6 +1304,7 @@ initShare({toast});
 async function start() {
   try {
     await loadConfig();
+    cards = await fetch('./data/cards.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));
     const response = await fetch('./data/places.json');
     if (!response.ok) throw new Error('Place data unavailable');
     places = (await response.json()).map(place => ({
