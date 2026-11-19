@@ -118,6 +118,8 @@ test.describe('L. 접근성', () => {
     await expect(page).toHaveURL(/#\/search$/);
     await page.locator('#nav a', { hasText: '홈' }).focus();
     await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#\/$/);
+    await expect(page.locator('.feed-post [data-action="copy"]').first()).toBeVisible(); // 홈을 다 그린 뒤에 (그 전에 잡으면 다시 그릴 때 사라진다)
     await page.locator('.feed-post [data-action="copy"]').first().focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('dialog.share-sheet')).toBeVisible();
