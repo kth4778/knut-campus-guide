@@ -161,6 +161,45 @@ const tabShapes = {
 const tabIcon = (name, on) =>
   `<svg class="icon tab-icon" viewBox="0 0 24 24" fill="${on?'currentColor':'none'}" stroke="${on?'none':'currentColor'}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${tabShapes[name][on?'fill':'line']}</svg>`;
 
+// 탭 바 렌즈를 마우스·손가락으로 끌어 옮기기: 끄는 동안 유리 알이 커져 따라오고, 놓으면 가장 가까운 탭으로 붙으며 그 화면으로 간다.
+// 6px 안쪽으로 움직였다 놓으면 그냥 탭 누르기로 본다
+let navDrag = null;
+nav.addEventListener('pointerdown', event => {
+  const lens = nav.querySelector('.nav-lens');
+  if (!lens || lens.hidden || event.button > 0) return;
+  navDrag = {x0:event.clientX, moved:false, id:event.pointerId, lens, tabs:nav.querySelector('.nav-tabs')};
+});
+nav.addEventListener('pointermove', event => {
+  if (!navDrag || event.pointerId !== navDrag.id) return;
+  if (!navDrag.moved) {
+    if (Math.abs(event.clientX - navDrag.x0) < 6) return;
+    navDrag.moved = true;
+    nav.setPointerCapture(event.pointerId);
+    navDrag.lens.classList.remove('moving');
+    navDrag.lens.classList.add('dragging');
+  }
+  const box = navDrag.tabs.getBoundingClientRect(), cell = (box.width - 12) / 5;
+  navDrag.pos = Math.min(4, Math.max(0, (event.clientX - box.left - 6 - cell / 2) / cell));
+  navDrag.lens.style.setProperty('--i', navDrag.pos.toFixed(3));
+});
+const endNavDrag = event => {
+  if (!navDrag || event.pointerId !== navDrag.id) return;
+  const {moved, pos, lens} = navDrag;
+  navDrag = null;
+  if (!moved) return;
+  lens.classList.remove('dragging');
+  const index = Math.round(pos ?? 0);
+  lens.style.setProperty('--i', index);
+  // 끌기 끝의 click 이 다른 탭을 누른 것으로 처리되지 않게 한 번 막는다
+  navDragEnded = Date.now();
+  const link = nav.querySelectorAll('.nav-tabs a')[index];
+  if (link && location.hash !== link.getAttribute('href')) location.hash = link.getAttribute('href');
+};
+let navDragEnded = 0;
+nav.addEventListener('click', event => { if (Date.now() - navDragEnded < 350) event.preventDefault(); }, true);
+nav.addEventListener('pointerup', endNavDrag);
+nav.addEventListener('pointercancel', endNavDrag);
+
 function renderNav(active) {
   const links = [
     ['','홈','home'], ['moa','MOA','moa'], ['map','지도','pin'], ['search','검색','search'], ['my','프로필','user'],
@@ -958,8 +997,9 @@ function startNaver() {
   usingNaver = true;
   map = new maps.Map('map-canvas', {
     center:new maps.LatLng(...campus), zoom:15, scaleControl:false, mapDataControl:false,
-    logoControlOptions:{position:maps.Position.BOTTOM_LEFT},
-    zoomControl:true, zoomControlOptions:{position:maps.Position.RIGHT_BOTTOM, style:maps.ZoomControlStyle.SMALL},
+    // 아래쪽엔 유리 카드·탭 바가 떠 있어서 로고는 위 왼쪽, 확대 버튼은 오른쪽 가운데로
+    logoControlOptions:{position:maps.Position.TOP_LEFT},
+    zoomControl:true, zoomControlOptions:{position:maps.Position.RIGHT_CENTER, style:maps.ZoomControlStyle.SMALL},
   });
   mapMarkers = [];
   naverInfo = new maps.InfoWindow({borderWidth:0, backgroundColor:'transparent', disableAnchor:true, pixelOffset:new maps.Point(0,-30)}); // 말풍선 모양은 .map-popup 이 그린다
@@ -973,9 +1013,9 @@ function startLeaflet() {
     document.getElementById('map-canvas').innerHTML = '<div class="empty"><p>지도를 불러오지 못했어요.</p><a class="primary" href="#/search">장소 검색</a></div>';
     return;
   }
-  map = L.map('map-canvas',{zoomControl:false,scrollWheelZoom:true,attributionControl:true}).setView(campus,mapCategory === '전체' ? 16 : 15); // 처음부터 건물 보기 높이로 (확대 움직임 없이)
-  map.attributionControl.setPrefix(false);
-  L.control.zoom({position:'bottomright',zoomInTitle:'확대',zoomOutTitle:'축소'}).addTo(map);
+  map = L.map('map-canvas',{zoomControl:false,scrollWheelZoom:true,attributionControl:false}).setView(campus,mapCategory === '전체' ? 16 : 15); // 처음부터 건물 보기 높이로 (확대 움직임 없이)
+  L.control.attribution({position:'topleft', prefix:false}).addTo(map); // 아래쪽은 유리 카드·탭 바에 가려서 위로
+  L.control.zoom({position:'topright',zoomInTitle:'확대',zoomOutTitle:'축소'}).addTo(map);
   const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
     maxZoom:19,
     attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>',

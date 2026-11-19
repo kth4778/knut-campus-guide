@@ -50,10 +50,40 @@
       </div>
       <div id="app"><p class="loading" role="status">캠퍼스 가이드를 불러오는 중…</p></div>
       <nav id="nav" class="nav" aria-label="주요 메뉴"></nav>
-      <!-- 리퀴드 글래스 렌즈 굴절 (glass.css .nav-lens): 가장자리일수록 뒤 그림을 바깥으로 휘게 -->
-      <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="lg-lens" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
-        <feImage href="assets/glass/lens-map.png" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
-        <feDisplacementMap in="SourceGraphic" in2="map" scale="-0.18" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+      <!-- 리퀴드 글래스 굴절 (glass.css). 굴절 지도(assets/glass/*-map.png)대로 뒤 그림을 휘고,
+           빨강·초록·파랑을 조금씩 다르게 휘어 가장자리에 무지개 번짐(색수차)을 만든다. 크롬 계열에서만 보인다 -->
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+        <filter id="lg-lens" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+          <feImage href="assets/glass/lens-map.png" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="0.930" xChannelSelector="R" yChannelSelector="G" result="dr"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="1.000" xChannelSelector="R" yChannelSelector="G" result="dg"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="1.070" xChannelSelector="R" yChannelSelector="G" result="db"/>
+          <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+          <feColorMatrix in="dg" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+          <feColorMatrix in="db" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>
+          <feBlend in="r" in2="g" mode="screen" result="rg"/><feBlend in="rg" in2="b" mode="screen"/>
+        </filter>
+        <filter id="lg-bar" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+          <feImage href="assets/glass/bar-map.png" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="0.940" xChannelSelector="R" yChannelSelector="G" result="dr"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="1.000" xChannelSelector="R" yChannelSelector="G" result="dg"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="1.060" xChannelSelector="R" yChannelSelector="G" result="db"/>
+          <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+          <feColorMatrix in="dg" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+          <feColorMatrix in="db" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>
+          <feBlend in="r" in2="g" mode="screen" result="rg"/><feBlend in="rg" in2="b" mode="screen"/>
+        </filter>
+        <filter id="lg-card" x="0" y="0" width="1" height="1" primitiveUnits="objectBoundingBox" color-interpolation-filters="sRGB">
+          <feImage href="assets/glass/card-map.png" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="0.940" xChannelSelector="R" yChannelSelector="G" result="dr"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="1.000" xChannelSelector="R" yChannelSelector="G" result="dg"/>
+          <feDisplacementMap in="SourceGraphic" in2="map" scale="1.060" xChannelSelector="R" yChannelSelector="G" result="db"/>
+          <feColorMatrix in="dr" type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r"/>
+          <feColorMatrix in="dg" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g"/>
+          <feColorMatrix in="db" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b"/>
+          <feBlend in="r" in2="g" mode="screen" result="rg"/><feBlend in="rg" in2="b" mode="screen"/>
+        </filter>
+      </svg>
       <div class="gesture" aria-hidden="true"></div>
       <div id="toast" class="toast" role="status"></div>
     </div>

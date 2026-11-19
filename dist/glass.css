@@ -1,57 +1,86 @@
-/* 하단 탭 바 — 애플 리퀴드 글래스(iOS 26)처럼
-   1) 바: 화면 위에 떠 있는 둥근 유리. 뒤 내용이 흐리게 비치고(blur·saturate), 위 가장자리에 빛 반사, 아래로 그림자
-   2) 렌즈: 고른 탭 뒤의 작은 유리 알. 탭을 바꾸면 통통 튀며 미끄러지고, 움직이는 동안 커지며 가장자리가 무지개빛으로 굴절
-      (크롬 계열은 SVG 굴절 지도로 뒤 글자가 실제로 휘어 보이고, 사파리는 흐림·밝기만) */
-:root{--nav-space:96px;--glass-tint:rgba(28,31,38,.5);--glass-edge:rgba(255,255,255,.26);--tab-on:#3d9bff}
-[data-theme="light"]{--glass-tint:rgba(250,251,253,.55);--glass-edge:rgba(255,255,255,.9);--tab-on:#0a7aff}
+/* 애플 리퀴드 글래스 (iOS 26) — 하단 탭 바 · 헤더 · 칩 · 지도 카드 · 아래 창 · 알림
+   유리 하나 = ① 뒤를 흐리고 진하게(blur·saturate) ② 가장자리를 실제로 휘게(굴절 지도, index.html 의 SVG 필터 · 크롬 계열)
+             ③ 위·왼쪽 가장자리에 빛, 아래·오른쪽에 얇은 반사광 ④ 빨강·파랑이 갈라지는 무지개 테두리
+   렌즈(고른 탭 뒤 유리 알)는 탭 글자 위에 올라가 글자를 확대하고 가장자리에서 말아 넣는다. 마우스·손가락으로 끌어 옮길 수 있다 */
+:root{--nav-space:100px;--glass-tint:rgba(24,27,34,.42);--glass-tint-strong:rgba(22,25,32,.62);--glass-hi:rgba(255,255,255,.34);
+  --glass-lo:rgba(255,255,255,.08);--tab-on:#3d9bff;--top-h:49px}
+[data-theme="light"]{--glass-tint:rgba(252,253,255,.5);--glass-tint-strong:rgba(250,251,253,.72);--glass-hi:rgba(255,255,255,.95);--glass-lo:rgba(255,255,255,.4);--tab-on:#0a7aff}
 
-.nav{position:absolute;z-index:60;left:14px;right:14px;bottom:30px;height:62px;padding:0;border:0;border-radius:31px;display:block;
-  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 55%),var(--glass-tint);
-  -webkit-backdrop-filter:blur(14px) saturate(190%) brightness(1.04);backdrop-filter:blur(14px) saturate(190%) brightness(1.04);
-  box-shadow:inset 0 1px .5px var(--glass-edge),inset 0 -.5px .5px rgba(255,255,255,.1),inset 0 0 0 .5px rgba(255,255,255,.12),
-    0 12px 32px rgba(0,0,0,.42),0 2px 6px rgba(0,0,0,.25)}
-/* 위쪽 둥근 가장자리를 따라 흐르는 빛 */
-.nav::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
-  background:radial-gradient(120% 140% at 18% -30%,rgba(255,255,255,.18),transparent 45%),radial-gradient(90% 120% at 95% 130%,rgba(255,255,255,.07),transparent 50%)}
-[data-theme="light"] .nav{box-shadow:inset 0 1px .5px var(--glass-edge),inset 0 0 0 .5px rgba(0,0,0,.06),0 10px 28px rgba(15,23,42,.18),0 2px 6px rgba(15,23,42,.1)}
+/* 공통 유리 표면 */
+.nav,.screen dialog.in-screen,.map-result,.toast,#app > .top{
+  -webkit-backdrop-filter:blur(18px) saturate(190%);backdrop-filter:blur(18px) saturate(190%)}
 
-.nav-tabs{position:relative;z-index:2;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:0 6px}
-.nav a{height:52px;border-radius:26px;color:rgba(255,255,255,.88);transition:color .25s}
-[data-theme="light"] .nav a{color:rgba(15,20,25,.82)}
+/* ---------- 하단 탭 바 ---------- */
+.nav{position:absolute;z-index:60;left:14px;right:14px;bottom:30px;height:62px;padding:0;border:0;border-radius:31px;display:block;touch-action:pan-y;
+  background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 60%),var(--glass-tint);
+  box-shadow:inset 0 1px .5px var(--glass-hi),inset 0 -1px .5px var(--glass-lo),inset 0 0 0 .5px rgba(255,255,255,.14),
+    inset 3px 0 4px -2px rgba(255,90,200,.18),inset -3px 0 4px -2px rgba(70,200,255,.2),0 14px 34px rgba(0,0,0,.42),0 2px 6px rgba(0,0,0,.22)}
+@supports (backdrop-filter:url(#lg-bar)){ .nav{backdrop-filter:url(#lg-bar) blur(10px) saturate(190%)} }
+.nav::before{content:"";position:absolute;inset:0;z-index:4;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(120% 160% at 16% -40%,rgba(255,255,255,.2),transparent 42%),radial-gradient(80% 120% at 92% 140%,rgba(255,255,255,.08),transparent 48%)}
+[data-theme="light"] .nav{box-shadow:inset 0 1px .5px var(--glass-hi),inset 0 0 0 .5px rgba(0,0,0,.06),inset 3px 0 4px -2px rgba(255,90,200,.14),inset -3px 0 4px -2px rgba(70,200,255,.16),0 12px 30px rgba(15,23,42,.18),0 2px 6px rgba(15,23,42,.1)}
+.nav-tabs{position:relative;z-index:1;height:100%;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;padding:0 6px}
+.nav a{height:52px;border-radius:26px;color:rgba(255,255,255,.9);transition:color .25s;-webkit-user-drag:none;user-select:none}
+[data-theme="light"] .nav a{color:rgba(15,20,25,.84)}
 .nav a[aria-current="page"],[data-theme="light"] .nav a[aria-current="page"]{color:var(--tab-on)}
-.nav a:active .tab-icon{transform:scale(.9)}
 
-/* 렌즈 */
-.nav-lens{position:absolute;z-index:1;top:5px;bottom:5px;left:6px;width:calc((100% - 12px) / 5);border-radius:26px;pointer-events:none;
-  transform:translateX(calc(var(--i, 0) * 100%));transition:transform .55s cubic-bezier(.34,1.42,.5,1);
-  background:radial-gradient(130% 100% at 50% -10%,rgba(255,255,255,.2),rgba(255,255,255,.05) 55%,rgba(255,255,255,.08));
-  -webkit-backdrop-filter:blur(.6px) brightness(1.18) saturate(1.5);backdrop-filter:blur(.6px) brightness(1.18) saturate(1.5);
-  box-shadow:inset 0 0 0 .75px rgba(255,255,255,.3),inset 0 1.5px 2px rgba(255,255,255,.35),inset 0 -2px 4px rgba(0,0,0,.22),
-    inset 2px 0 3px rgba(255,80,190,.22),inset -2px 0 3px rgba(60,200,255,.24),0 3px 10px rgba(0,0,0,.22)}
-/* 크롬 계열: 렌즈 뒤 글자·아이콘이 가장자리에서 실제로 굴절 (index.html 의 #lg-lens) */
-@supports (backdrop-filter:url(#lg-lens)){
-  .nav-lens{backdrop-filter:url(#lg-lens) blur(.4px) brightness(1.18) saturate(1.5)}
-}
-/* 움직이는 동안: 유리 알이 커지고 무지개 테두리가 짙어진다 */
+/* 렌즈: 탭 글자 "위"에 올라간 유리 알 (눌림은 통과) */
+.nav-lens{position:absolute;z-index:3;top:4px;bottom:4px;left:6px;width:calc((100% - 12px) / 5);border-radius:27px;pointer-events:none;
+  transform:translateX(calc(var(--i, 0) * 100%));transition:transform .55s cubic-bezier(.34,1.42,.5,1),scale .3s;
+  background:radial-gradient(120% 90% at 50% -8%,rgba(255,255,255,.3),rgba(255,255,255,.1) 58%,rgba(255,255,255,.16));
+  -webkit-backdrop-filter:brightness(1.12) saturate(1.5);backdrop-filter:brightness(1.12) saturate(1.5);
+  box-shadow:inset 0 0 0 .75px rgba(255,255,255,.34),inset 0 1.5px 1.5px rgba(255,255,255,.5),inset 0 -2px 4px rgba(0,0,0,.24),
+    inset 2.5px 0 3px -1px rgba(255,80,190,.38),inset -2.5px 0 3px -1px rgba(60,200,255,.42),0 4px 12px rgba(0,0,0,.25)}
+@supports (backdrop-filter:url(#lg-lens)){ .nav-lens{backdrop-filter:url(#lg-lens) brightness(1.1) saturate(1.5)} }
+.nav-lens::after{content:"";position:absolute;inset:1px;border-radius:inherit;
+  background:radial-gradient(70% 45% at 30% 12%,rgba(255,255,255,.35),transparent 70%),radial-gradient(60% 40% at 72% 96%,rgba(255,255,255,.14),transparent 70%)}
 .nav-lens.moving{animation:lens-move .55s cubic-bezier(.3,.9,.4,1)}
-@keyframes lens-move{
-  0%{scale:1 1}
-  30%{scale:1.22 1.14;box-shadow:inset 0 0 0 1px rgba(255,255,255,.45),inset 3px 0 5px rgba(255,80,190,.45),inset -3px 0 5px rgba(60,200,255,.45),inset 0 2px 3px rgba(255,255,255,.4),0 6px 18px rgba(0,0,0,.3)}
-  70%{scale:.96 1.02}
-  100%{scale:1 1}
-}
-[data-theme="light"] .nav-lens{background:radial-gradient(130% 100% at 50% -10%,rgba(255,255,255,.85),rgba(255,255,255,.35) 60%);
-  box-shadow:inset 0 0 0 .75px rgba(255,255,255,.95),inset 0 -2px 4px rgba(15,23,42,.08),inset 2px 0 3px rgba(255,80,190,.18),inset -2px 0 3px rgba(60,200,255,.2),0 3px 10px rgba(15,23,42,.12)}
+.nav-lens.dragging{transition:scale .25s cubic-bezier(.3,1.4,.5,1);scale:1.2 1.12}
+@keyframes lens-move{0%{scale:1 1}30%{scale:1.24 1.14}70%{scale:.96 1.03}100%{scale:1 1}}
+[data-theme="light"] .nav-lens{background:radial-gradient(120% 90% at 50% -8%,rgba(255,255,255,.75),rgba(255,255,255,.2) 60%);
+  box-shadow:inset 0 0 0 .75px rgba(255,255,255,.95),inset 0 -2px 4px rgba(15,23,42,.1),inset 2.5px 0 3px -1px rgba(255,80,190,.3),inset -2.5px 0 3px -1px rgba(60,200,255,.34),0 4px 12px rgba(15,23,42,.14)}
 
-/* 바가 화면 위에 떠 있으니, 맨 아래 내용이 바에 가리지 않게 자리를 비운다 (스크롤 내용은 바 뒤로 비쳐 지나간다) */
+/* ---------- 헤더: 스크롤 내용이 헤더 뒤로 비쳐 지나간다 ---------- */
+/* #app 은 위치 기준을 만들지 않는다(아래 창 dialog 가 폰 화면 맨 아래에 붙어야 해서). 대신 .screen 기준으로 상태 표시줄 높이만큼 내린다 */
+:root{--app-top:54px}
+#app > .top{position:relative;z-index:40;border-bottom:0;background:var(--glass-tint-strong);box-shadow:inset 0 -.5px 0 rgba(255,255,255,.1),0 6px 18px -10px rgba(0,0,0,.5)}
+#app > .top:has(+ .scroll){position:absolute;left:0;right:0;top:var(--app-top)}
+#app > .top + .scroll{padding-top:var(--top-h)}
+
+/* ---------- 칩: 작은 유리 알약 ---------- */
+.chip{background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border:0;color:var(--text);
+  box-shadow:inset 0 1px .5px rgba(255,255,255,.22),inset 0 0 0 .5px rgba(255,255,255,.12),0 2px 6px rgba(0,0,0,.18);transition:background .2s,box-shadow .2s,transform .15s}
+.chip:active{transform:scale(.95)}
+.chip[aria-pressed="true"]{color:#08203f;background:linear-gradient(180deg,#cfe2ff,#9cc3ff);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.85),inset 0 -1px 2px rgba(20,60,140,.25),inset 2px 0 3px -1px rgba(255,80,190,.35),inset -2px 0 3px -1px rgba(60,200,255,.4),0 3px 10px rgba(61,155,255,.35)}
+[data-theme="light"] .chip{background:linear-gradient(180deg,#fff,#f1f4f9);box-shadow:inset 0 1px .5px #fff,inset 0 0 0 .5px rgba(15,23,42,.1),0 2px 6px rgba(15,23,42,.08)}
+.map-chips,.live-row{border-bottom:0}
+
+/* ---------- 지도: 장소 카드가 지도 위에 뜬 유리 카드 ---------- */
+#app > .map-result{position:absolute;z-index:50;left:12px;right:12px;bottom:calc(var(--nav-space) + 24px);margin:0;border:0;border-radius:24px;padding:13px 16px 12px;
+  background:var(--glass-tint-strong);
+  box-shadow:inset 0 1px .5px var(--glass-hi),inset 0 -1px .5px var(--glass-lo),inset 0 0 0 .5px rgba(255,255,255,.12),
+    inset 3px 0 4px -2px rgba(255,90,200,.16),inset -3px 0 4px -2px rgba(70,200,255,.18),0 12px 30px rgba(0,0,0,.4)}
+@supports (backdrop-filter:url(#lg-card)){ #app > .map-result{backdrop-filter:url(#lg-card) blur(14px) saturate(190%)} }
+#app > .map-result:empty{display:none}
+.map-panel{margin-bottom:0}
+.map-panel .leaflet-top.leaflet-right{top:50px} /* 캠퍼스 중심 버튼 아래 */
+.map-reset{border-radius:50%;background:var(--glass-tint-strong);color:var(--text);-webkit-backdrop-filter:blur(14px) saturate(180%);backdrop-filter:blur(14px) saturate(180%);box-shadow:inset 0 1px .5px var(--glass-hi),inset 0 0 0 .5px rgba(255,255,255,.14),0 4px 12px rgba(0,0,0,.3)}
+.mc-actions{border-top-color:rgba(255,255,255,.1)}
+
+/* ---------- 아래 창(시트) · 알림 ---------- */
+.screen dialog.in-screen{background:var(--glass-tint-strong);border-radius:28px 28px 0 0;
+  box-shadow:inset 0 1px .5px var(--glass-hi),inset 0 0 0 .5px rgba(255,255,255,.12),0 -10px 30px rgba(0,0,0,.35)}
+.toast{background:var(--glass-tint-strong);color:var(--text);border-radius:22px;box-shadow:inset 0 1px .5px var(--glass-hi),inset 0 0 0 .5px rgba(255,255,255,.14),0 8px 24px rgba(0,0,0,.35);bottom:calc(var(--nav-space) + 8px)}
+
+/* 바가 떠 있으니 맨 아래 내용이 가리지 않게 (스크롤 내용은 바 뒤로 비쳐 지나간다) */
 .scroll{padding-bottom:var(--nav-space)}
-#app > :last-child:not(.scroll):not(dialog){margin-bottom:calc(var(--nav-space) - 22px)}
+#app > :last-child:not(.scroll):not(dialog):not(.map-result){margin-bottom:calc(var(--nav-space) - 22px)}
 .gesture{position:relative;z-index:61;background:transparent}
-.toast{bottom:calc(var(--nav-space) + 8px)}
 
 @media (max-width:520px){
-  .nav{bottom:calc(10px + env(safe-area-inset-bottom));padding:0;height:62px}
-  :root{--nav-space:calc(88px + env(safe-area-inset-bottom))}
-  #app > :last-child:not(.scroll):not(dialog){margin-bottom:var(--nav-space)}
+  .nav{bottom:calc(10px + env(safe-area-inset-bottom))}
+  :root{--nav-space:calc(86px + env(safe-area-inset-bottom));--app-top:0px}
+  #app > :last-child:not(.scroll):not(dialog):not(.map-result){margin-bottom:var(--nav-space)}
 }
 @media (prefers-reduced-motion:reduce){.nav-lens{transition:none}.nav-lens.moving{animation:none}}

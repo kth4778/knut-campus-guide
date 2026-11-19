@@ -13,6 +13,22 @@ test.describe('A. 앱 시작·공통', () => {
     expect(await page.locator('.feed-post').count()).toBeGreaterThan(10);
   });
 
+  test('A4 탭 바 유리 렌즈를 마우스로 끌어 다른 탭에 놓으면 그 화면으로 간다', { tag: '@P1' }, async ({ page }) => {
+    await openApp(page, '#/');
+    const lens = page.locator('#nav .nav-lens');
+    await expect(lens).toBeAttached();
+    const from = await page.locator('#nav a', { hasText: '홈' }).boundingBox();
+    const to = await page.locator('#nav a', { hasText: '검색' }).boundingBox();
+    await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+    await expect(lens).toHaveClass(/dragging/);                       // 끄는 동안 커진다
+    await page.mouse.up();
+    await expect(page).toHaveURL(/#\/search$/);
+    await expect(lens).not.toHaveClass(/dragging/);
+    await expect(page.locator('#nav a[aria-current="page"]')).toHaveText('검색');
+  });
+
   test('A2 하단 탭 5개: 주소가 바뀌고 고른 탭 아이콘이 채워진다', P0, async ({ page }) => {
     await openApp(page);
     const tabs = [['#/moa', 'MOA'], ['#/map', '지도'], ['#/search', '검색'], ['#/my', '프로필'], ['#/', '홈']];
