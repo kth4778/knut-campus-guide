@@ -252,15 +252,27 @@ function brandAvatar() {
   return '<img class="account-avatar" src="assets/knutips-logo.webp" alt="" width="34" height="34">';
 }
 
-// 팁 게시물 카드 그림 (data/cards.json: 게시물 id → assets/cards/*.webp, 게시물 글을 gpt-image 로 카드로 만든 것)
+// 카드뉴스 (data/cards.json: 게시물 id → 그림 한 장 또는 여러 장 [표지, 메뉴, …]. 게시물 글을 gpt-image 로 만든 것)
 let cards = {};
+const cardList = id => [].concat(cards[id] || []);
 
 function postCover(post, grid = false) {
   if (post.local && post.image) {
     return `<img class="cover-image" src="${escape(post.image)}" alt="" loading="lazy">`;
   }
-  if (cards[post.id]) {
-    return `<img class="cover-image card-image" src="assets/${escape(cards[post.id])}" alt="${escape(post.name)} 정리 카드" loading="lazy">`;
+  const slides = cardList(post.id);
+  if (slides.length === 1 || (slides.length && grid)) {
+    return `<img class="cover-image card-image" src="assets/${escape(slides[0])}" alt="${escape(post.name)} 카드뉴스" loading="lazy">`;
+  }
+  if (slides.length) {
+    // 여러 장: 옆으로 넘겨 보는 카드뉴스 (인스타처럼 오른쪽 위 1/3, 아래 점, 컴퓨터에선 좌우 화살표)
+    return `<div class="card-carousel">
+      <div class="card-track">${slides.map((src, i) => `<img class="cover-image card-image" src="assets/${escape(src)}" alt="${escape(post.name)} 카드뉴스 ${i + 1}/${slides.length}" loading="lazy" draggable="false">`).join('')}</div>
+      <span class="card-count">1/${slides.length}</span>
+      <button type="button" class="card-nav prev" data-action="card-step" data-step="-1" aria-label="이전 장" hidden>‹</button>
+      <button type="button" class="card-nav next" data-action="card-step" data-step="1" aria-label="다음 장">›</button>
+      <div class="card-dots" aria-hidden="true">${slides.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div>
+    </div>`;
   }
   if (post.cover) {
     return `<img class="cover-image" src="assets/${escape(post.cover.asset)}" alt="${escape(post.cover.note)}" loading="lazy">`;
@@ -1127,6 +1139,11 @@ app.addEventListener('click', event => {
   if (!control) return;
   switch (control.dataset.action) {
     case 'save': toggleSave(control.dataset.id); break;
+    case 'card-step': {
+      const track = control.closest('.card-carousel').querySelector('.card-track');
+      track.scrollBy({left:track.clientWidth * Number(control.dataset.step), behavior:'smooth'});
+      break;
+    }
     case 'map-save':
       toggleSave(control.dataset.id);
       control.setAttribute('aria-pressed', saved.has(control.dataset.id));
@@ -1197,6 +1214,18 @@ function updateLikeCount(id) {
     line.hidden = !n;
   });
 }
+
+// 카드뉴스를 넘기면 1/3 숫자·점·화살표를 맞춘다
+app.addEventListener('scroll', event => {
+  const track = event.target;
+  if (!track.classList?.contains('card-track')) return;
+  const box = track.parentElement, total = track.children.length;
+  const index = Math.round(track.scrollLeft / track.clientWidth);
+  box.querySelector('.card-count').textContent = `${index + 1}/${total}`;
+  box.querySelectorAll('.card-dots i').forEach((dot, i) => dot.classList.toggle('on', i === index));
+  box.querySelector('.card-nav.prev').hidden = index === 0;
+  box.querySelector('.card-nav.next').hidden = index === total - 1;
+}, true);
 
 // 사진을 두 번 누르면 좋아요 (인스타처럼 이미 누른 건 취소하지 않는다) + 하트가 튀어 오른다
 let lastTap = {id:'', at:0};
@@ -1315,7 +1344,7 @@ async function start() {
     byId = new Map(places.map(place => [place.id,place]));
     mappedPlaces = places.filter(place => place.latlng);
     await initBuildings({escape, route, top, iconLink, placeRow}, places);
-    await initAccounts({escape, route, top, iconLink, postCover, getPlaces:() => places,
+    await initAccounts({escape, route, top, iconLink, postCover, hasCard:id => cardList(id).length > 0, getPlaces:() => places,
       isLiked:id => likes.has(id),
       likeButton:id => button(likes.has(id)?'heartFilled':'heart',likes.has(id)?'좋아요 취소':'좋아요','like',`data-id="${id}" aria-pressed="${likes.has(id)}"`)});
     window.addEventListener('hashchange', event => {

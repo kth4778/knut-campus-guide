@@ -164,7 +164,7 @@ export function partnerFeedPost(p) {
       <a class="post-owner" href="${route('account', {id:'제휴'})}"><strong>교통대 제휴</strong><small>${escape(p.cat)} · ${escape(shortAddr(p.addr))}</small></a>
       ${ctx.iconLink('more', '게시물 열기', url)}
     </header>
-    <div class="post-cover" data-like-area="${p.id}" aria-label="${escape(p.name)} 제휴 · 두 번 누르면 좋아요">${partnerCard(p)}<span class="like-burst" aria-hidden="true"></span></div>
+    <div class="post-cover" data-like-area="${p.id}" aria-label="${escape(p.name)} 제휴 · 두 번 누르면 좋아요">${ctx.hasCard?.(p.id) ? ctx.postCover(p) : partnerCard(p)}<span class="like-burst" aria-hidden="true"></span></div>
     <div class="post-actions">${ctx.likeButton(p.id)}${ctx.iconLink('arrow', '제휴 게시물 열기', url)}</div>
     <div class="post-caption">
       <p class="post-likes" data-likes="${p.id}" ${ctx.isLiked(p.id) ? '' : 'hidden'}>추천 1개</p>

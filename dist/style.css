@@ -238,7 +238,20 @@ img{display:block;width:100%;object-fit:cover}
 .post-header .ib{color:var(--text)}
 .post-cover{position:relative;margin:0;border-radius:0;aspect-ratio:1/1;user-select:none;-webkit-user-select:none}
 .welcome-post .post-cover{aspect-ratio:4/3}
-.post-cover:has(.card-image){aspect-ratio:4/5} /* 정리 카드는 인스타 세로 비율 그대로(글자가 잘리지 않게) */
+.post-cover:has(.card-image){aspect-ratio:4/5} /* 카드뉴스는 인스타 세로 비율 그대로(글자가 잘리지 않게) */
+/* 여러 장 카드뉴스: 옆으로 넘기기 */
+.card-carousel{position:relative;width:100%;height:100%}
+.card-track{display:flex;width:100%;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.card-track::-webkit-scrollbar{display:none}
+.card-track img{flex:0 0 100%;width:100%;scroll-snap-align:start;-webkit-user-drag:none}
+.card-count{position:absolute;top:10px;right:10px;padding:3px 9px;border-radius:12px;background:rgba(0,0,0,.55);color:#fff;font-size:11.5px;font-weight:700;pointer-events:none}
+.card-dots{position:absolute;left:0;right:0;bottom:9px;display:flex;justify-content:center;gap:5px;pointer-events:none}
+.card-dots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.55);box-shadow:0 0 2px rgba(0,0,0,.4);transition:background .2s,transform .2s}
+.card-dots i.on{background:#fff;transform:scale(1.15)}
+.card-nav{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;border:0;background:rgba(255,255,255,.85);color:#111;font-size:20px;line-height:28px;box-shadow:0 2px 6px rgba(0,0,0,.3);opacity:0;transition:opacity .2s;cursor:pointer}
+.card-nav.prev{left:8px}.card-nav.next{right:8px}
+.card-carousel:hover .card-nav:not([hidden]){opacity:1}
+@media (hover:none){.card-nav{display:none}}
 .cover-art img,.cover-art>.icon{width:min(34vw,150px);height:min(34vw,150px)}
 .cover-credit{padding:6px 13px 0}
 
