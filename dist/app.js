@@ -103,7 +103,10 @@ let localPosts = readLocal('posts', []);
 // 프로필 편집에서 바꾸는 이름·소개 (이 브라우저에만 저장)
 let profile = {name:'KNUTIPS', bio:'한국교통대 충주캠퍼스', ...readLocal('profile', {})};
 const likes = new Set(readLocal('likes', []));
-const comments = readLocal('comments', {});
+// 댓글: 게시물 id → [{id, text, at(작성 시각), liked, replyTo(답글이면 원 댓글 id)}]. 예전 글자만 저장된 것도 읽는다
+const comments = Object.fromEntries(Object.entries(readLocal('comments', {})).map(([pid, list]) =>
+  [pid, list.map((c, i) => typeof c === 'string' ? {id:`old${i}`, text:c, at:0, liked:false, replyTo:null} : c)]));
+const saveComments = () => { try { writeLocal('comments', comments); } catch { toast('댓글을 저장하지 못했어요.'); } };
 let profileTab = 'posts';
 let places = [];
 let byId = new Map();
@@ -312,6 +315,7 @@ function postCaption(post, url) {
     <p class="caption-text"><a href="${url}"><strong>${escape(post.name)}</strong></a> ${escape(text)}</p>
     ${text.length > 60 ? `<button type="button" class="caption-more" data-action="caption-more">더 보기</button>` : ''}
     <button data-action="comments" data-id="${post.id}">${count?'댓글 '+count+'개 모두 보기':'댓글 달기…'}</button>
+    ${commentPreview(post.id)}
     ${postedDate(post) ? `<p class="post-time">${postedDate(post)}</p>` : ''}
   </div>`;
 }
@@ -605,18 +609,94 @@ function localPostPage(post) {
   return `${top('게시물',iconLink('back','뒤로',placeBack))}<main class="scroll">${content}</main>`;
 }
 
+// ---------- 댓글 (인스타그램처럼) ----------
+// 아래에서 올라오는 창: 맨 위 손잡이 + 「댓글」, 댓글마다 이름·시간·내용·「답글 달기」·오른쪽 하트, 답글은 들여쓰기,
+// 맨 아래 이모지 한 줄 + 내 프로필 + 입력칸 + 「게시」. 달아도 창은 열린 채로 바로 목록에 붙는다
+const QUICK_EMOJI = ['❤️', '🙌', '🔥', '👏', '😢', '😍', '😮', '😂'];
+function ago(at) {
+  if (!at) return '';
+  const m = Math.floor((Date.now() - at) / 60000);
+  if (m < 1) return '방금';
+  if (m < 60) return `${m}분`;
+  if (m < 1440) return `${Math.floor(m / 60)}시간`;
+  if (m < 10080) return `${Math.floor(m / 1440)}일`;
+  return `${Math.floor(m / 10080)}주`;
+}
+function commentPreview(postId) {
+  const list = (comments[postId] ?? []).filter(c => !c.replyTo).slice(-2);
+  return list.length ? `<div class="comment-preview">${list.map(c => `<p><strong>${escape(profile.name)}</strong> ${escape(c.text)}</p>`).join('')}</div>` : '';
+}
+function commentItem(c, reply = false) {
+  return `<div class="cm${reply ? ' reply' : ''}" data-cid="${escape(c.id)}">
+    ${brandAvatar()}
+    <div class="cm-body">
+      <p><strong>${escape(profile.name)}</strong> <small>${ago(c.at)}</small></p>
+      <p class="cm-text">${escape(c.text)}</p>
+      <div class="cm-tools"><button type="button" data-cm="reply">답글 달기</button><button type="button" data-cm="delete">삭제</button></div>
+    </div>
+    <button type="button" class="cm-like" data-cm="like" aria-pressed="${!!c.liked}" aria-label="${c.liked ? '좋아요 취소' : '댓글 좋아요'}">${icon(c.liked ? 'heartFilled' : 'heart')}${c.liked ? '<span>1</span>' : ''}</button>
+  </div>`;
+}
+function commentListHtml(postId) {
+  const list = comments[postId] ?? [];
+  if (!list.length) return '<div class="cm-empty"><strong>아직 댓글이 없습니다.</strong><span>댓글을 남겨 보세요.</span></div>';
+  return list.filter(c => !c.replyTo).map(c => commentItem(c) + list.filter(r => r.replyTo === c.id).map(r => commentItem(r, true)).join('')).join('');
+}
+function refreshCommentCount(postId) {
+  const n = comments[postId]?.length ?? 0;
+  app.querySelectorAll(`.post-caption button[data-action="comments"][data-id="${CSS.escape(postId)}"]`).forEach(b => {
+    b.textContent = n ? `댓글 ${n}개 모두 보기` : '댓글 달기…';
+    b.parentElement.querySelector('.comment-preview')?.remove();
+    b.insertAdjacentHTML('afterend', commentPreview(postId));
+  });
+}
+
 function openComments(id) {
-  const post = findPost(id);
-  if (!post) return;
-  const entries = comments[id] ?? [];
+  if (!findPost(id)) return;
+  app.querySelector('dialog.comment-sheet.comments')?.close();
   const dialog = document.createElement('dialog');
-  dialog.className = 'comment-sheet';
-  dialog.innerHTML = `<div class="sheet-top"><h2>댓글</h2>${button('close','댓글 닫기','close-comments')}</div>
-    <div class="comment-list">${entries.length ? entries.map(entry=>`<p>${brandAvatar()}<span>${escape(entry)}</span></p>`).join('') : '<p>첫 댓글을 남겨 보세요.</p>'}</div>
-    <form id="comment-form" data-id="${id}"><input name="text" aria-label="댓글 입력" placeholder="댓글 달기…" required maxlength="300"><button type="submit">게시</button></form>`;
+  dialog.className = 'comment-sheet comments';
+  dialog.innerHTML = `<span class="share-grip" aria-hidden="true"></span>
+    <h2 class="cm-title">댓글</h2>
+    <div class="comment-list">${commentListHtml(id)}</div>
+    <div class="cm-compose">
+      <div class="cm-replying" hidden><span></span><button type="button" data-cm="cancel-reply" aria-label="답글 취소">${icon('close')}</button></div>
+      <div class="cm-emoji">${QUICK_EMOJI.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join('')}</div>
+      <form id="comment-form" data-id="${escape(id)}">${brandAvatar()}<input name="text" aria-label="댓글 입력" placeholder="${escape(profile.name)}(으)로 댓글 달기..." required maxlength="300" autocomplete="off"><button type="submit" disabled>게시</button></form>
+    </div>`;
   app.append(dialog);
+  const form = dialog.querySelector('form'), input = form.text, send = form.querySelector('button[type="submit"]');
+  const sync = () => { send.disabled = !input.value.trim(); };
+  input.addEventListener('input', sync);
   dialog.addEventListener('close', () => dialog.remove());
+  dialog.addEventListener('click', event => {
+    if (event.target === dialog) { dialog.close(); return; }
+    const emoji = event.target.closest('[data-emoji]')?.dataset.emoji;
+    if (emoji) { input.value += emoji; sync(); input.focus(); return; }
+    const act = event.target.closest('[data-cm]')?.dataset.cm;
+    if (!act) return;
+    if (act === 'cancel-reply') { delete form.dataset.reply; dialog.querySelector('.cm-replying').hidden = true; return; }
+    const cid = event.target.closest('[data-cid]')?.dataset.cid;
+    const list = comments[id] ?? [], c = list.find(x => x.id === cid);
+    if (!c) return;
+    if (act === 'like') { c.liked = !c.liked; saveComments(); dialog.querySelector('.comment-list').innerHTML = commentListHtml(id); return; }
+    if (act === 'reply') {
+      form.dataset.reply = c.replyTo || c.id; // 답글의 답글은 같은 줄기에 붙는다 (인스타처럼 한 단계만)
+      const bar = dialog.querySelector('.cm-replying');
+      bar.querySelector('span').textContent = `${profile.name}님에게 답글 남기는 중`;
+      bar.hidden = false;
+      input.value = `@${profile.name} `; sync(); input.focus();
+      return;
+    }
+    if (act === 'delete') {
+      comments[id] = list.filter(x => x.id !== cid && x.replyTo !== cid);
+      saveComments();
+      dialog.querySelector('.comment-list').innerHTML = commentListHtml(id);
+      refreshCommentCount(id);
+    }
+  });
   dialog.showModal();
+  setTimeout(() => input.focus({preventScroll:true}), 60);
 }
 
 // 아래에서 올라오는 시트. mount(body)가 돌려준 정리 함수는 닫힐 때 불러요.
@@ -1422,15 +1502,16 @@ app.addEventListener('submit', async event => {
     const id = form.dataset.id;
     const text = fields.get('text').trim();
     if (!text) return;
-    const entries = comments[id] ?? [];
-    comments[id] = [...entries,text];
-    try { writeLocal('comments',comments); } catch { toast('댓글을 저장하지 못했어요.'); }
-    form.closest('dialog').close();
-    const scroll = app.querySelector('.scroll');
-    const offset = scroll?.scrollTop ?? 0;
-    render();
-    app.querySelector('.scroll')?.scrollTo(0,offset);
-    openComments(id);
+    const entry = {id:`c${Date.now().toString(36)}`, text, at:Date.now(), liked:false, replyTo:form.dataset.reply || null};
+    comments[id] = [...(comments[id] ?? []), entry];
+    saveComments();
+    const dialog = form.closest('dialog');
+    dialog.querySelector('.comment-list').innerHTML = commentListHtml(id);
+    dialog.querySelector(`[data-cid="${entry.id}"]`)?.scrollIntoView({block:'nearest'});
+    form.reset(); delete form.dataset.reply;
+    dialog.querySelector('.cm-replying').hidden = true;
+    form.querySelector('button[type="submit"]').disabled = true;
+    refreshCommentCount(id);
     return;
   }
   const name = fields.get('name').trim();

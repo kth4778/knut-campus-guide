@@ -173,7 +173,7 @@ test.describe('C. 게시물 동작', () => {
     await expect(post.locator('[data-action="like"]')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('C3 댓글: 폰 화면 안에 창이 열리고, 달면 「댓글 1개 모두 보기」', P1, async ({ page }) => {
+  test('C3 댓글(인스타처럼): 창은 열린 채 바로 붙고, 답글·하트·이모지, 피드에 개수·미리보기', P1, async ({ page }) => {
     await openApp(page);
     const post = placePost(page);
     await post.locator('.post-actions [data-action="comments"]').click();
@@ -183,11 +183,28 @@ test.describe('C. 게시물 동작', () => {
     const [s, d] = await Promise.all([page.locator('.screen').boundingBox(), sheet.boundingBox()]);
     expect(Math.round(d.x)).toBe(Math.round(s.x));
     expect(Math.round(d.x + d.width)).toBe(Math.round(s.x + s.width));
+    await expect(sheet.locator('.cm-empty')).toContainText('아직 댓글이 없습니다');
+    await expect(sheet.locator('button[type="submit"]')).toBeDisabled();            // 글자를 써야 「게시」가 켜진다
     await sheet.locator('input[name="text"]').fill('테스트 댓글이에요');
     await sheet.locator('button[type="submit"]').click();
-    await expect(page.locator('dialog.comment-sheet .comment-list')).toContainText('테스트 댓글이에요');
+    await expect(sheet).toBeVisible();                                                // 인스타처럼 창은 열린 채로
+    await expect(sheet.locator('.comment-list')).toContainText('테스트 댓글이에요');
+    await expect(sheet.locator('.cm small').first()).toHaveText('방금');
+    // 답글: 들여쓰기로 붙고, 「답글 남기는 중」 표시는 게시하면 사라진다
+    await sheet.locator('[data-cm="reply"]').first().click();
+    await expect(sheet.locator('.cm-replying')).toBeVisible();
+    await sheet.locator('input[name="text"]').pressSequentially('고마워요');
+    await sheet.locator('button[type="submit"]').click();
+    await expect(sheet.locator('.cm.reply')).toHaveCount(1);
+    await expect(sheet.locator('.cm-replying')).toBeHidden();
+    // 댓글 하트, 이모지 한 줄
+    await sheet.locator('.cm-like').first().click();
+    await expect(sheet.locator('.cm-like').first()).toHaveAttribute('aria-pressed', 'true');
+    await sheet.locator('[data-emoji="🔥"]').click();
+    await expect(sheet.locator('input[name="text"]')).toHaveValue('🔥');
     await page.keyboard.press('Escape');
-    await expect(placePost(page).locator('.post-caption button[data-action="comments"]')).toHaveText('댓글 1개 모두 보기');
+    await expect(placePost(page).locator('.post-caption button[data-action="comments"]')).toHaveText('댓글 2개 모두 보기');
+    await expect(placePost(page).locator('.comment-preview')).toContainText('테스트 댓글이에요');
   });
 
   test('C4 저장하면 프로필 저장 탭 격자에 나온다', P1, async ({ page }) => {

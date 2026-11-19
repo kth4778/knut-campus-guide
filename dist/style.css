@@ -322,3 +322,42 @@ img{display:block;width:100%;object-fit:cover}
 .ptr.ready .ptr-spin{stroke:var(--text)}
 .ptr.loading .ptr-spin{animation:ptr-spin .8s linear infinite;stroke:var(--text)}
 @keyframes ptr-spin{to{transform:rotate(360deg)}}
+
+/* 댓글 창 (인스타그램처럼) */
+.comment-sheet.comments{display:flex;flex-direction:column;max-height:min(620px,78svh);padding:6px 0 0}
+.comment-sheet.comments .share-grip{align-self:center}
+.cm-title{text-align:center;font-size:15px;font-weight:750;padding:6px 0 10px;border-bottom:1px solid var(--line)}
+.comment-sheet.comments .comment-list{flex:1;min-height:180px;max-height:none;overflow:auto;padding:6px 14px 10px}
+.cm{display:flex;gap:10px;padding:10px 0;align-items:flex-start}
+.cm.reply{padding-left:44px}
+.cm .account-avatar{width:32px;height:32px}
+.cm.reply .account-avatar{width:24px;height:24px}
+.cm-body{flex:1;min-width:0}
+.cm-body p{font-size:13px;line-height:1.4}
+.cm-body strong{font-weight:700}
+.cm-body small{color:var(--muted);font-size:12px;margin-left:4px}
+.cm-text{overflow-wrap:anywhere;margin-top:1px}
+.cm-tools{display:flex;gap:14px;margin-top:4px}
+.cm-tools button{background:none;border:0;padding:0;font-size:12px;font-weight:650;color:var(--muted);cursor:pointer}
+.cm-like{flex:none;display:grid;justify-items:center;gap:1px;background:none;border:0;color:var(--muted);padding:4px 0 0;cursor:pointer;font-size:11px}
+.cm-like .icon{width:14px;height:14px}
+.cm-like[aria-pressed="true"]{color:#ed4956}
+.cm-empty{display:grid;justify-items:center;gap:6px;padding:46px 0;text-align:center}
+.cm-empty strong{font-size:19px;font-weight:800}
+.cm-empty span{font-size:13px;color:var(--muted)}
+.cm-compose{border-top:1px solid var(--line);padding:6px 12px 10px}
+.cm-replying[hidden]{display:none}
+.cm-replying{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);padding:4px 2px 6px}
+.cm-replying button{background:none;border:0;color:var(--muted);padding:2px}
+.cm-replying .icon{width:14px;height:14px}
+.cm-emoji{display:flex;justify-content:space-between;padding:6px 2px 8px}
+.cm-emoji button{background:none;border:0;font-size:24px;line-height:1;padding:2px;cursor:pointer;transition:transform .12s}
+.cm-emoji button:active{transform:scale(1.25)}
+.comment-sheet.comments form{display:flex;align-items:center;gap:10px;padding:0;border:0}
+.comment-sheet.comments form .account-avatar{width:34px;height:34px}
+.comment-sheet.comments form input{flex:1;border-radius:20px;padding:9px 14px}
+.comment-sheet.comments form button{background:none;border:0;color:#0095f6;font-weight:700;font-size:14px;padding:4px}
+.comment-sheet.comments form button:disabled{opacity:.4}
+/* 피드 댓글 미리보기 */
+.comment-preview p{font-size:13.5px;line-height:1.45;padding:1px 0}
+.comment-preview strong{font-weight:700}
