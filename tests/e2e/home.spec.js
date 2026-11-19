@@ -60,7 +60,9 @@ test.describe('B. 홈·계정', () => {
     const name = (await page.locator('.partner-tile strong').first().textContent()).trim();
     await page.locator('.partner-tile').first().click();
     await expect(page).toHaveURL(/#\/partner\?id=S\d+/);
-    await expect(page.locator('.partner-card h3')).toHaveText(name);
+    // 카드뉴스가 있으면 카드뉴스, 없으면 혜택 상자 — 어느 쪽이든 그 매장 게시물이어야 한다
+    await expect(page.locator('.post-owner small, .partner-card h3, .post-cover img').first()).toBeVisible();
+    await expect(page.locator('.post-cover')).toHaveAttribute('aria-label', new RegExp(name));
   });
 
   test('B3 꿀팁 계정: 게시물 수 = 격자 칸 수, 칸을 누르면 상세', P1, async ({ page }) => {
