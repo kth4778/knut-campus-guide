@@ -35,7 +35,7 @@ const clock = (d = new Date()) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 export const busKey = () => String(window.KNUT_CONFIG?.BUS_API_KEY ?? '').trim();
 
 // 개발계정은 초당 요청 수 제한이 있어서, 요청을 줄 세워 간격을 두고 보내요.
-// 사람이 기다리는 요청(정류장 도착 정보)은 줄 맨 앞에 세워, 20초마다 도는 버스 위치 요청 뒤에서 기다리지 않게 해요.
+// 사람이 기다리는 요청(정류장 도착 정보)은 줄 맨 앞에 세워, 주기적으로 도는 버스 위치 요청 뒤에서 기다리지 않게 해요.
 const queue = {busy:0, wait:[], last:0};
 function apiFetch(url, urgent = false) {
   return new Promise((ok, no) => { queue.wait[urgent ? 'unshift' : 'push']([url, ok, no, urgent]); pump(); });
@@ -253,9 +253,11 @@ export function mountExpress(body, terminal, {extra = ''} = {}) {
 
 // ---------- 실시간 시내버스 위치 (TAGO 버스위치정보) ----------
 // 학교 주변 정류장을 지나는 노선 목록은 data/bus-routes.json (TAGO, 2026-11-12 기준)에 넣어 뒀어요.
-// 하루 호출 한도 때문에 고른 노선(최대 LIVE_MAX개)만 20초마다 위치를 받아요.
+// 하루 호출 한도 때문에 고른 노선(최대 LIVE_MAX개)만 위치를 받아요.
+// 갱신 간격: 노선 1~2개면 10초, 3~4개면 20초 (TAGO 위치는 8~34초 간격으로 바뀌어 10초보다 짧게 해도 소용이 적고,
+// 노선 하나가 방향별로 요청 4~5번이라 노선이 많을 때 짧게 하면 하루 한도가 금방 찬다)
 export const LIVE_MAX = 4;
-export const LIVE_EVERY = 20000;
+export const liveEvery = routes => routes <= 2 ? 10000 : 20000;
 export const liveColor = no => /급행/.test(no) ? '#e5483f' : String(no) === '999' ? '#9b2a2e' : '#4f9a1c';
 export const routeSort = (a, b) => (parseInt(a) || 9999) - (parseInt(b) || 9999) || a.localeCompare(b);
 
@@ -282,8 +284,8 @@ export async function liveBuses(numbers, index) {
   return {buses, error};
 }
 
-export function liveBusInfo(bus) {
+export function liveBusInfo(bus, seconds = 20) {
   return `<p class="transit-sub">${esc(bus.dir)} · 차량 ${esc(bus.vehicleno || '')}</p>
     <p class="live-now">지금 <b>${esc(bus.nodenm || '')}</b> 근처 (${esc(bus.nodeord)}번째 정류장)</p>
-    <p class="transit-foot">20초마다 위치가 갱신돼요</p>`;
+    <p class="transit-foot">${seconds}초마다 위치가 갱신돼요</p>`;
 }

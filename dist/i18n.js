@@ -62,6 +62,7 @@
     '예매는 고속버스 예매 앱에서 해요': ['Book tickets in an express bus app', '请在高速巴士购票App中购票', '予約は高速バス予約アプリで'],
     '노선 불러오는 중…': ['Loading routes…', '正在加载线路…', '路線を読み込み中…'], '노선 목록 없음': ['No routes', '无线路', '路線なし'],
     '20초마다 위치가 갱신돼요': ['Location updates every 20 seconds', '每20秒更新位置', '20秒ごとに位置を更新'],
+    '10초마다 위치가 갱신돼요': ['Location updates every 10 seconds', '每10秒更新位置', '10秒ごとに位置を更新'],
     '고속버스 시간표·요금 · 달리는 버스 실시간 위치': ['Express bus times · fares · live bus location', '高速巴士时刻·票价 · 实时位置', '高速バス時刻・運賃 · リアルタイム位置'],
     '기준 · 30초마다 갱신': ['· updates every 30 s', '· 每30秒更新', '· 30秒ごとに更新'], '기준 · 1분마다 위치 갱신': ['· location every 1 min', '· 每分钟更新位置', '· 1分ごとに位置更新'],
     // 프로필 · 설정

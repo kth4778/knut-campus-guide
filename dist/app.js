@@ -1,5 +1,5 @@
 import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
-  LIVE_MAX, LIVE_EVERY, liveColor, routeSort, routeIndex, liveBuses, liveBusInfo} from './transit.js';
+  LIVE_MAX, liveEvery, liveColor, routeSort, routeIndex, liveBuses, liveBusInfo} from './transit.js';
 
 import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
@@ -693,7 +693,7 @@ function paintTransit() {
   if (!live.on) return;
   for (const bus of live.buses) {
     addPoint(bus.latlng, `<span class="live-bus" style="background:${liveColor(bus.no)}">${escape(bus.no)}</span>`,
-      `${bus.no}번 버스`, () => openSheet(`${bus.no}번 버스`, body => { body.innerHTML = liveBusInfo(bus); }), 1100);
+      `${bus.no}번 버스`, () => openSheet(`${bus.no}번 버스`, body => { body.innerHTML = liveBusInfo(bus, liveEvery(live.picked.size) / 1000); }), 1100);
   }
 }
 
@@ -733,13 +733,15 @@ async function liveStart() {
   if (!live.on) return;
   renderLiveRow();
   livePoll();
-  live.timer = setInterval(() => { if (!document.hidden) livePoll(); }, LIVE_EVERY);
+  // 고른 노선 수에 따라 간격이 바뀌므로 매번 다음 간격을 새로 정한다 (1~2개 10초, 3~4개 20초)
+  const tick = () => { live.timer = setTimeout(() => { if (!document.hidden) livePoll(); if (live.on) tick(); }, liveEvery(live.picked.size)); };
+  tick();
 }
 
 function liveStop() {
   live.on = false;
   live.buses = [];
-  clearInterval(live.timer);
+  clearTimeout(live.timer);
   renderLiveRow();
 }
 

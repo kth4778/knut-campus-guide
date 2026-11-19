@@ -314,6 +314,17 @@ test.describe('E. 버스·고속버스 (고정 응답)', () => {
     await expect(row.locator('[aria-pressed="true"]')).toHaveCount(4);
   });
 
+  test('E7 노선을 1~2개만 고르면 버스 위치를 10초마다 새로 받는다', P1, async ({ page }) => {
+    let polls = 0;
+    page.on('request', request => { if (/getRouteAcctoBusLcList/.test(request.url())) polls++; });
+    await openApp(page, '#/map?category=버스');              // 기본 노선 999 하나
+    await expect(page.locator('.live-bus').first()).toBeVisible();
+    await expect.poll(() => polls).toBeGreaterThan(0);
+    const first = polls;
+    await page.clock.fastForward(10500);
+    await expect.poll(() => polls).toBeGreaterThan(first);   // 20초가 아니라 10초 만에 다시 받는다
+  });
+
   test('E4 고속버스 시간표: 시간·요금이 나오고 이미 떠난 차는 「운행 중」', P1, async ({ page }) => {
     await openApp(page, '#/map?category=고속버스');
     await page.locator('.marker.transit-marker.exp').first().click();
