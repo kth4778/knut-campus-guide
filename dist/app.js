@@ -267,7 +267,7 @@ function postCover(post, grid = false) {
   if (slides.length) {
     // 여러 장: 옆으로 넘겨 보는 카드뉴스 (인스타처럼 오른쪽 위 1/3, 아래 점, 컴퓨터에선 좌우 화살표)
     return `<div class="card-carousel">
-      <div class="card-track">${slides.map((src, i) => `<img class="cover-image card-image" src="assets/${escape(src)}" alt="${escape(post.name)} 카드뉴스 ${i + 1}/${slides.length}" loading="lazy" draggable="false">`).join('')}</div>
+      <div class="card-track" tabindex="0" role="group" aria-label="${escape(post.name)} 카드뉴스 ${slides.length}장 · 좌우 화살표로 넘기기">${slides.map((src, i) => `<img class="cover-image card-image" src="assets/${escape(src)}" alt="${escape(post.name)} 카드뉴스 ${i + 1}/${slides.length}" loading="lazy" draggable="false">`).join('')}</div>
       <span class="card-count">1/${slides.length}</span>
       <button type="button" class="card-nav prev" data-action="card-step" data-step="-1" aria-label="이전 장" hidden>‹</button>
       <button type="button" class="card-nav next" data-action="card-step" data-step="1" aria-label="다음 장">›</button>
