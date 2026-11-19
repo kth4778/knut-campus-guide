@@ -5,10 +5,10 @@ const P0 = { tag: '@P0' };
 const P1 = { tag: '@P1' };
 
 test.describe('A. 앱 시작·공통', () => {
-  test('A1 첫 화면: 장소 데이터 385개를 받고 홈 피드가 그려진다', P0, async ({ page }) => {
+  test('A1 첫 화면: 장소 데이터 484개를 받고 홈 피드가 그려진다', P0, async ({ page }) => {
     const data = page.waitForResponse(r => r.url().includes('/data/places.json'));
     await openApp(page);
-    expect((await (await data).json()).length).toBe(385);
+    expect((await (await data).json()).length).toBe(484);
     await expect(page.locator('.feed-post').first()).toBeVisible();
     expect(await page.locator('.feed-post').count()).toBeGreaterThan(10);
   });
