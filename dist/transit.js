@@ -2,42 +2,46 @@
 // API 키는 config.js 의 window.KNUT_CONFIG.BUS_API_KEY 에서 읽어요. 없으면 위치와 지도 링크만 보여요.
 
 // 학교 주변 시내버스 정류장 (위치 © OpenStreetMap 기여자, no = 정류장 번호)
+// node = TAGO 정류소 ID (충주시). 미리 적어 두어 정류장을 누르면 「정류소 찾기」 없이 바로 도착 정보를 묻는다
+//   (2026-11-19 TAGO 좌표 근처 정류소 조회로 번호 → 이름 → 거리 순으로 맞춤)
 export const BUS_STOPS = [
-  {id:"bus8069151342", name:"검단리", no:"", latlng:[36.9670611, 127.8755407]},
-  {id:"bus7883538065", name:"교통대(철도뒷길.시내방향)", no:"", latlng:[36.9620796, 127.871188]},
-  {id:"bus7883538064", name:"교통대(철도뒷편.대소원방향)", no:"", latlng:[36.9621826, 127.8708181]},
-  {id:"bus7883538058", name:"상검단", no:"", latlng:[36.9638845, 127.8637894]},
-  {id:"bus7899541878", name:"상검단(상검단교)", no:"64070", latlng:[36.9678433, 127.8658047]},
-  {id:"bus7899541877", name:"상검단(상검단교건너편)", no:"43028", latlng:[36.9679595, 127.8658358]},
-  {id:"bus7945418661", name:"하검단리(하검단교)", no:"", latlng:[36.9723034, 127.8781254]},
-  {id:"bus7945418662", name:"하검단리(하검단교건너편)", no:"", latlng:[36.972371, 127.8780343]},
-  {id:"bus7258635086", name:"한국교통대 (대학본부)", no:"43069", latlng:[36.9707078, 127.8719474]},
-  {id:"bus7258635087", name:"한국교통대 (대학본부건너편)", no:"43077", latlng:[36.970621, 127.8718724]},
-  {id:"bus12299733741", name:"한국교통대 (스마트ICT관)", no:"64643", latlng:[36.9705303, 127.8746056]},
-  {id:"bus12684305967", name:"한국교통대 (정문)", no:"43075", latlng:[36.9667185, 127.8721183]},
-  {id:"bus7258635085", name:"한국교통대 (체육관)", no:"43076", latlng:[36.967993, 127.8715393]},
-  {id:"bus7258635084", name:"한국교통대 (체육관건너편)", no:"43071", latlng:[36.9680665, 127.8718082]},
-  {id:"bus7881714883", name:"한국교통대 (회차지)", no:"43078", latlng:[36.9727647, 127.8707643]},
-  {id:"bus7883538059", name:"한국교통대(농협)", no:"43070", latlng:[36.9630457, 127.8700693]},
-  {id:"bus4654355183", name:"한국교통대(농협.건너편)", no:"43072", latlng:[36.9625221, 127.8715314]},
-  {id:"bus8059307234", name:"한국교통대(시내방향)", no:"43073", latlng:[36.9652493, 127.8711099]},
-  {id:"bus8059307233", name:"한국교통대(요거프레소앞)", no:"", latlng:[36.9645239, 127.8709608]},
-  {id:"bus8059307235", name:"한국교통대(정문방향)", no:"43074", latlng:[36.9652033, 127.8714065]},
+  {id:"bus8069151342", name:"검단리", no:"", latlng:[36.9670611, 127.8755407], node:"CHB272043004"},
+  {id:"bus7883538065", name:"교통대(철도뒷길.시내방향)", no:"", latlng:[36.9620796, 127.871188], node:"CHB272064450"},
+  {id:"bus7883538064", name:"교통대(철도뒷편.대소원방향)", no:"", latlng:[36.9621826, 127.8708181], node:"CHB272064449"},
+  {id:"bus7883538058", name:"상검단", no:"", latlng:[36.9638845, 127.8637894], node:"CHB272043027"},
+  {id:"bus7899541878", name:"상검단(상검단교)", no:"64070", latlng:[36.9678433, 127.8658047], node:"CHB272064070"},
+  {id:"bus7899541877", name:"상검단(상검단교건너편)", no:"43028", latlng:[36.9679595, 127.8658358], node:"CHB272043028"},
+  {id:"bus7945418661", name:"하검단리(하검단교)", no:"", latlng:[36.9723034, 127.8781254], node:"CHB272043066"},
+  {id:"bus7945418662", name:"하검단리(하검단교건너편)", no:"", latlng:[36.972371, 127.8780343], node:"CHB272043067"},
+  {id:"bus7258635086", name:"한국교통대 (대학본부)", no:"43069", latlng:[36.9707078, 127.8719474], node:"CHB272043069"},
+  {id:"bus7258635087", name:"한국교통대 (대학본부건너편)", no:"43077", latlng:[36.970621, 127.8718724], node:"CHB272043077"},
+  {id:"bus12299733741", name:"한국교통대 (스마트ICT관)", no:"64643", latlng:[36.9705303, 127.8746056], node:"CHB272064643"},
+  {id:"bus12684305967", name:"한국교통대 (정문)", no:"43075", latlng:[36.9667185, 127.8721183], node:"CHB272043075"},
+  {id:"bus7258635085", name:"한국교통대 (체육관)", no:"43076", latlng:[36.967993, 127.8715393], node:"CHB272043076"},
+  {id:"bus7258635084", name:"한국교통대 (체육관건너편)", no:"43071", latlng:[36.9680665, 127.8718082], node:"CHB272043071"},
+  {id:"bus7881714883", name:"한국교통대 (회차지)", no:"43078", latlng:[36.9727647, 127.8707643], node:"CHB272043078"},
+  {id:"bus7883538059", name:"한국교통대(농협)", no:"43070", latlng:[36.9630457, 127.8700693], node:"CHB272043070"},
+  {id:"bus4654355183", name:"한국교통대(농협.건너편)", no:"43072", latlng:[36.9625221, 127.8715314], node:"CHB272043072"},
+  {id:"bus8059307234", name:"한국교통대(시내방향)", no:"43073", latlng:[36.9652493, 127.8711099], node:"CHB272043073"},
+  {id:"bus8059307233", name:"한국교통대(요거프레소앞)", no:"", latlng:[36.9645239, 127.8709608], node:"CHB272043073"},
+  {id:"bus8059307235", name:"한국교통대(정문방향)", no:"43074", latlng:[36.9652033, 127.8714065], node:"CHB272043074"},
 ];
 
 const BUS_API = 'https://apis.data.go.kr/1613000';
+const CITY = 33020; // 충주시
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2, '0');
 const clock = (d = new Date()) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
 export const busKey = () => String(window.KNUT_CONFIG?.BUS_API_KEY ?? '').trim();
 
 // 개발계정은 초당 요청 수 제한이 있어서, 요청을 줄 세워 간격을 두고 보내요.
+// 사람이 기다리는 요청(정류장 도착 정보)은 줄 맨 앞에 세워, 20초마다 도는 버스 위치 요청 뒤에서 기다리지 않게 해요.
 const queue = {busy:0, wait:[], last:0};
-function apiFetch(url) {
-  return new Promise((ok, no) => { queue.wait.push([url, ok, no]); pump(); });
+function apiFetch(url, urgent = false) {
+  return new Promise((ok, no) => { queue.wait[urgent ? 'unshift' : 'push']([url, ok, no, urgent]); pump(); });
 }
 function pump() {
-  if (queue.busy >= 2 || !queue.wait.length) return;
+  if (!queue.wait.length || queue.busy >= (queue.wait[0][3] ? 3 : 2)) return; // 급한 요청은 한 칸 더 열어 준다
   const gap = 150 - (Date.now() - queue.last);
   if (gap > 0) { setTimeout(pump, gap); return; }
   const [url, ok, no] = queue.wait.shift();
@@ -47,17 +51,17 @@ function pump() {
   pump();
 }
 
-async function tago(path, params, retry = 1) {
+async function tago(path, params, {retry = 1, urgent = false} = {}) {
   const query = new URLSearchParams({numOfRows:100, pageNo:1, _type:'json', ...params});
   // 인코딩된 키를 그대로 붙여야 해요 (URLSearchParams 로 넣으면 한 번 더 인코딩돼요)
-  const response = await apiFetch(`${BUS_API}/${path}?serviceKey=${busKey()}&${query}`);
+  const response = await apiFetch(`${BUS_API}/${path}?serviceKey=${busKey()}&${query}`, urgent);
   let data;
   try { data = await response.json(); }
   catch { throw new Error(response.status === 403 ? '키가 등록되지 않았어요' : '응답 오류 ' + response.status); }
   const errMsg = data.OpenAPI_ServiceResponse?.cmmMsgHeader?.errMsg || '';
   if (/PER_SECOND/.test(errMsg) && retry) {
-    await new Promise(wait => setTimeout(wait, 1100));
-    return tago(path, params, retry - 1);
+    await new Promise(wait => setTimeout(wait, 400));
+    return tago(path, params, {retry:retry - 1, urgent});
   }
   const head = data.response?.header;
   if (!head) throw new Error(errMsg || '응답 오류 ' + response.status);
@@ -68,18 +72,25 @@ async function tago(path, params, retry = 1) {
 
 // ---------- 시내버스 정류장: 실시간 도착 ----------
 const stopNodes = {};
+const squash = text => String(text).replace(/[\s.()·]/g, '').replace('한국교통대', '교통대');
 async function arrivals(stop) {
   if (!stopNodes[stop.id]) {
-    const [lat, lng] = stop.latlng;
-    const near = await tago('BusSttnInfoInqireService/getCrdntPrxmtSttnList', {gpsLati:lat, gpsLong:lng, numOfRows:30});
-    if (!near.length) throw new Error('정류장을 찾지 못했어요');
-    const dist = node => Math.hypot(node.gpslati - lat, node.gpslong - lng);
-    stopNodes[stop.id] = near.find(node => stop.no && String(node.nodeno) === stop.no) || near.sort((a, b) => dist(a) - dist(b))[0];
+    if (stop.node) stopNodes[stop.id] = {citycode:CITY, nodeid:stop.node};
+    else { // 정류소 ID를 모르는 정류장만: 좌표 근처 정류소를 찾아 번호 → 이름 → 거리 순으로 고른다
+      const [lat, lng] = stop.latlng;
+      const near = await tago('BusSttnInfoInqireService/getCrdntPrxmtSttnList', {gpsLati:lat, gpsLong:lng, numOfRows:30}, {urgent:true});
+      if (!near.length) throw new Error('정류장을 찾지 못했어요');
+      const dist = node => Math.hypot(node.gpslati - lat, node.gpslong - lng);
+      stopNodes[stop.id] = near.find(node => stop.no && String(node.nodeno) === stop.no)
+        || near.find(node => squash(node.nodenm) === squash(stop.name)) || near.sort((a, b) => dist(a) - dist(b))[0];
+    }
   }
   const node = stopNodes[stop.id];
-  const list = await tago('ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList', {cityCode:node.citycode, nodeId:node.nodeid, numOfRows:50});
+  const list = await tago('ArvlInfoInqireService/getSttnAcctoArvlPrearngeInfoList', {cityCode:node.citycode, nodeId:node.nodeid, numOfRows:50}, {urgent:true});
   return list.sort((a, b) => a.arrtime - b.arrtime);
 }
+// 마지막으로 받은 도착 정보 (정류장을 다시 열면 기다리지 않고 먼저 보여 주고 뒤에서 새로 받는다)
+const arrivalCache = {};
 
 export function mapLinks(name, [lat, lng]) {
   const naver = `https://map.naver.com/p/search/${encodeURIComponent(name)}?c=${lng},${lat},17,0,0,0,dh`;
@@ -96,7 +107,7 @@ export function mountBusStop(body, stop, {onLive} = {}) {
   }
   body.innerHTML = head + '<div class="transit-live"><p class="transit-note">도착 정보를 불러오는 중…</p></div>' + mapLinks(stop.name, stop.latlng);
   let alive = true;
-  const load = () => arrivals(stop).then(list => {
+  const draw = (list, at) => {
     const box = alive && body.querySelector('.transit-live');
     if (!box) return;
     box.innerHTML = (list.length
@@ -108,10 +119,16 @@ export function mountBusStop(body, stop, {onLive} = {}) {
             ${onLive ? `<button type="button" class="pill" data-live="${esc(route)}">위치</button>` : ''}</li>`;
         }).join('')}</ul>`
       : '<p class="transit-note">지금 도착 예정인 버스가 없어요.</p>')
-      + `<p class="transit-foot">${clock()} 기준 · 30초마다 갱신 <button type="button" data-refresh>새로고침</button></p>`;
+      + `<p class="transit-foot">${clock(at)} 기준 · 30초마다 갱신 <button type="button" data-refresh>새로고침</button></p>`;
+  };
+  const cached = arrivalCache[stop.id];
+  if (cached && Date.now() - cached.at < 120000) draw(cached.list, new Date(cached.at)); // 2분 안에 본 정류장은 바로 보여 준다
+  const load = () => arrivals(stop).then(list => {
+    arrivalCache[stop.id] = {list, at:Date.now()};
+    draw(list, new Date());
   }).catch(error => {
     const box = alive && body.querySelector('.transit-live');
-    if (box) box.innerHTML = `<p class="transit-note">도착 정보를 못 불러왔어요 (${esc(error.message)})</p>`;
+    if (box && !box.querySelector('.arrivals')) box.innerHTML = `<p class="transit-note">도착 정보를 못 불러왔어요 (${esc(error.message)})</p>`;
   });
   body.onclick = event => {
     const live = event.target.closest('[data-live]');
@@ -237,7 +254,6 @@ export function mountExpress(body, terminal, {extra = ''} = {}) {
 // ---------- 실시간 시내버스 위치 (TAGO 버스위치정보) ----------
 // 학교 주변 정류장을 지나는 노선 목록은 data/bus-routes.json (TAGO, 2026-11-12 기준)에 넣어 뒀어요.
 // 하루 호출 한도 때문에 고른 노선(최대 LIVE_MAX개)만 20초마다 위치를 받아요.
-const CITY = 33020; // 충주시
 export const LIVE_MAX = 4;
 export const LIVE_EVERY = 20000;
 export const liveColor = no => /급행/.test(no) ? '#e5483f' : String(no) === '999' ? '#9b2a2e' : '#4f9a1c';

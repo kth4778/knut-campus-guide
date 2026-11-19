@@ -274,6 +274,22 @@ test.describe('E. 버스·고속버스 (고정 응답)', () => {
     await expect(sheet.locator('.arrivals li').nth(1)).toContainText('7분 후');
   });
 
+  test('E6 정류장을 누르면 정류소 찾기 없이 바로 도착 정보를 묻고(정류소 ID 미리 저장), 다시 열면 바로 보인다', P1, async ({ page }) => {
+    const asked = [];
+    page.on('request', request => { if (/apis\.data\.go\.kr/.test(request.url())) asked.push(request.url()); });
+    await openApp(page, '#/map?category=버스');
+    await page.locator('.marker.transit-marker.bus').first().click();
+    const sheet = page.locator('dialog.transit-sheet');
+    await expect(sheet.locator('.arrivals li').first()).toBeVisible();
+    expect(asked.filter(url => /getCrdntPrxmtSttnList/.test(url))).toEqual([]);
+    expect(asked.find(url => /getSttnAcctoArvlPrearngeInfoList/.test(url))).toMatch(/nodeId=CHB272\d+/);
+    await page.keyboard.press('Escape');
+    await expect(sheet).toBeHidden();
+    await page.route(/getSttnAcctoArvlPrearngeInfoList/, () => {}); // 두 번째는 응답이 안 와도
+    await page.locator('.marker.transit-marker.bus').first().click();
+    await expect(page.locator('dialog.transit-sheet .arrivals li').first()).toBeVisible(); // 지난 결과가 바로 보인다
+  });
+
   test.describe('키 없음', () => {
     test.use({ busKey: false });
     test('E2 키가 없으면 안내만 나오고 오류는 없다', P1, async ({ page }) => {
