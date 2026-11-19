@@ -248,7 +248,8 @@
   const textOrig = new WeakMap(), textOut = new WeakMap();
   const attrOrig = new WeakMap();
   const ATTRS = ['aria-label', 'placeholder', 'title', 'alt'];
-  const SKIP = '.chat-msg:not(.chat-intro), script, style, textarea, .lang, .leaflet-control-attribution';
+  // 가게·장소 이름은 번역하지 않는다 (게시물 주인 이름, 기본 그림 속 이름, 격자 이름)
+  const SKIP = '.chat-msg:not(.chat-intro), script, style, textarea, .lang, .leaflet-control-attribution, .post-owner strong, .cover-art strong, .grid-name';
 
   // 사전에 없는 내용(가게 이름·후기·혜택 등)은 Google 번역으로 바꾸고, 이 브라우저에 기억해 둬요
   const TL = {en: 'en', zh: 'zh-CN', ja: 'ja'};

@@ -134,6 +134,7 @@ export function accountPage(id, params) {
           <div class="profile-counts">${counts.map(([n, label]) => `<span><b>${escape(n)}</b>${label}</span>`).join('')}</div>
         </div></div>
         <p>${escape(account.bio)}</p>
+        ${account.kind === 'tip' ? `<a class="pill tip-cta" href="${route('tip', {account:account.id})}">이 계정에 꿀팁 제보하기</a>` : ''}
       </section>
       ${chips}
       ${grid}

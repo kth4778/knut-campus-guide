@@ -3,7 +3,7 @@
 // - 층별 안내(그 층에 어떤 부서·시설이 있는지)는 학교 캠퍼스지도에서 모은 data/buildings.json 을 쓴다
 //   (만드는 법: scripts/collect_buildings.py → scripts/export_buildings.py)
 // - 실제 도면(방 위치)은 데이터에 없어서 그리지 않는다
-// - 건물 사진은 그 건물 장소에 붙은 실제 사진(위키미디어 공용)이 있을 때만 쓴다
+// - 건물 사진: 2014년 위키미디어 사진은 빼고, 팀이 새로 찍은 사진이 생기면 넣는다
 
 const NOT_BUILDING = new Set(['', '원본 지도 제보 지점']);
 let ctx = null;            // app.js 에서 넘겨받는 도구 (escape, route, top, iconLink, placeRow, icon)
@@ -86,7 +86,7 @@ export async function initBuildings(tools, places) {
       if (!building.floors.has(floor)) building.floors.set(floor, []);
       building.floors.get(floor).push(place);
     }
-    building.photo = building.places.find(p => p.cover?.asset)?.cover || null;
+    building.photo = null; // 2014년 위키미디어 사진은 너무 옛날이라 쓰지 않는다 (팀이 새로 찍은 사진이 생기면 여기서 연결)
     building.type = typeOf(building.official?.name || building.name);
   }
 }

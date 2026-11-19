@@ -274,9 +274,6 @@ function postCover(post, grid = false) {
       <div class="card-dots" aria-hidden="true">${slides.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div>
     </div>`;
   }
-  if (post.cover) {
-    return `<img class="cover-image" src="assets/${escape(post.cover.asset)}" alt="${escape(post.cover.note)}" loading="lazy">`;
-  }
   const info = categoryInfo.get(post.category) || categoryInfo.get('전체');
   const area = post.area === '장소 없음' ? '' : post.area;
   return `<div class="cover-art" data-cat="${escape(post.category)}">
@@ -285,13 +282,6 @@ function postCover(post, grid = false) {
   </div>`;
 }
 
-function creditLine(post) {
-  if (!post.cover?.page) return '';
-  return `<div class="cover-credit">${escape(post.cover.note)} ·
-    <a href="${safeUrl(post.cover.page)}" target="_blank" rel="noopener">${escape(post.cover.author)} / Wikimedia Commons</a> ·
-    <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>
-  </div>`;
-}
 
 // 인스타그램처럼: 아이콘만 있는 줄(♡ 💬 ✈︎ 📍 … 🔖) → 추천 수 → 캡션 2줄 → 댓글 → 날짜
 function postActions(post) {
@@ -334,7 +324,6 @@ function feedPost(post) {
       ${iconLink('more','게시물 열기',url)}
     </header>
     <div class="post-cover" data-like-area="${post.id}" aria-label="${escape(post.name)} 사진 · 두 번 누르면 좋아요">${postCover(post)}<span class="like-burst" aria-hidden="true"></span></div>
-    ${creditLine(post)}
     ${postActions(post)}
     ${postCaption(post, url)}
   </article>`;
@@ -496,12 +485,46 @@ function composePage() {
         </fieldset>
         <label class="field"><span>제목</span><input name="name" placeholder="장소나 기록 이름" required maxlength="60"></label>
         <label class="field"><span>내용</span><textarea name="caption" placeholder="문구를 입력하세요…" required maxlength="500"></textarea><small class="count">0/500</small></label>
-        <p class="compose-note">게시물은 이 브라우저에 저장됩니다.</p>
+        <p class="compose-note">게시물은 이 브라우저에 저장됩니다. 학교 꿀팁이라면 <a href="${route('tip')}">꿀팁 제보</a>로 보내 주세요 — 모두에게 보여요.</p>
         <p class="form-error" role="status"></p>
         <button class="primary compose-submit" type="submit">게시</button>
       </form>
     </main>`;
 }
+
+// 꿀팁 제보: 학생이 보낸 팁은 팀이 확인한 뒤 게시물·카드뉴스로 올린다.
+// 이 앱은 서버가 없어서, 공개 저장소 GitHub 이슈(「꿀팁 제보」)로 미리 채워 열어 준다 (GitHub 로그인 필요)
+const TIP_REPO = 'https://github.com/kth4778/knut-campus-guide/issues/new';
+const TIP_ACCOUNTS = ['학사·장학 팁', '생활·주거 팁', '교통 팁', '식사 팁'];
+function tipPage(params) {
+  const pick = TIP_ACCOUNTS.includes(params.get('account')) ? params.get('account') : TIP_ACCOUNTS[0];
+  return `${top('꿀팁 제보',iconLink('back','뒤로',placeBack))}
+    <main class="scroll compose">
+      <form id="tip-form" class="compose-form">
+        <p class="tip-lead">선배·동기만 아는 학교 꿀팁을 알려 주세요. 팀이 확인한 뒤 카드뉴스로 올려요.</p>
+        <fieldset class="cat-pick"><legend>어느 계정에 올릴까요</legend>
+          <div>${TIP_ACCOUNTS.map(name => `<label><input type="radio" name="account" value="${name}" ${name === pick ? 'checked' : ''}><span>${name}</span></label>`).join('')}</div>
+        </fieldset>
+        <label class="field"><span>제목</span><input name="title" placeholder="예: 휴학 신청하는 법" required maxlength="40"></label>
+        <label class="field"><span>내용</span><textarea name="body" placeholder="언제·어디서·어떻게를 적어 주세요" required maxlength="500"></textarea></label>
+        <label class="field"><span>어디서 알게 됐나요 (선택)</span><input name="source" placeholder="예: 학교 홈페이지 공지, 직접 겪음" maxlength="80"></label>
+        <label class="tip-agree"><input type="checkbox" name="agree" required><span>이름·연락처·학번 같은 개인정보는 적지 않았어요. 앱에 소개되는 것에 동의해요.</span></label>
+        <p class="compose-note">보내기를 누르면 GitHub 「꿀팁 제보」 창이 열려요. 거기서 한 번 더 제출해 주세요.</p>
+        <button class="primary compose-submit" type="submit">보내기</button>
+      </form>
+    </main>`;
+}
+
+app.addEventListener('submit', event => {
+  const form = event.target;
+  if (form.id !== 'tip-form') return;
+  event.preventDefault();
+  const f = new FormData(form);
+  const body = `### 계정\n${f.get('account')}\n\n### 내용\n${f.get('body').trim()}\n\n### 출처\n${(f.get('source') || '').trim() || '(적지 않음)'}\n\n— KNUTIPS 앱 꿀팁 제보`;
+  const url = `${TIP_REPO}?${new URLSearchParams({title:`[꿀팁 제보] ${f.get('title').trim()}`, body, labels:'꿀팁 제보'})}`;
+  window.open(url, '_blank', 'noopener');
+  toast('GitHub 창에서 제출하면 접수돼요. 고마워요!');
+});
 
 // 새 게시물: 고른 사진 미리보기, 내용 글자 수
 app.addEventListener('change', event => {
@@ -1091,6 +1114,7 @@ function render() {
   } else if (path === 'settings') app.innerHTML = settingsPage();
   else if (path === 'profile-edit') app.innerHTML = profileEditPage();
   else if (path === 'compose') app.innerHTML = composePage();
+  else if (path === 'tip') app.innerHTML = tipPage(params);
   else if (path === 'post') app.innerHTML = localPostPage(findPost(params.get('id')));
   else if (path === 'place') app.innerHTML = placePage(place);
   else if (path === 'account') app.innerHTML = accountPage(params.get('id'), params);
@@ -1098,7 +1122,7 @@ function render() {
   else if (path === 'building') app.innerHTML = buildingPage(params.get('name'), params);
   else app.innerHTML = home(category);
   if (keepScroll) { const scroller = app.querySelector('.scroll'); if (scroller) scroller.scrollTop = keepScroll; }
-  renderNav(path === 'building' ? 'map' : ['place','account','partner'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
+  renderNav(path === 'building' ? 'map' : ['place','account','partner','tip'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
 }
 
 function toast(message) {
@@ -1348,7 +1372,7 @@ async function start() {
       isLiked:id => likes.has(id),
       likeButton:id => button(likes.has(id)?'heartFilled':'heart',likes.has(id)?'좋아요 취소':'좋아요','like',`data-id="${id}" aria-pressed="${likes.has(id)}"`)});
     window.addEventListener('hashchange', event => {
-      if (['place','compose','post'].includes(readRoute()[0]) && readRoute()[0] !== currentView) {
+      if (['place','compose','post','tip'].includes(readRoute()[0]) && readRoute()[0] !== currentView) {
         placeBack = new URL(event.oldURL).hash || '#/';
       }
       render();

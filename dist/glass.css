@@ -56,6 +56,7 @@
 #app > .top{position:relative;z-index:40;border-bottom:0;background:var(--glass-tint-strong);box-shadow:inset 0 -.5px 0 rgba(255,255,255,.1),0 6px 18px -10px rgba(0,0,0,.5)}
 #app > .top:has(+ .scroll){position:absolute;left:0;right:0;top:var(--app-top)}
 #app > .top + .scroll{padding-top:var(--top-h)}
+#app > .top + .scroll.compose{padding-top:calc(var(--top-h) + 14px)} /* 글쓰기·제보 화면은 원래 위 여백을 살린다 */
 
 /* ---------- 칩: 작은 유리 알약 ---------- */
 .chip{background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.03));border:0;color:var(--text);
