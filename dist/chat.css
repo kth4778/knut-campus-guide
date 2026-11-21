@@ -80,3 +80,7 @@
 .match-box>*,.match-form>*,.mm-me>*,.mm-me select{min-width:0}
 .mm-me select{width:100%}
 .chat-log{overflow-x:hidden}
+/* 누티 답변: 장소 칩은 말풍선 아래 줄로 (한 줄에 두면 말풍선이 한두 글자 폭으로 눌림) */
+.chat-msg.bot{flex-wrap:wrap}
+.chat-msg.bot>p{flex:0 1 auto;min-width:0;max-width:calc(100% - 46px)}
+.chat-msg.bot>.chat-refs{flex:1 0 100%;padding-left:45px;margin-top:-1px}
