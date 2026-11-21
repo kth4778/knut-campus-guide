@@ -3,7 +3,9 @@
 // - 층별 안내(그 층에 어떤 부서·시설이 있는지)는 학교 캠퍼스지도에서 모은 data/buildings.json 을 쓴다
 //   (만드는 법: scripts/collect_buildings.py → scripts/export_buildings.py)
 // - 실제 도면(방 위치)은 데이터에 없어서 그리지 않는다
-// - 건물 사진: 2014년 위키미디어 사진은 빼고, 팀이 새로 찍은 사진이 생기면 넣는다
+// - 건물 사진: 2014년 위키미디어 사진은 빼고, 팀이 모은 사진(photos.js 의 BUILDING_PHOTOS)을 넣는다
+
+import {BUILDING_PHOTOS} from './photos.js';
 
 const NOT_BUILDING = new Set(['', '원본 지도 제보 지점']);
 let ctx = null;            // app.js 에서 넘겨받는 도구 (escape, route, top, iconLink, placeRow, icon)
@@ -86,7 +88,9 @@ export async function initBuildings(tools, places) {
       if (!building.floors.has(floor)) building.floors.set(floor, []);
       building.floors.get(floor).push(place);
     }
-    building.photo = null; // 2014년 위키미디어 사진은 너무 옛날이라 쓰지 않는다 (팀이 새로 찍은 사진이 생기면 여기서 연결)
+    // 2014년 위키미디어 사진은 너무 옛날이라 쓰지 않고, 팀이 모은 사진(photos.js)만 공식 건물 번호로 연결한다
+    const teamPhoto = BUILDING_PHOTOS[building.official?.code];
+    building.photo = teamPhoto ? {asset:teamPhoto} : null;
     building.type = typeOf(building.official?.name || building.name);
   }
 }
@@ -252,7 +256,7 @@ export function buildingPage(name, params) {
   const guideTotal = guideCount(building);
   const photo = building.photo
     ? `<figure class="building-photo"><img src="assets/${escape(building.photo.asset)}" alt="${escape(building.name)} 사진">
-        <figcaption>${escape(building.photo.note || '')} · ${escape(building.photo.author || '')} / Wikimedia Commons · CC BY-SA 4.0</figcaption></figure>`
+        ${building.photo.author ? `<figcaption>${escape(building.photo.note || '')} · ${escape(building.photo.author)} / Wikimedia Commons · CC BY-SA 4.0</figcaption>` : ''}</figure>`
     : '';
   const stack = range.length ? isoStack(building, range, picked) : '';
   const facts = [range[0] > 0 && `지상 ${range[0]}층`, range.at(-1) < 0 && `지하 ${-range.at(-1)}층`, guideTotal && `학교 안내 ${guideTotal}곳`, building.places.length && `누팁스 장소 ${building.places.length}곳`].filter(Boolean).join(' · ');

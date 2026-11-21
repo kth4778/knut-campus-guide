@@ -1,0 +1,2 @@
+/* 실제 사진 (photos.js): 카드뉴스 틀(4:5) 안에서 잘리지 않게 통째로 보여 주고, 남는 칸은 어둡게 */
+.real-photo{object-fit:contain;background:#0d1114}

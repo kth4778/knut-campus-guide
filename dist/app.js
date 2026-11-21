@@ -5,6 +5,7 @@ import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
 import {mealRoomPage, mountMealRoom} from './meal-room.js';
+import {PLACE_PHOTOS} from './photos.js';
 import {initShare, openShare} from './share.js';
 import {initBuildings, floorOf, buildingOf, buildingPinHtml, buildingPage, mapBuildings, buildingMarkHtml, guideCount, shortName} from './buildings.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
@@ -265,14 +266,19 @@ function postCover(post, grid = false) {
   if (post.local && post.image) {
     return `<img class="cover-image" src="${escape(post.image)}" alt="" loading="lazy">`;
   }
-  const slides = cardList(post.id);
+  // 실제 사진(photos.js)이 있으면 게시물에서는 사진이 첫 장. 검색 격자 썸네일은 카드뉴스 그대로
+  const photo = grid ? null : PLACE_PHOTOS[post.id];
+  const slides = photo ? [photo, ...cardList(post.id)] : cardList(post.id);
+  const slide = (src, alt) => src === photo
+    ? `<img class="cover-image card-image real-photo" src="assets/${escape(src)}" alt="${escape(post.name)} 사진" loading="lazy" draggable="false">`
+    : `<img class="cover-image card-image" src="assets/${escape(src)}" alt="${alt}" loading="lazy" draggable="false">`;
   if (slides.length === 1 || (slides.length && grid)) {
-    return `<img class="cover-image card-image" src="assets/${escape(slides[0])}" alt="${escape(post.name)} 카드뉴스" loading="lazy">`;
+    return slide(slides[0], `${escape(post.name)} 카드뉴스`);
   }
   if (slides.length) {
     // 여러 장: 옆으로 넘겨 보는 카드뉴스 (인스타처럼 오른쪽 위 1/3, 아래 점, 컴퓨터에선 좌우 화살표)
     return `<div class="card-carousel">
-      <div class="card-track" tabindex="0" role="group" aria-label="${escape(post.name)} 카드뉴스 ${slides.length}장 · 좌우 화살표로 넘기기">${slides.map((src, i) => `<img class="cover-image card-image" src="assets/${escape(src)}" alt="${escape(post.name)} 카드뉴스 ${i + 1}/${slides.length}" loading="lazy" draggable="false">`).join('')}</div>
+      <div class="card-track" tabindex="0" role="group" aria-label="${escape(post.name)} 카드뉴스 ${slides.length}장 · 좌우 화살표로 넘기기">${slides.map((src, i) => slide(src, `${escape(post.name)} 카드뉴스 ${i + 1}/${slides.length}`)).join('')}</div>
       <span class="card-count">1/${slides.length}</span>
       <button type="button" class="card-nav prev" data-action="card-step" data-step="-1" aria-label="이전 장" hidden>‹</button>
       <button type="button" class="card-nav next" data-action="card-step" data-step="1" aria-label="다음 장">›</button>
