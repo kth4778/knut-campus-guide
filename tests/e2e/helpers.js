@@ -51,6 +51,8 @@ const test = base.extend({
         contentType: 'text/javascript',
         body: `window.KNUT_CONFIG = { BUS_API_KEY: '${busKey ? 'TEST-KEY' : ''}' };`,
       }));
+      // 혼밥 매칭은 실제 Firebase 에 붙지 않고 데모로 (가짜 Firebase 는 H5 가 따로 붙인다)
+      await page.route(/firebase-config\.js/, route => route.fulfill({ contentType: 'text/javascript', body: 'window.KNUT_FIREBASE = null;' }));
       await page.route(/apis\.data\.go\.kr/, route => {
         const hit = TAGO.find(([pattern]) => pattern.test(route.request().url()));
         return hit ? route.fulfill({ contentType: 'application/json', headers: CORS, body: tago(hit[1]) }) : route.abort();

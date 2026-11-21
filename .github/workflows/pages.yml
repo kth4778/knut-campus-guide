@@ -54,6 +54,14 @@ jobs:
           if [ -n "$BUS_API_KEY" ]; then
             printf "window.KNUT_CONFIG = { BUS_API_KEY: '%s' };\n" "$BUS_API_KEY" > dist/config.js
           fi
+      # 저장소 Secret 'FIREBASE_CONFIG'(Firebase 웹 앱 설정 JSON)가 있으면 혼밥 친구 매칭이 실제 학우끼리 동작해요. 없으면 데모
+      - name: Firebase 설정 넣기
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
+        run: |
+          if [ -n "$FIREBASE_CONFIG" ]; then
+            printf "window.KNUT_FIREBASE = %s;\n" "$FIREBASE_CONFIG" > dist/firebase-config.js
+          fi
       # GitHub Pages는 파일을 10분 동안 캐시해서 새로고침해도 옛 화면이 보여요.
       # 배포할 때마다 우리 js·css·json 주소 뒤에 ?v=커밋 을 붙여 새 파일을 받게 해요 (배포본만, git 원본은 그대로)
       - name: 캐시 무효화용 버전 붙이기

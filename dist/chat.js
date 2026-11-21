@@ -3,7 +3,8 @@
 // 대화 기록과 연결 설정은 이 브라우저(localStorage)에만 저장돼요.
 
 import {stickerImg, stickerButton, stickerPanel, stickerLabel, stickerSrc, isSticker} from './stickers.js';
-import {MATCH_RE, matchFormCard, matchResultCard, readProfile, profileSummary, runMatch, buddyName} from './meal-match.js';
+import {MATCH_RE, matchFormCard, matchResultCard, readProfile, profileSummary, runMatch, findPick, inboxCard, toBuddy, loadProfile} from './meal-match.js';
+import {mealStore} from './meal-store.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm = value => String(value ?? '').normalize('NFKC').toLowerCase();
@@ -21,14 +22,24 @@ const STOP = new Set(['어디','어디서','어디야','추천','추천해줘','
 let messages = read(LOG, []);
 let busy = false;
 let getPlaces = () => [];
+// 혼밥 매칭 공용 저장소 (Firebase). 연결 설정이 없으면 null 이라 데모로 동작해요
+let store = null;
+let requests = null;
+const STATUS = {pending:'신청 보냄', accepted:'수락됨', declined:'거절됨'};
+const sentTo = () => store
+  ? Object.fromEntries((requests ?? []).filter(r => r.from === store.uid).map(r => [r.to, STATUS[r.status]]))
+  : Object.fromEntries(read(APPLIED, []).map(id => [id, STATUS.pending]));
+const inboxCount = () => (requests ?? []).filter(r => store && r.to === store.uid && r.status === 'pending').length;
+const inboxChip = () => `<button type="button" class="chip chat-match-chip mm-inbox-chip" data-chat="match-inbox" ${store ? '' : 'hidden'}>📬 밥 신청함${inboxCount() ? ` <b>${inboxCount()}</b>` : ''}</button>`;
 
 export function chatPage(header) {
+  if (chatOptions) connectStore(chatOptions);
   const c = config();
   return `${header}
     <main class="chat-page">
       <div class="chat-log" id="chat-log" aria-live="polite">${intro() + messages.map(bubble).join('')}</div>
       ${stickerPanel()}
-      <div class="chat-suggest"><button type="button" class="chip chat-match-chip" data-chat="match">🍚 혼밥 친구 찾기</button>${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <div class="chat-suggest"><button type="button" class="chip chat-match-chip" data-chat="match">🍚 혼밥 친구 찾기</button>${inboxChip()}${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
       <form class="chat-form" id="chat-form">
         ${stickerButton()}
         <input name="q" aria-label="누티에게 질문" placeholder="학교생활 무엇이든 물어보세요" autocomplete="off" maxlength="300" required>
@@ -59,8 +70,9 @@ function intro() {
 }
 
 function bubble(m) {
-  if (m.kind === 'match-form') return matchFormCard();
-  if (m.kind === 'match-result') return matchResultCard(m, read(APPLIED, []));
+  if (m.kind === 'match-form') return matchFormCard(!!store);
+  if (m.kind === 'match-result') return matchResultCard(m, sentTo());
+  if (m.kind === 'match-inbox') return inboxCard(requests, store?.uid);
   const bot = m.role !== 'user';
   if (m.sticker) return `<div class="chat-msg ${bot ? 'bot' : 'me'} sticker-msg">${bot ? NUTI_FACE : ''}${stickerImg(m.sticker)}</div>`;
   const refs = (m.refs ?? []).map(r => `<a class="chip" href="#/place?id=${esc(r.id)}">${esc(r.name)}</a>`).join('');
@@ -164,8 +176,20 @@ function openMatch(root, said) {
 
 async function findBuddies(root, form) {
   if (busy) return;
-  const {profile, error} = readProfile(form);
-  if (error) { form.querySelector('.mm-error').textContent = error; return; }
+  const {profile, error} = readProfile(form, !!store);
+  const showError = text => { form.querySelector('.mm-error').textContent = text; };
+  if (error) { showError(error); return; }
+  let buddies;
+  if (store) {
+    busy = true;
+    try {
+      await store.saveProfile(profile);
+      buddies = (await store.listProfiles()).map(toBuddy);
+    } catch (err) {
+      showError(`밥친구 카드를 저장하지 못했어요. 인터넷 연결을 확인해 주세요. (${err.code || err.message})`);
+      return;
+    } finally { busy = false; }
+  }
   messages = messages.filter(m => m.kind !== 'match-form');
   messages.push({role:'user', content:profileSummary(profile)});
   const result = {role:'assistant', kind:'match-result', content:'누티가 밥친구를 찾는 중…', picks:[]};
@@ -173,7 +197,7 @@ async function findBuddies(root, form) {
   busy = true;
   paint(root);
   try {
-    Object.assign(result, await runMatch(profile, {...config(), places:getPlaces()}));
+    Object.assign(result, await runMatch(profile, {...config(), places:getPlaces(), ...(buddies ? {buddies} : {})}));
   } finally {
     busy = false;
     messages = messages.slice(-40);
@@ -182,18 +206,77 @@ async function findBuddies(root, form) {
   }
 }
 
-function applyBuddy(root, id) {
-  const applied = read(APPLIED, []);
-  if (!id || applied.includes(id)) return;
-  write(APPLIED, [...applied, id]);
+function botSay(root, text) {
+  messages.push({role:'assistant', sticker:'together', content:'(이모티콘: 같이하자!)'});
+  messages.push({role:'assistant', content:text});
+  messages = messages.slice(-40);
+  write(LOG, messages);
   paint(root);
-  setTimeout(() => {
-    messages.push({role:'assistant', sticker:'together', content:'(이모티콘: 같이하자!)'});
-    messages.push({role:'assistant', content:`${buddyName(id)}님에게 같이 먹자고 신청했어요! 수락하면 만날 시간과 장소를 정하면 돼요. (지금은 데모라 실제 학우에게 전달되지는 않아요)`});
-    messages = messages.slice(-40);
-    write(LOG, messages);
+}
+
+async function applyBuddy(root, button, options) {
+  const id = button.dataset.buddy;
+  const pick = findPick(messages, id);
+  if (!id || !pick || sentTo()[id]) return;
+  if (!store) {
+    write(APPLIED, [...read(APPLIED, []), id]);
     paint(root);
-  }, 600);
+    setTimeout(() => botSay(root, `${pick.buddy.nick}님에게 같이 먹자고 신청했어요! 수락하면 만날 시간과 장소를 정하면 돼요. (지금은 데모라 실제 학우에게 전달되지는 않아요)`), 600);
+    return;
+  }
+  button.disabled = true;
+  try {
+    await store.sendRequest(id, {myNick:loadProfile().nick, toNick:pick.buddy.nick, place:pick.place});
+    botSay(root, `${pick.buddy.nick}님에게 같이 먹자고 신청했어요! 수락하면 「📬 밥 신청함」에서 채팅을 열어 만날 시간과 장소를 정할 수 있어요.`);
+  } catch (err) {
+    button.disabled = false;
+    options.toast(`신청을 보내지 못했어요. (${err.code || err.message})`);
+  }
+}
+
+function openInbox(root) {
+  messages = messages.filter(m => m.kind !== 'match-inbox');
+  messages.push({role:'assistant', kind:'match-inbox', content:'(밥 신청함)'});
+  write(LOG, messages);
+  paint(root);
+  root.querySelector('.mm-inbox')?.scrollIntoView({block:'start'});
+}
+
+async function respond(button, status, options) {
+  button.disabled = true;
+  try {
+    await store.respond(button.dataset.req, status);
+    options.toast(status === 'accepted' ? '수락했어요! 채팅을 열어 약속을 잡아 보세요.' : '거절했어요.');
+  } catch (err) {
+    button.disabled = false;
+    options.toast(`처리하지 못했어요. (${err.code || err.message})`);
+  }
+}
+
+// 신청함을 실시간으로 받아서, 새 신청이 오면 알려 주고 화면을 고쳐 그려요
+let chatOptions = null, connecting = false;
+function connectStore(options) {
+  if (connecting) return;
+  connecting = true;
+  mealStore().then(s => {
+    if (!s) return;
+    store = s;
+    let known = null;
+    s.watchRequests(list => {
+      const fresh = list.filter(r => r.to === s.uid && r.status === 'pending' && known && !known.has(r.id));
+      const acceptedNow = list.filter(r => r.from === s.uid && r.status === 'accepted' && known && known.get(r.id) === 'pending');
+      known = new Map(list.map(r => [r.id, r.status]));
+      requests = list;
+      if (fresh.length) options.toast(`🍚 ${fresh[0].fromNick}님이 같이 밥 먹자고 신청했어요!`);
+      if (acceptedNow.length) options.toast(`🎉 ${acceptedNow[0].toNick}님이 밥 신청을 수락했어요!`);
+      const root = document.querySelector('.chat-page')?.parentElement;
+      if (!root) return;
+      root.querySelector('.mm-inbox-chip')?.replaceWith(Object.assign(document.createElement('template'), {innerHTML:inboxChip()}).content);
+      if (messages.some(m => m.kind)) paint(root);
+    });
+    const chip = document.querySelector('.mm-inbox-chip');
+    if (chip) chip.hidden = false;
+  });
 }
 
 async function ask(root, question) {
@@ -248,6 +331,9 @@ async function ask(root, question) {
 
 export function initChat(root, options) {
   getPlaces = options.getPlaces;
+  chatOptions = options;
+  // 밥친구 카드를 올린 적이 있으면 앱을 열 때부터 신청함을 받아요. 아니면 누티 화면을 처음 열 때 연결해요
+  if (read('knut-campus-guide:meal-profile', null)) connectStore(options);
   root.addEventListener('submit', event => {
     if (event.target.matches('.match-form')) { event.preventDefault(); findBuddies(root, event.target); return; }
     if (event.target.id !== 'chat-form') return;
@@ -264,7 +350,10 @@ export function initChat(root, options) {
     if (!control) return;
     if (control.dataset.chat === 'ask') ask(root, control.dataset.q);
     if (control.dataset.chat === 'match') openMatch(root);
-    if (control.dataset.chat === 'match-apply') applyBuddy(root, control.dataset.buddy);
+    if (control.dataset.chat === 'match-apply') applyBuddy(root, control, options);
+    if (control.dataset.chat === 'match-inbox') openInbox(root);
+    if (control.dataset.chat === 'match-accept') respond(control, 'accepted', options);
+    if (control.dataset.chat === 'match-decline') respond(control, 'declined', options);
     if (control.dataset.chat === 'clear') { messages = []; write(LOG, messages); write(APPLIED, []); paint(root); options.toast('대화를 지웠어요.'); }
     if (control.dataset.chat === 'save-config') {
       const box = control.closest('.chat-config');

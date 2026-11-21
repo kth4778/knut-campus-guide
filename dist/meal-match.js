@@ -3,7 +3,8 @@
 // 2) 특징 목록 만들기: 나와 후보의 취향을 글로 정리하고, 나와 겹치는 점도 적어요.
 // 3) LLM이 고르기: 후보 기호(A, B, …)만 고를 수 있는 JSON 형식으로 받아서 목록에 없는 사람을 지어내지 못하게 해요.
 //    LLM에 연결하지 못하면 겹치는 점 점수로 대신 골라요.
-// 데모라서 학우 프로필은 예시이고, 신청·수락도 이 브라우저(localStorage)에서만 일어나요.
+// Firebase(meal-store.js)가 연결되면 실제 학우들이 올린 밥친구 카드에서 고르고, 신청·수락·채팅도 실제로 오가요.
+// 연결 설정이 없으면 예시 학우로 동작하는 데모예요 (신청은 이 브라우저(localStorage)에만 남아요).
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PROFILE = 'knut-campus-guide:meal-profile';
@@ -18,7 +19,7 @@ const FOODS = ['한식', '분식', '중식', '일식', '양식', '고기', '치�
 const AREAS = ['교내', '학교 앞', '시내'];
 const MOODS = ['조용히 밥만', '가볍게 대화', '수다 환영'];
 const PAYS = ['각자 계산', '상관없음'];
-const DEFAULT_PROFILE = {days:['월', '화', '수', '목', '금'], times:['점심'], foods:['한식', '분식'], areas:['교내', '학교 앞'], mood:'가볍게 대화', pay:'각자 계산', intro:''};
+const DEFAULT_PROFILE = {nick:'', dept:'', year:0, visible:true, days:['월', '화', '수', '목', '금'], times:['점심'], foods:['한식', '분식'], areas:['교내', '학교 앞'], mood:'가볍게 대화', pay:'각자 계산', intro:''};
 
 // 예시 학우 (데모)
 const BUDDIES = [
@@ -40,18 +41,32 @@ const DAY_ALL = '평일 아무 때나';
 const listText = arr => arr.length === 5 && arr.every(d => DAYS.includes(d)) ? DAY_ALL : arr.join('·');
 const overlap = (a = [], b = []) => a.filter(x => b.includes(x));
 
-export const loadProfile = () => ({...DEFAULT_PROFILE, ...read(PROFILE, {})});
+export const loadProfile = () => ({...DEFAULT_PROFILE, nick:read('knut-campus-guide:nick', '') || '', ...read(PROFILE, {})});
+export const saveLocalProfile = p => write(PROFILE, p);
+
+// 실제 학우 카드(Firestore)를 예시 학우와 같은 모양으로
+const FACES = ['🐻', '🦊', '🐰', '🐱', '🐶', '🐼', '🐧', '🐯'];
+export const toBuddy = p => ({id:p.id, nick:p.nick, face:FACES[[...p.id].reduce((n, c) => n + c.charCodeAt(0), 0) % FACES.length],
+  dept:p.dept || '학과 비공개', year:p.year || 0, days:p.days ?? [], times:p.times ?? [], foods:p.foods ?? [], areas:p.areas ?? [],
+  mood:p.mood ?? '', pay:p.pay ?? '', intro:p.intro || '(소개 없음)'});
+const yearText = y => y ? `${y}학년` : '';
 
 // ── 화면 ──
 const chipGroup = (name, options, picked, type = 'checkbox') => `<div class="mm-chips">${options.map(o =>
   `<label><input type="${type}" name="${name}" value="${esc(o)}" ${picked.includes(o) ? 'checked' : ''}><span>${esc(o)}</span></label>`).join('')}</div>`;
 
-export function matchFormCard() {
+export function matchFormCard(online) {
   const p = loadProfile();
   return `<div class="match-box">
     <form class="match-form">
       <p class="mm-title">🍚 혼밥 친구 찾기</p>
-      <p class="mm-sub">언제, 무엇을, 어디서 먹고 싶은지 골라 주세요. 누티가 잘 맞는 학우를 찾아 드려요.</p>
+      <p class="mm-sub">${online ? '언제, 무엇을, 어디서 먹고 싶은지 골라 주세요. 밥친구 카드를 올린 학우들 중에서 누티가 잘 맞는 사람을 찾아 드려요.'
+        : '언제, 무엇을, 어디서 먹고 싶은지 골라 주세요. 누티가 잘 맞는 학우를 찾아 드려요. (지금은 예시 학우로 보여 주는 데모예요)'}</p>
+      ${online ? `<div class="mm-me">
+        <label class="mm-intro"><span>닉네임</span><input name="nick" maxlength="12" required value="${esc(p.nick)}" placeholder="예) 학식러"></label>
+        <label class="mm-intro"><span>학과</span><input name="dept" maxlength="20" value="${esc(p.dept)}" placeholder="예) 컴퓨터공학과"></label>
+        <label class="mm-intro"><span>학년</span><select name="year">${[0, 1, 2, 3, 4].map(y => `<option value="${y}" ${+p.year === y ? 'selected' : ''}>${y ? y + '학년' : '비공개'}</option>`).join('')}</select></label>
+      </div>` : ''}
       <fieldset><legend>요일</legend>${chipGroup('days', DAYS, p.days)}</fieldset>
       <fieldset><legend>시간</legend>${chipGroup('times', TIMES, p.times)}</fieldset>
       <fieldset><legend>먹고 싶은 것</legend>${chipGroup('foods', FOODS, p.foods)}</fieldset>
@@ -59,35 +74,39 @@ export function matchFormCard() {
       <fieldset><legend>밥 먹을 때 분위기</legend>${chipGroup('mood', MOODS, [p.mood], 'radio')}</fieldset>
       <fieldset><legend>계산</legend>${chipGroup('pay', PAYS, [p.pay], 'radio')}</fieldset>
       <label class="mm-intro"><span>한 줄 소개 (선택)</span><input name="intro" maxlength="60" value="${esc(p.intro)}" placeholder="예) 학식 자주 먹는 2학년이에요"></label>
+      ${online ? `<label class="mm-visible"><input type="checkbox" name="visible" ${p.visible ? 'checked' : ''}><span>내 밥친구 카드를 다른 학우에게 보여 주기<small>닉네임·학과·학년과 위 취향만 보여요. 끄면 나는 찾기만 하고 남에게는 안 보여요.</small></span></label>` : ''}
       <p class="mm-error" role="status"></p>
       <button type="submit" class="primary">밥친구 찾기</button>
     </form></div>`;
 }
 
-export function readProfile(form) {
+export function readProfile(form, online) {
   const all = name => [...form.querySelectorAll(`[name="${name}"]:checked`)].map(i => i.value);
-  const p = {days:all('days'), times:all('times'), foods:all('foods'), areas:all('areas'),
+  const field = name => form.elements[name]?.value.trim() ?? '';
+  const p = {nick:field('nick').slice(0, 12), dept:field('dept').slice(0, 20), year:+field('year') || 0, visible:!!form.elements.visible?.checked,
+    days:all('days'), times:all('times'), foods:all('foods'), areas:all('areas'),
     mood:all('mood')[0] || DEFAULT_PROFILE.mood, pay:all('pay')[0] || DEFAULT_PROFILE.pay, intro:form.elements.intro.value.trim().slice(0, 60)};
   const missing = [['days', '요일'], ['times', '시간'], ['foods', '먹고 싶은 것'], ['areas', '어디서']].find(([k]) => !p[k].length);
   if (missing) return {error:`${missing[1]}을(를) 하나 이상 골라 주세요.`};
+  if (online && !p.nick) return {error:'닉네임을 적어 주세요.'};
   write(PROFILE, p);
   return {profile:p};
 }
 
 export const profileSummary = p => `밥친구 찾아줘: ${listText(p.days)} ${p.times.join('·')} · ${p.foods.join('·')} · ${p.areas.join('·')} · ${p.mood}`;
 
-export function matchResultCard(m, applied) {
+export function matchResultCard(m, sent) {
   const picks = (m.picks ?? []).map(pick => {
-    const b = BUDDIES.find(x => x.id === pick.id);
+    const b = pick.buddy ?? BUDDIES.find(x => x.id === pick.id);
     if (!b) return '';
-    const done = applied.includes(b.id);
+    const done = sent[b.id];
     return `<article class="mm-buddy">
-      <div class="mm-head"><span class="mm-face" aria-hidden="true">${b.face}</span><div><b>${esc(b.nick)}</b><small>${esc(b.dept)} ${b.year}학년</small></div></div>
+      <div class="mm-head"><span class="mm-face" aria-hidden="true">${b.face}</span><div><b>${esc(b.nick)}</b><small>${esc(b.dept)} ${yearText(b.year)}</small></div></div>
       <p class="mm-tags">${[listText(b.days), b.times.join('·'), b.foods.join('·'), b.areas.join('·'), b.mood].map(t => `<span>${esc(t)}</span>`).join('')}</p>
       <p class="mm-quote">“${esc(b.intro)}”</p>
       <p class="mm-reason">💡 ${esc(pick.reason)}</p>
       ${pick.place ? `<a class="chip mm-place" href="#/place?id=${esc(pick.place.id)}">🍽️ 같이 가기 좋은 곳 · ${esc(pick.place.name)}</a>` : ''}
-      <button type="button" class="${done ? 'pill' : 'primary'} mm-apply" data-chat="match-apply" data-buddy="${b.id}" ${done ? 'disabled' : ''}>${done ? '신청 보냄' : '같이 먹자 신청'}</button>
+      <button type="button" class="${done ? 'pill' : 'primary'} mm-apply" data-chat="match-apply" data-buddy="${b.id}" ${done ? 'disabled' : ''}>${done ? esc(done) : '같이 먹자 신청'}</button>
     </article>`;
   }).join('');
   return `<div class="match-box mm-result">
@@ -98,7 +117,28 @@ export function matchResultCard(m, applied) {
   </div>`;
 }
 
-export const buddyName = id => BUDDIES.find(b => b.id === id)?.nick ?? '';
+export const findPick = (messages, id) => {
+  for (const m of [...messages].reverse()) { const pick = m.picks?.find(p => p.id === id); if (pick) return {...pick, buddy:pick.buddy ?? BUDDIES.find(b => b.id === id)}; }
+  return null;
+};
+
+// 밥 신청함: 받은 신청(수락·거절), 수락된 밥약속(채팅 열기), 보낸 신청(기다리는 중)
+const ago = at => { const m = Math.round((Date.now() - at) / 6e4); return m < 1 ? '방금' : m < 60 ? `${m}분 전` : m < 1440 ? `${Math.round(m / 60)}시간 전` : `${Math.round(m / 1440)}일 전`; };
+export function inboxCard(requests, uid) {
+  if (!requests) return '<div class="match-box"><p class="mm-title">📬 밥 신청함</p><p class="mm-sub">불러오는 중…</p></div>';
+  const row = (r, body) => `<article class="mm-req"><div><b>${esc(r.from === uid ? r.toNick : r.fromNick)}</b><small>${ago(r.at)}${r.place ? ' · ' + esc(r.place.name) : ''}</small></div>${body}</article>`;
+  const incoming = requests.filter(r => r.to === uid && r.status === 'pending');
+  const accepted = requests.filter(r => r.status === 'accepted');
+  const waiting = requests.filter(r => r.from === uid && r.status !== 'accepted');
+  const section = (title, list, body) => list.length ? `<p class="mm-sec">${title}</p>${list.map(r => row(r, body(r))).join('')}` : '';
+  return `<div class="match-box mm-inbox">
+    <p class="mm-title">📬 밥 신청함</p>
+    ${section('나에게 온 신청', incoming, r => `<div class="mm-req-act"><button type="button" class="primary" data-chat="match-accept" data-req="${esc(r.id)}">수락</button><button type="button" class="pill" data-chat="match-decline" data-req="${esc(r.id)}">거절</button></div>`)}
+    ${section('같이 먹기로 한 학우', accepted, r => `<a class="primary mm-room" href="#/meal-room?id=${encodeURIComponent(r.id)}">채팅 열기</a>`)}
+    ${section('내가 보낸 신청', waiting, r => `<span class="mm-state">${r.status === 'declined' ? '거절됨' : '기다리는 중'}</span>`)}
+    ${incoming.length + accepted.length + waiting.length ? '' : '<p class="mm-sub">아직 주고받은 신청이 없어요. 「혼밥 친구 찾기」로 밥친구를 찾아 보세요.</p>'}
+  </div>`;
+}
 
 // ── 매칭 ──
 function shared(me, b) {
@@ -133,7 +173,7 @@ function pickPlace(places, me, b, s) {
 }
 
 const fmt = (label, b, s) => [
-  `[후보 ${label}] ${b.nick} · ${b.dept} ${b.year}학년`,
+  `[후보 ${label}] ${b.nick} · ${b.dept} ${yearText(b.year)}`,
   `  요일: ${listText(b.days)} / 시간: ${b.times.join('·')} / 장소: ${b.areas.join('·')}`,
   `  먹고 싶은 것: ${b.foods.join('·')} / 분위기: ${b.mood} / 계산: ${b.pay}`,
   `  소개: ${b.intro}`,
@@ -145,12 +185,13 @@ function answerLanguage() {
   return name ? `reason은 반드시 ${name}로 쓴다.` : 'reason은 한국어 존댓말 한 문장으로 쓴다.';
 }
 
-export async function runMatch(me, {endpoint, model, places}) {
+export async function runMatch(me, {endpoint, model, places, buddies = BUDDIES}) {
   // 1) 규칙: 요일·시간·장소가 하나라도 겹치는 학우만
-  let pool = BUDDIES.map(b => ({b, s:shared(me, b)})).filter(x => x.s.days.length && x.s.times.length && x.s.areas.length);
+  if (!buddies.length) return {content:'아직 밥친구 카드를 올린 학우가 없어요.', note:'내 카드를 「보여 주기」로 올려 두면, 다른 학우가 찾을 때 내가 추천돼요.', picks:[]};
+  let pool = buddies.map(b => ({b, s:shared(me, b)})).filter(x => x.s.days.length && x.s.times.length && x.s.areas.length);
   let note = '';
   if (pool.length < 3) {
-    pool = BUDDIES.map(b => ({b, s:shared(me, b)})).filter(x => x.s.days.length && x.s.times.length);
+    pool = buddies.map(b => ({b, s:shared(me, b)})).filter(x => x.s.days.length && x.s.times.length);
     note = '장소까지 맞는 학우가 적어서 장소 조건은 넓혀서 찾았어요.';
   }
   if (!pool.length) return {content:'지금 조건에 맞는 학우가 없어요.', note:'요일이나 시간을 더 골라서 다시 찾아 주세요.', picks:[]};
@@ -197,5 +238,5 @@ reason에는 나와 겹치는 점을 구체적으로 넣는다. ${answerLanguage
     if (!picks.some(p => p.x === x)) picks.push({x, reason:ruleReason(x.s)});
   }
   return {content:`잘 맞는 밥친구 ${picks.length}명을 찾았어요!`, note,
-    picks:picks.map(({x, reason}) => ({id:x.b.id, reason, place:pickPlace(places, me, x.b, x.s)}))};
+    picks:picks.map(({x, reason}) => ({id:x.b.id, reason, place:pickPlace(places, me, x.b, x.s), ...(buddies === BUDDIES ? {} : {buddy:x.b})}))};
 }

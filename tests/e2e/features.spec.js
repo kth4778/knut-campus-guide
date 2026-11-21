@@ -206,4 +206,54 @@ test.describe('H. 챗봇 누티 (가짜 AI)', () => {
     await page.locator('.mm-apply').first().click();
     await expect(page.locator('.mm-apply').first()).toHaveText('신청 보냄');
   });
+
+  test('H5 실제 학우 매칭(가짜 Firebase): 카드 올리기 → 신청 → 받은 신청 수락 → 밥약속 채팅', P1, async ({ page }) => {
+    const fake = require('fs').readFileSync(require('path').join(__dirname, 'fixtures', 'fake-firebase.js'), 'utf8');
+    const now = Date.parse('2026-11-19T09:00:00+09:00');
+    const card = (nick, extra) => ({ nick, dept: '컴퓨터공학과', year: 2, days: ['월', '화', '수', '목', '금'], times: ['점심'], foods: ['한식', '분식'],
+      areas: ['교내', '학교 앞'], mood: '가볍게 대화', pay: '각자 계산', intro: '같이 먹어요', visible: true, updatedAt: now, ...extra });
+    await page.addInitScript(seed => { window.__FAKE_FB = seed; }, {
+      uid: 'me',
+      docs: {
+        'mealProfiles/u2': card('학식러'),
+        'mealProfiles/u3': card('분식왕', { foods: ['분식'] }),
+        'mealProfiles/u4': card('숨김', { visible: false }),
+        'mealRequests/r1': { from: 'u3', to: 'me', users: ['u3', 'me'], fromNick: '분식왕', toNick: '테스터', place: null, status: 'pending', createdAt: now },
+      },
+    });
+    await page.route(/firebase-config\.js/, route => route.fulfill({ contentType: 'text/javascript', body: "window.KNUT_FIREBASE = { apiKey: 'test', projectId: 'test' };" }));
+    await page.route(/gstatic\.com\/firebasejs\//, route => route.fulfill({ contentType: 'text/javascript', headers: { 'Access-Control-Allow-Origin': '*' }, body: fake }));
+    await page.route(/\/api\/chat/, route => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ message: { content: JSON.stringify({ picks: [{ id: 'A', reason: '점심·한식이 같아요' }] }) }, done: true }),
+    }));
+    await openApp(page, '#/chat');
+
+    // 받은 신청이 하나 있어 신청함에 1 이 뜬다
+    await expect(page.locator('.mm-inbox-chip')).toBeVisible();
+    await expect(page.locator('.mm-inbox-chip b')).toHaveText('1');
+
+    // 내 카드를 올리고 찾으면 보여 주기를 켠 학우만 나온다 (숨김은 안 나옴)
+    await page.locator('[data-chat="match"]').click();
+    await page.locator('.match-form [name="nick"]').fill('테스터');
+    await page.locator('.match-form button[type="submit"]').click();
+    await expect(page.locator('.mm-buddy').first()).toBeVisible();
+    await expect(page.locator('.mm-result')).not.toContainText('숨김');
+    expect(await page.evaluate(() => window.__FAKE_FB_STATE.docs.get('mealProfiles/me').nick)).toBe('테스터');
+
+    // 신청하면 Firestore 에 신청이 생기고 버튼이 바뀐다
+    await page.locator('.mm-apply').first().click();
+    await expect(page.locator('.mm-apply').first()).toHaveText('신청 보냄');
+    expect(await page.evaluate(() => [...window.__FAKE_FB_STATE.docs.values()].filter(d => d.from === 'me' && d.status === 'pending').length)).toBe(1);
+
+    // 받은 신청을 수락하고 채팅을 연다
+    await page.locator('.mm-inbox-chip').click();
+    await page.locator('[data-chat="match-accept"]').click();
+    await page.locator('.mm-inbox a.mm-room').click();
+    await expect(page).toHaveURL(/#\/meal-room\?id=r1/);
+    await expect(page.locator('.mm-room-head')).toContainText('분식왕님과 밥약속');
+    await page.locator('#mm-room-form input[name="text"]').fill('내일 12시 학생식당 어때요?');
+    await page.locator('#mm-room-form input[name="text"]').press('Enter');
+    await expect(page.locator('#mm-room-log .chat-msg.me')).toContainText('내일 12시 학생식당 어때요?');
+  });
 });

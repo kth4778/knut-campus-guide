@@ -4,6 +4,7 @@ import {BUS_STOPS, EXP_TERMINALS, mountBusStop, mountExpress, busKey,
 import {moaPage, initMoa, openNewFund, fundById} from './moa.js';
 import {moaChatPage, initMoaChat} from './moa-chat.js';
 import {chatPage, initChat, scrollChat} from './chat.js';
+import {mealRoomPage, mountMealRoom} from './meal-room.js';
 import {initShare, openShare} from './share.js';
 import {initBuildings, floorOf, buildingOf, buildingPinHtml, buildingPage, mapBuildings, buildingMarkHtml, guideCount, shortName} from './buildings.js';
 import {initAccounts, storyRail, accountPage, partnerPage, partnerFeedPost, homeFeed, accountAvatar} from './accounts.js';
@@ -1239,6 +1240,9 @@ function render() {
   } else if (path === 'chat') {
     app.innerHTML = chatPage(top('누티 Nuti', iconLink('back','프로필로',route('my'))));
     scrollChat(app);
+  } else if (path === 'meal-room') {
+    app.innerHTML = mealRoomPage(top('밥약속 채팅', iconLink('back','누티로',route('chat'))));
+    mountMealRoom(app, params.get('id'));
   } else if (path === 'settings') app.innerHTML = settingsPage();
   else if (path === 'profile-edit') app.innerHTML = profileEditPage();
   else if (path === 'compose') app.innerHTML = composePage();
@@ -1250,7 +1254,7 @@ function render() {
   else if (path === 'building') app.innerHTML = buildingPage(params.get('name'), params);
   else app.innerHTML = home(category);
   if (keepScroll) { const scroller = app.querySelector('.scroll'); if (scroller) scroller.scrollTop = keepScroll; }
-  renderNav(path === 'building' ? 'map' : ['place','account','partner','tip'].includes(path) ? '' : ['settings','chat','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
+  renderNav(path === 'building' ? 'map' : ['place','account','partner','tip'].includes(path) ? '' : ['settings','chat','meal-room','profile-edit'].includes(path) ? 'my' : path === 'moa-chat' ? 'moa' : path);
 }
 
 function toast(message) {

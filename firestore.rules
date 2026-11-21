@@ -1,0 +1,51 @@
+// KNUTIPS 혼밥 친구 매칭 (dist/meal-store.js) 의 Firestore 보안 규칙
+// Firebase 콘솔 → Firestore Database → 규칙 탭에 이 내용을 그대로 붙여 넣고 「게시」를 누르세요.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function shortText(value, max) { return value is string && value.size() <= max; }
+    function pickList(value, max) { return value is list && value.size() <= max; }
+
+    // 밥친구 카드: 로그인한 학우는 볼 수 있고, 고치고 지우는 건 본인만
+    match /mealProfiles/{uid} {
+      allow read: if signedIn();
+      allow delete: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['nick', 'dept', 'year', 'days', 'times', 'foods', 'areas', 'mood', 'pay', 'intro', 'visible', 'updatedAt'])
+        && shortText(request.resource.data.nick, 12) && request.resource.data.nick.size() >= 1
+        && shortText(request.resource.data.dept, 20) && request.resource.data.year is int
+        && pickList(request.resource.data.days, 5) && pickList(request.resource.data.times, 3)
+        && pickList(request.resource.data.foods, 8) && pickList(request.resource.data.areas, 3)
+        && shortText(request.resource.data.mood, 10) && shortText(request.resource.data.pay, 10)
+        && shortText(request.resource.data.intro, 60) && request.resource.data.visible is bool
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    // 같이 먹자 신청: 주고받은 두 사람만 보고, 수락·거절은 받은 사람만
+    match /mealRequests/{rid} {
+      function room() { return get(/databases/$(database)/documents/mealRequests/$(rid)).data; }
+      allow read: if signedIn() && request.auth.uid in resource.data.users;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['from', 'to', 'users', 'fromNick', 'toNick', 'place', 'status', 'createdAt'])
+        && request.resource.data.from == request.auth.uid && request.resource.data.to != request.auth.uid
+        && request.resource.data.users == [request.auth.uid, request.resource.data.to]
+        && shortText(request.resource.data.fromNick, 12) && shortText(request.resource.data.toNick, 12)
+        && (request.resource.data.place == null || (request.resource.data.place is map && request.resource.data.place.keys().hasOnly(['id', 'name'])))
+        && request.resource.data.status == 'pending' && request.resource.data.createdAt == request.time;
+      allow update: if signedIn() && request.auth.uid == resource.data.to && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['accepted', 'declined'];
+
+      // 채팅: 수락된 신청의 두 사람만
+      match /messages/{mid} {
+        allow read: if signedIn() && request.auth.uid in room().users;
+        allow create: if signedIn() && room().status == 'accepted' && request.auth.uid in room().users
+          && request.resource.data.keys().hasOnly(['uid', 'nick', 'text', 'at'])
+          && request.resource.data.uid == request.auth.uid && shortText(request.resource.data.nick, 12)
+          && shortText(request.resource.data.text, 300) && request.resource.data.text.size() >= 1
+          && request.resource.data.at == request.time;
+      }
+    }
+  }
+}
