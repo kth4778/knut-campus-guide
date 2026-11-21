@@ -163,6 +163,12 @@ function paint(root) {
   if (send) send.disabled = busy;
 }
 
+// 채팅 목록 안에서만 그 카드가 맨 위에 오게 내려요 (scrollIntoView 는 폰 화면 전체를 밀어 위 머리글이 사라짐)
+function showInLog(root, selector) {
+  const log = root.querySelector('#chat-log'), card = log?.querySelector(selector);
+  if (card) log.scrollTop = card.getBoundingClientRect().top - log.getBoundingClientRect().top + log.scrollTop - 8;
+}
+
 // 혼밥 친구 매칭 (meal-match.js): 취향 카드를 띄우고, 고르면 LLM이 밥친구를 골라요
 function openMatch(root, said) {
   if (busy) return;
@@ -171,7 +177,7 @@ function openMatch(root, said) {
   messages.push({role:'assistant', kind:'match-form', content:'(혼밥 친구 찾기 카드)'});
   write(LOG, messages);
   paint(root);
-  root.querySelector('.match-form')?.scrollIntoView({block:'start'});
+  showInLog(root, '.match-box:has(.match-form)');
 }
 
 async function findBuddies(root, form) {
@@ -239,7 +245,7 @@ function openInbox(root) {
   messages.push({role:'assistant', kind:'match-inbox', content:'(밥 신청함)'});
   write(LOG, messages);
   paint(root);
-  root.querySelector('.mm-inbox')?.scrollIntoView({block:'start'});
+  showInLog(root, '.mm-inbox');
 }
 
 async function respond(button, status, options) {
