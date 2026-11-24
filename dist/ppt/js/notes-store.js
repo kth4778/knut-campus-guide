@@ -1,7 +1,7 @@
 // 팀 공유 대본 저장소. 발표 화면의 「대본」 패널과 발표자 창이 같이 쓴다.
 // 여러 명이 같은 장을 동시에 고쳐도 글이 사라지지 않게, 장마다 대본을 Yjs 문서(글자 단위로 합쳐지는 자료형)로 두고
 // 고친 내용(변경분)만 차곡차곡 쌓는다. 쌓인 변경분은 지우거나 덮어쓰지 않는다 — 누가 언제 무엇을 고쳤든 전부 남는다.
-//   실제 사이트(GitHub Pages): 앱과 같은 Firebase(익명 로그인 + Firestore)의 deckEdits 컬렉션 — 문서 하나 = 변경분 하나
+//   실제 사이트(GitHub Pages): 발표 대본 전용 Firebase(없으면 앱과 같은 Firebase) — 익명 로그인 + Firestore deckEdits 컬렉션, 문서 하나 = 변경분 하나
 //   내 컴퓨터(localhost·파일): 이 브라우저의 localStorage + 같은 브라우저의 다른 탭과 BroadcastChannel
 // 변경분 모양: {slide(장 이름), u(Yjs 변경분 base64), by(고친 사람 이름), at(ISO 시각)}
 
@@ -23,8 +23,10 @@ function loadScript(src) {
 // ---- 변경분을 주고받는 통로 두 가지: {kind, subscribe(onAdd, onErr), append(entry)} ----
 async function firebaseLog() {
   if (!/^https?:$/.test(location.protocol) || /^(localhost|127\.)/.test(location.hostname)) return null;
-  if (window.KNUT_FIREBASE === undefined) await loadScript('../firebase-config.js');
-  const config = window.KNUT_FIREBASE;
+  // 발표 대본 전용 프로젝트(deck-firebase-config.js)가 있으면 그것, 없으면 앱과 같은 프로젝트
+  if (window.KNUT_DECK_FIREBASE === undefined) await loadScript('deck-firebase-config.js');
+  if (!window.KNUT_DECK_FIREBASE && window.KNUT_FIREBASE === undefined) await loadScript('../firebase-config.js');
+  const config = window.KNUT_DECK_FIREBASE || window.KNUT_FIREBASE;
   if (!config?.apiKey || !config?.projectId) return null;
   const [{ initializeApp }, auth, fs] = await Promise.all([import(SDK + 'firebase-app.js'), import(SDK + 'firebase-auth.js'), import(SDK + 'firebase-firestore.js')]);
   const app = initializeApp(config, 'knutips-deck');

@@ -6,7 +6,7 @@ let cur = Math.max(0, (+(location.hash.match(/#\/(\d+)/) || [])[1] || 1) - 1);
 let black = false, aud = null;
 // 대본: 팀 공유 대본(js/notes-store.js — 실제 사이트는 Firestore, 내 컴퓨터는 이 브라우저)이 있으면 그것, 없으면 원래 대본
 // 여러 명이 동시에 고쳐도 글자 단위로 합쳐진다(Yjs). 고칠 때마다 바로 반영, 다른 사람 글이 들어오면 내 커서는 그대로
-import { notesStore, tidy, shiftCaret } from './notes-store.js?v=1795494651';
+import { notesStore, tidy, shiftCaret } from './notes-store.js?v=1795496118';
 const key = i => DECK[i].kind === 'static' ? 's' + DECK[i].n : DECK[i].id;
 const body = i => DECK[i].notes.replace(/^\[[^\]]+\]\s*/, '');
 let SHARED = {}, store = null, saving = '';

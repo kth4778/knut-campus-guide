@@ -1,0 +1,20 @@
+// 발표 대본 전용 Firebase 프로젝트(저장소 Secret DECK_FIREBASE_CONFIG)의 Firestore 보안 규칙
+// Firebase 콘솔 → Firestore → 규칙 탭에 이 내용을 그대로 붙여 넣고 「게시」를 누르세요.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function shortText(value, max) { return value is string && value.size() <= max; }
+
+    // 발표 대본 동시 편집: 고친 내용(Yjs 변경분)을 문서 하나씩 쌓는다. 쌓인 것은 고치거나 지울 수 없다 — 누가 무엇을 고쳤든 전부 남는다
+    match /deckEdits/{id} {
+      allow read: if signedIn();
+      allow update, delete: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['slide', 'u', 'by', 'at'])
+        && shortText(request.resource.data.slide, 40) && request.resource.data.slide.size() >= 1
+        && shortText(request.resource.data.u, 200000) && request.resource.data.u.size() >= 1
+        && shortText(request.resource.data.by, 20) && shortText(request.resource.data.at, 40);
+    }
+  }
+}

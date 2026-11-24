@@ -62,6 +62,15 @@ jobs:
           if [ -n "$FIREBASE_CONFIG" ]; then
             printf "window.KNUT_FIREBASE = %s;\n" "$FIREBASE_CONFIG" > dist/firebase-config.js
           fi
+      # 저장소 Secret 'DECK_FIREBASE_CONFIG'(발표 대본 전용 Firebase 웹 앱 설정)가 있으면 발표 자료(ppt/)의 팀 대본은 그 프로젝트에 저장돼요.
+      # 없으면 앱과 같은 프로젝트(FIREBASE_CONFIG)를 써요
+      - name: 발표 대본용 Firebase 설정 넣기
+        env:
+          DECK_FIREBASE_CONFIG: ${{ secrets.DECK_FIREBASE_CONFIG }}
+        run: |
+          if [ -n "$DECK_FIREBASE_CONFIG" ]; then
+            printf "window.KNUT_DECK_FIREBASE = %s;\n" "$DECK_FIREBASE_CONFIG" > dist/ppt/deck-firebase-config.js
+          fi
       # GitHub Pages는 파일을 10분 동안 캐시해서 새로고침해도 옛 화면이 보여요.
       # 배포할 때마다 우리 js·css·json 주소 뒤에 ?v=커밋 을 붙여 새 파일을 받게 해요 (배포본만, git 원본은 그대로)
       - name: 캐시 무효화용 버전 붙이기
