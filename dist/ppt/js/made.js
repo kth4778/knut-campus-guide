@@ -2,7 +2,7 @@
 // 실제 앱 화면 · 팀이 찍은 사진 · 학교 공식 페이지 캡처 · 실제 카드뉴스 · 실제 로고 · 실제 테스트 이름만 쓴다.
 // 숫자·문구는 발표 대본(data/deck-order.json)에 있는 검증된 값만.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, clip, ring, under, arrow, swipe, num, device, ticker, divider, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795497608';
+import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, clip, ring, under, arrow, swipe, num, device, ticker, divider, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795498706';
 
 // 영상 속 폰이 화면 높이를 거의 채우게(원래의 약 1.26배)
 const ST = [987, 3, 907, 1134];

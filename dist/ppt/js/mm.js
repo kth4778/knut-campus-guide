@@ -1,6 +1,6 @@
 // 모션 장 16개(이름 키)를 실제 자료 + 손으로 만든 스타일로. 대본의 (영상: …) 설명을 그대로 움직임으로 옮겼다.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795497608';
+import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795498706';
 
 const RC = n => `media/real/cards/${n}`;
 const rnd = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };   // 고정된 흩뿌림
