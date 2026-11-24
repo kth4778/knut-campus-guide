@@ -2,7 +2,7 @@
 // 실제 앱 화면 · 팀이 찍은 사진 · 학교 공식 페이지 캡처 · 실제 카드뉴스 · 실제 로고 · 실제 테스트 이름만 쓴다.
 // 숫자·문구는 발표 대본(data/deck-order.json)에 있는 검증된 값만.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, clip, ring, under, arrow, swipe, num, device, ticker, divider, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795489195';
+import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, clip, ring, under, arrow, swipe, num, device, ticker, divider, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795490889';
 
 // 영상 속 폰이 화면 높이를 거의 채우게(원래의 약 1.26배)
 const ST = [987, 3, 907, 1134];
@@ -33,8 +33,7 @@ export const MADE = {
   1(root) {
     const s = scene(root), el = s.el;
     s.rise(h(el, 'hm-kicker', { left: '150px', top: '170px' }, '도메인 특화 AI 데이터 스토리텔링'), 0);
-    s.pop(img(el, LOGO('logo'), '', { position: 'absolute', left: '150px', top: '250px', height: '150px' }), 100);
-    s.rise(h(el, 'hm-title', { left: '320px', top: '262px', fontSize: '140px' }, 'KNUTIPS'), 180);
+    s.pop(brand(el, 150, 262, 140), 100);
     s.rise(h(el, 'hm-sub', { left: '156px', top: '450px', fontSize: '44px', color: '#1E2430', fontWeight: '700' }, '교통대 생활 정보를, <em>인스타처럼</em> 넘겨 보다'), 320);
     photo(s, PHOTO('library-w20'), 150, 580, 400, 270, { rot: -4, cap: '도서관', at: 500 });
     photo(s, PHOTO('cafeteria'), 600, 610, 380, 250, { rot: 3, cap: '학생식당', at: 650 });
@@ -113,7 +112,7 @@ export const MADE = {
      ['디자인', 'K 로고·빨강·카드뉴스는 인스타와 따로 직접 디자인', 'logo'],
      ['데이터', '에브리타임 · 학교 인스타 · 학교 홈페이지 · 기존 앱(수업 표준화 데이터)에서 모음', null]].forEach(([k, v, lg], i) => {
       const n = note(s, 1100, 260 + i * 255, 680, `<b style="font-size:38px">${k}</b><div style="font-size:28px;margin-top:6px">${v}</div>`, { rot: [-1.5, 1, -1][i], at: 900 + i * 250 });
-      if (lg) n.prepend(img(n, LOGO(lg), '', { height: '56px', display: 'block', marginBottom: '6px' }));
+      if (lg) { const b = brand(n, 0, 0, 44, { position: 'relative', left: null, top: null, display: 'block', marginBottom: '10px' }); n.prepend(b); }
       if (i === 2) { const row = h(n, '', { display: 'flex', gap: '14px', marginTop: '12px' }); ['everytime', 'instagram', 'emblem'].forEach(l => img(row, LOGO(l), '', { height: '40px' })); }
     });
     return s;
@@ -168,12 +167,20 @@ export const MADE = {
     return s;
   },
   19(root) {
-    const s = scene(root);
+    const s = scene(root), el = s.el;
     const y = clipSlide(s, 'feed-order', '피드 순서', '추천 수로 짠 <em>피드</em>', '무리 사이사이에 제휴와 꿀팁', 1);
-    [['추천 5개 이상', 0], ['+ 제휴 · 꿀팁', 1], ['추천 2~4개', 0], ['+ 제휴 · 꿀팁', 1], ['추천 0~1개', 0]].forEach(([t, k], i) => {
-      const n = note(s, k ? 260 : 130, y + i * 92, k ? 340 : 500, `<b>${t}</b>`, { rot: k ? 1 : -1, at: 800 + i * 160, tape: false });
-      n.style.padding = '16px 24px'; n.style.fontSize = '34px'; if (k) n.style.background = '#FFF6C9';
+    const cut = t => t.length > 13 ? t.slice(0, 12) + '…' : t;
+    [['5+', '추천 5개 이상'], ['2-4', '추천 2~4개'], ['0-1', '추천 0~1개']].forEach(([k, l], i) => {
+      const g = REAL.feed[k], top = y + i * 205, bw = Math.max(18, g.count / 380 * 520), at = 700 + i * 320;
+      s.rise(h(el, 'hm-label', { left: '150px', top: px(top), fontSize: '30px', color: '#141A24' }, `<b>${i + 1}. ${l}</b>`), at);
+      const bar = h(el, '', { position: 'absolute', left: '150px', top: px(top + 52), width: px(bw), height: '46px', borderRadius: '6px', background: i ? '#B9C0CA' : '#8b1a1f', transformOrigin: 'left center' });
+      s.custom(bar, [{ transform: 'scaleX(0)' }, { transform: 'none' }], at + 100, 800, 'cubic-bezier(.2,.8,.2,1)');
+      const n = h(el, '', { position: 'absolute', left: px(170 + bw), top: px(top + 44), fontSize: '50px', fontWeight: '900', letterSpacing: '-.03em' }, g.count + '<small style="font-size:26px;margin-left:4px">곳</small>');
+      s.rise(n, at + 500);
+      s.fade(h(el, '', { position: 'absolute', left: '150px', top: px(top + 112), fontSize: '23px', fontWeight: '600', color: '#4A5260', whiteSpace: 'nowrap' }, g.top.slice(0, 2).map(t => `${cut(t.name)} <b style="color:#8b1a1f">추천 ${t.rec}</b>`).join('　·　')), at + 600);
+      if (i < 2) s.pop(h(el, '', { position: 'absolute', left: '560px', top: px(top + 158), fontSize: '21px', fontWeight: '800', background: '#FFE97A', padding: '4px 14px', borderRadius: '4px', rotate: '-2deg' }, '+ 제휴 · 꿀팁 끼워 넣기'), at + 800);
     });
+    s.fade(h(el, '', { position: 'absolute', left: '150px', top: '1030px', fontSize: '20px', fontWeight: '700', color: '#8A93A0' }, '앱 places.json 484개 기록의 실제 추천 수'), 1800);
     return s;
   },
   20(root) {
@@ -184,12 +191,16 @@ export const MADE = {
     return s;
   },
   21(root) {
-    const s = scene(root);
-    const y = clipSlide(s, 'search-open', '검색', '서버 없이 <em>바로</em>', '브라우저 안에서 찾아 바로 열기', 1);
-    [['검색어', '장학금'], ['브라우저 안', '484개 자료'], ['바로 열기', '그 자리에서']].forEach(([a, b], i) => {
-      note(s, 150 + i * 280, y + 20 + (i % 2) * 40, 240, `<b style="font-size:40px">${a}</b><br><span style="font-size:32px">${b}</span>`, { rot: i % 2 ? 2 : -2, at: 800 + i * 250 });
-      if (i < 2) arrow(s, 390 + i * 280, y + 120, 42, 1000 + i * 250, 0);
-    });
+    const s = scene(root), el = s.el;
+    const y = clipSlide(s, 'search-open', '검색', '서버 없이 <em>바로</em>', '자료 파일 하나를 브라우저가 바로 찾아요', 1);
+    const R = REAL.record, q = v => `<span class="v">${typeof v === 'string' ? '"' + v + '"' : v}</span>`;
+    const code = h(el, 'hm-code', { left: '130px', top: px(y + 40), rotate: '-1deg' },
+      `<span class="c">// places.json · ${REAL.placesKB}KB · 484개 중 하나</span>\n{\n` +
+      [['id', R.id], ['name', R.name], ['category', R.category], ['rec', R.rec], ['minPrice', R.minPrice]].map(([k, v]) => `  <span class="k">"${k}"</span>: ${q(v)},`).join('\n') +
+      `\n  <span class="k">"hours"</span>: [{ ${q('start')}: ${q(R.hours[0].start)}, ${q('end')}: ${q(R.hours[0].end)} … }],\n  <span class="k">"checked"</span>: ${q(R.checked)},\n  <span class="c">…</span>\n}`);
+    tape(code, 260, -18, 140, -3);
+    s.custom(code, [{ opacity: 0, transform: 'translateY(30px) rotate(-1deg)' }, { opacity: 1, transform: 'rotate(-1deg)' }], 700, 700);
+    code.querySelectorAll('.k').forEach((k, i) => s.custom(k, [{ background: '#FFF1A8' }, { background: 'transparent' }], 1300 + i * 120, 500));
     return s;
   },
   22(root) {
@@ -291,25 +302,27 @@ export const MADE = {
   32(root) {
     const s = scene(root);
     const y = clipSlide(s, 'moa-join', 'MOA · N빵 자동 계산', '3명 3,300원 →<br>4명 <em>2,500원</em>', '참여하면 바로 다시 계산', 2);
-    note(s, 130, y + 30, 680, '<span style="font-size:42px;line-height:1.6"><b>9,800원</b> ÷ 3명 → 3,300원<br><b>9,800원</b> ÷ 4명 → <b style="background:#FFF1A8">2,500원</b></span>', { rot: -2, at: 900, src: '충주터미널 택시비' });
+    zoom(s, SCR('C1-moa'), 1170, [36, 1500, 1098, 255], 130, y + 40, 720, { rot: -1.5, at: 800, cap: '참여 전 · 3명 → 1인 3,300원' });
+    arrow(s, 430, y + 255, 70, 1300, 90);
+    zoom(s, SCR('C3-moa-joined'), 1170, [36, 1500, 1098, 255], 130, y + 340, 720, { rot: 1, at: 1500, cap: '내가 참여 · 4명 → 1인 2,500원' });
     return s;
   },
   33(root) {
     const s = scene(root);
     const y = clipSlide(s, 'moa-chat', 'MOA · 참여자 채팅', '참여자끼리만 쓰는<br><em>채팅방</em>', '만날 곳과 시간을 정해요', 2);
-    memo(s, 150, y + 30, 420, '참여한 사람만<br>들어오는 방', { rot: -3, at: 900, size: 44, pin: true, mh: 250 });
+    zoom(s, SCR('C4w-moa-chat'), 390, [8, 52, 374, 262], 130, y + 40, 640, { rot: -1.5, at: 800, cap: '참여자 4명만 보는 방 · 실제 화면' });
     return s;
   },
   34(root) {
     const s = scene(root);
     const y = clipSlide(s, 'nuti-match', '누티 · AI 챗봇 밥친구 찾기', '혼밥 친구 <em>찾기</em>', '네 가지만 고르면 됩니다', 1);
-    ['요일', '시간', '메뉴', '장소'].forEach((t, i) => memo(s, 150 + (i % 2) * 360, y + Math.floor(i / 2) * 250, 300, t, { rot: [-4, 3, 2, -3][i], at: 800 + i * 200, size: 64, mh: 200 }));
+    zoom(s, SCR('C6-match-form'), 1170, [45, 450, 1095, 840], 130, y + 40, 640, { rot: -1.5, at: 800, cap: '요일 · 시간 · 메뉴 · 장소 고르기' });
     return s;
   },
   35(root) {
     const s = scene(root);
     const y = clipSlide(s, 'match-result', '누티 · 밥친구 매칭', '잘 맞는 학우와<br><em>그 이유</em>', '공개 사이트에서는 예시 학우로 시연', 2);
-    memo(s, 150, y + 30, 420, '맞는 학우 +<br>그 이유', { rot: 3, at: 900, size: 44, pin: true, mh: 250 });
+    zoom(s, SCR('C8-match-result'), 1170, [36, 165, 1098, 660], 130, y + 40, 640, { rot: 1.5, at: 800, cap: '「나와 같은 점」이 이유 · 실제 화면' });
     return s;
   },
   36(root) {
@@ -324,7 +337,7 @@ export const MADE = {
   37(root) {
     const s = scene(root);
     [['A3-place-photo', -4], ['B2-building', 2], ['C6-match-form', 5]].forEach(([n, r], i) => P(s, n, 860 + i * 300, 110 + (i % 2) * 30, 860, r, 100 + i * 150));
-    title(s, 150, 380, null, '이 화면들 뒤에서,<br>AI는 <em>무엇을</em> 했을까요?', null, { size: 84 });
+    title(s, 150, 360, null, '이 화면들 뒤에서,<br>AI는 <em>무엇을</em><br>했을까요?', null, { size: 76 });
     return s;
   },
 
@@ -418,11 +431,10 @@ export const MADE = {
     [...REAL.tests_short, ...REAL.tests_short].forEach(t => h(col, 'hm-row', { fontSize: '28px' }, `${MARK(true)}<span>${t}</span>`));
     s.rise(box, 300);
     s.custom(col, [{ transform: 'translateY(0)' }, { transform: 'translateY(-50%)' }], 300, 90000, 'linear');
-    [['자동 테스트', '모두 통과?', null], ['GitHub Pages', '배포', 'github'], ['공개 사이트', '다시 확인', null]].forEach(([a, b, l], i) => {
-      const n = note(s, 900 + i * 340, 520 + (i % 2) * 40, 270, `<b style="font-size:30px">${a}</b><br>${b}`, { rot: [-2, 2, -1][i], at: 700 + i * 300 });
-      if (l) n.prepend(img(n, LOGO(l), '', { height: '50px', display: 'block', marginBottom: '8px' }));
-      if (i < 2) arrow(s, 1180 + i * 340, 610, 60, 900 + i * 300, 0);
-    });
+    const gl = h(el, '', { position: 'absolute', left: '880px', top: '410px', display: 'flex', gap: '12px', alignItems: 'center', fontSize: '26px', fontWeight: '800', color: '#141A24' }, `<img src="${LOGO('github')}" style="height:40px"> 실제 자동 배포 기록 #91`);
+    s.rise(gl, 600);
+    zoom(s, 'media/rich/gh-run.webp', 1650, [0, 0, 1650, 540], 880, 480, 960, { rot: 1, at: 700 });
+    jobs(s, 870, 850, 1300, 345);
     return s;
   },
   47(root) {
@@ -481,8 +493,7 @@ export const MADE = {
   },
   52(root) {
     const s = scene(root), el = s.el;
-    s.pop(img(el, LOGO('logo'), '', { position: 'absolute', left: '150px', top: '100px', height: '110px' }), 0);
-    s.rise(h(el, 'hm-title', { left: '280px', top: '108px', fontSize: '100px' }, 'KNUTIPS'), 100);
+    s.pop(brand(el, 156, 120, 100), 0);
     [['왜', '흩어진 학교 정보를 한곳에'], ['무엇', '장소·꿀팁 484개를 카드뉴스 · 지도 · 실시간 버스로'], ['어떻게', '공개 데이터 + AI 카드뉴스 + OCR · 자동 테스트 검증']].forEach(([k, v], i) => {
       const r = h(el, '', { position: 'absolute', left: '160px', top: px(300 + i * 120), display: 'flex', gap: '30px', alignItems: 'baseline', whiteSpace: 'nowrap', borderBottom: '1px dashed #C9CED6', paddingBottom: '20px', width: '1080px' }, `<b style="font-size:30px;width:110px;color:#6B7280">${k}</b><span style="font-size:36px;font-weight:800">${v}</span>`);
       s.custom(r, [{ opacity: 0, transform: 'translateX(-20px)' }, { opacity: 1, transform: 'none' }], 300 + i * 220, 450);
@@ -501,7 +512,7 @@ export const MADE = {
     photo(s, PHOTO('dorm-yeseong'), 960, 90, 600, 400, { rot: -4, at: 300 });
     photo(s, PHOTO('cafe-flore'), 1360, 330, 480, 320, { rot: 5, at: 450 });
     photo(s, RC('P040-1.webp'), 1000, 540, 320, 400, { rot: 3, at: 600 });
-    s.pop(img(el, LOGO('logo'), '', { position: 'absolute', left: '1500px', top: '780px', height: '150px' }), 900);
+    s.pop(brand(el, 160, 800, 80), 900);
     return s;
   },
 };

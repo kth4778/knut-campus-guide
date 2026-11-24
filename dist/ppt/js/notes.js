@@ -1,6 +1,6 @@
 // 발표 화면의 「대본」 패널: 장마다 대본을 고치면 팀 공유 저장소(js/notes-store.js)에 저장되고, 열어 둔 모든 사람에게 바로 보인다.
 // 고친 적 없는 장은 원래 대본(data/deck-order.json). 「이 장 원래대로」는 그 장의 공유 대본을 지운다.
-import { notesStore, tidy, myName, setMyName } from './notes-store.js?v=1795489195';
+import { notesStore, tidy, myName, setMyName } from './notes-store.js?v=1795490889';
 
 const key = it => (it.kind === 'static' ? 's' + it.n : it.id);
 const head = it => (it.notes.match(/^\[([^\]]+)\]\s*/) || [])[1] || it.speaker || '';

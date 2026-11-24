@@ -5,7 +5,7 @@ const N = DECK.length;
 let cur = Math.max(0, (+(location.hash.match(/#\/(\d+)/) || [])[1] || 1) - 1);
 let black = false, aud = null;
 // 대본: 팀 공유 대본(js/notes-store.js — 실제 사이트는 Firestore, 내 컴퓨터는 이 브라우저)이 있으면 그것, 없으면 원래 대본
-import { notesStore, tidy, myName } from './notes-store.js?v=1795489195';
+import { notesStore, tidy, myName } from './notes-store.js?v=1795490889';
 const key = i => DECK[i].kind === 'static' ? 's' + DECK[i].n : DECK[i].id;
 const body = i => DECK[i].notes.replace(/^\[[^\]]+\]\s*/, '');
 let SHARED = {}, store = null;

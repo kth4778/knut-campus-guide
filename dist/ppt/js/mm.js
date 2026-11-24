@@ -1,6 +1,6 @@
 // 모션 장 16개(이름 키)를 실제 자료 + 손으로 만든 스타일로. 대본의 (영상: …) 설명을 그대로 움직임으로 옮겼다.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795489195';
+import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795490889';
 
 const RC = n => `media/real/cards/${n}`;
 const rnd = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };   // 고정된 흩뿌림
@@ -28,14 +28,13 @@ export const MM = {
   // 로고 → 실제 앱 화면 4개가 펼쳐진다
   open(root) {
     const s = scene(root), el = s.el;
-    const lg = img(el, LOGO('logo'), '', { position: 'absolute', left: '150px', top: '170px', height: '150px' });
-    s.custom(lg, [{ opacity: 0, transform: 'scale(.3) rotate(-20deg)' }, { opacity: 1, transform: 'none' }], 0, 800, 'cubic-bezier(.3,1.4,.5,1)');
-    s.rise(h(el, 'hm-title', { left: '330px', top: '165px', fontSize: '130px' }, 'KNUTIPS'), 250);
+    const lg = brand(el, 150, 180, 130);
+    s.custom(lg, [{ opacity: 0, transform: 'translateY(30px) scale(.9)' }, { opacity: 1, transform: 'none' }], 0, 800, 'cubic-bezier(.3,1.4,.5,1)');
     s.rise(h(el, 'hm-sub', { left: '156px', top: '335px', fontSize: '38px', color: '#1E2430', fontWeight: '700' }, '피드 · 지도 · MOA · 누티, <em>한 앱에</em>'), 450);
     [['A1-home', '피드'], ['B1-map', '지도'], ['C1-moa', 'MOA<br><small>배달·택시 같이</small>'], ['C5-nuti', '누티<br><small>AI 챗봇</small>']].forEach(([n, l], i) => {
       const p = phone(s, SCR(n), 150 + i * 440, 475, 270, { rot: [-4, 2, -2, 4][i], at: 700 + i * 180, k: 1 });
       s.custom(p, [{ opacity: 0, transform: 'translate(0, 300px) rotate(0deg)' }, { opacity: 1, transform: 'none' }], 700 + i * 180, 800);
-      s.rise(h(el, 'hm-label', { left: px(150 + i * 440), top: '420px', width: '270px', textAlign: 'center', fontSize: '26px', fontWeight: '800', color: '#141A24', whiteSpace: 'nowrap' }, l.replace('<br><small>', ' <span style="font-weight:600;color:#6B7280">').replace('</small>', '</span>')), 1300 + i * 180);
+      s.rise(h(el, 'hm-label', { left: px(150 + i * 440), top: '398px', width: '270px', textAlign: 'center', fontSize: '26px', fontWeight: '800', color: '#141A24', whiteSpace: 'nowrap' }, l.replace('<br><small>', ' <span style="font-weight:600;color:#6B7280">').replace('</small>', '</span>')), 1300 + i * 180);
     });
     return s;
   },
@@ -74,9 +73,9 @@ export const MM = {
       const m = memo(s, x, y, 380, `<span style="font-size:72px;letter-spacing:-.04em">${b}</span><div style="font-size:26px;margin-top:8px">${l}</div>`, { rot: [-4, 3, -2][i], at: 300 + i * 250 });
       s.custom(m, [{ opacity: 1 }, { opacity: 0, transform: `translate(${960 - x - 190}px, ${560 - y - 150}px) scale(.1)` }], 2300, 900, 'cubic-bezier(.5,0,.3,1)');
     });
-    const lg = img(el, LOGO('logo'), '', { position: 'absolute', left: '820px', top: '220px', height: '280px' });
+    const lg = brand(el, null, 360, 190);
     s.custom(lg, [{ opacity: 0, transform: 'scale(.2)' }, { opacity: 1, transform: 'none' }], 3200, 700, 'cubic-bezier(.3,1.5,.5,1)');
-    s.rise(h(el, 'hm-title', { left: '0', width: '1920px', textAlign: 'center', top: '560px', fontSize: '140px' }, '<em>KNUTIPS</em> 하나로'), 3500);
+    s.rise(h(el, 'hm-title', { left: '0', width: '1920px', textAlign: 'center', top: '610px', fontSize: '110px' }, '<em>한 앱</em>으로'), 3500);
     return s;
   },
   // 숫자 8개가 차례로 멈춘다 — 숫자마다 실제 자료 한 장
@@ -309,9 +308,9 @@ export const MM = {
     const stop = stamp(s, 1080, 340, '배포 중지', '#D63A2F', 1700);
     s.custom(stop, [{ opacity: .88 }, { opacity: 0 }], 3000, 300);
     s.rise(h(el, 'hm-label', { left: '1080px', top: '470px', fontSize: '38px', fontWeight: '800', color: '#D63A2F' }, '하나라도 실패 → 멈추고 고친다'), 1900);
-    const n = note(s, 1100, 600, 360, '<b style="font-size:34px">GitHub Pages</b><br>모두 ✓ → 배포', { rot: 2, at: 3400 });
-    n.prepend(img(n, LOGO('github'), '', { height: '60px', display: 'block', marginBottom: '8px' }));
-    stamp(s, 1520, 700, '배포', '#1F9D55', 3800);
+    s.rise(h(el, '', { position: 'absolute', left: '1080px', top: '600px', display: 'flex', gap: '12px', alignItems: 'center', fontSize: '26px', fontWeight: '800', color: '#141A24' }, `<img src="${LOGO('github')}" style="height:40px"> 모두 통과하면 — 실제 기록 #91`), 3300);
+    jobs(s, 1080, 670, 3400, 110, true);
+    stamp(s, 1480, 760, '배포', '#1F9D55', 4500);
     return s;
   },
   // 꿀팁 제보 → GitHub 이슈 → 팀 확인 → 카드뉴스로 쌓인다
@@ -341,9 +340,8 @@ export const MM = {
       const p = phone(s, SCR(n), x, y, 180, { rot: (rnd(i) - .5) * 16, at: 100 + i * 80 });
       s.custom(p, [{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none', offset: .3 }, { opacity: 1, transform: 'none', offset: .6 }, { opacity: 0, transform: `translate(${960 - x - 90}px, ${430 - y - 195}px) scale(.1) rotate(30deg)` }], 100 + i * 80, 3000, 'cubic-bezier(.5,0,.3,1)');
     });
-    const lg = img(el, LOGO('logo'), '', { position: 'absolute', left: '820px', top: '130px', height: '280px' });
+    const lg = brand(el, null, 380, 200);
     s.custom(lg, [{ opacity: 0, transform: 'scale(.2)' }, { opacity: 1, transform: 'none' }], 2900, 700, 'cubic-bezier(.3,1.5,.5,1)');
-    s.rise(h(el, 'hm-title', { left: '0', width: '1920px', textAlign: 'center', top: '450px', fontSize: '150px' }, 'KNUTIPS'), 3100);
     s.rise(h(el, 'hm-sub', { left: '0', width: '1920px', textAlign: 'center', top: '700px', fontSize: '50px', color: '#141A24', fontWeight: '800' }, '따로 찾지 마세요. <em>넘기면 교통대가 보입니다</em>'), 3400);
     return s;
   },

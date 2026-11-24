@@ -2,7 +2,7 @@
 // 학교 인스타 언급, 수업에서 학생들이 같은 형식으로 정리한 표준화 기록, 실제 카드뉴스, 팀이 찍은 사진, OSM 외곽선.
 // 꾸밈은 hand.js(테이프 · 메모 · 형광펜 · 마커)로 — 손으로 붙여 만든 발표처럼.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, SCR, OFF, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker } from './hand.js?v=1795489195';
+import { px, LOGO, SCR, OFF, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker } from './hand.js?v=1795490889';
 
 const won = v => v ? v.toLocaleString('ko-KR') + '원' : '-';
 function colHead(s, x, y, logos, t, sub, at) {

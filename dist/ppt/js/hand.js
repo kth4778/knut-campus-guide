@@ -14,6 +14,8 @@ export const MARK = ok => `<img src="media/hand/${ok ? 'check' : 'cross'}.webp" 
 // 실패 1개를 정해 두고 두 장(47·ci)에서 같은 테스트로 보여 준다
 export const PICK_TESTS = ['A1 첫 화면', 'B1 계정 동그라미', 'D11 건물 핀을 누르면 건물 화면', 'E3 실시간 노선', 'F5 픽업 N빵', 'H1 「학생식당 어디야」'];
 export const FAIL_AT = 3;
+// 실제 앱 로고: 빨간 네모 K + NUTIPS (앱 화이트 모드 머리글과 같은 모양)
+export const brand = (parent, x, y, size, o = {}) => h(parent, 'hm-brand', { left: x == null ? '0' : px(x), width: x == null ? '1920px' : null, textAlign: x == null ? 'center' : null, top: px(y), fontSize: px(size), ...o }, '<i>K</i>NUTIPS');
 
 const REAL = await fetch('data/real.json').then(r => r.json());
 const MOCK = await fetch('media/mock/meta.json').then(r => r.json());
@@ -47,6 +49,22 @@ export function note(s, x, y, w, html, o = {}) {
   c.style.left = px(x); c.style.top = px(y);
   drop(s, c, o.at || 0, o.rot || 0);
   return c;
+}
+// 실제 화면 한 부분을 크게 잘라 붙이기: 원본 너비 nw 에서 crop=[x,y,w,h] 영역을 너비 w 로
+export function zoom(s, src, nw, crop, x, y, w, o = {}) {
+  const [cx, cy, cw, ch] = crop, k = w / cw;
+  const c = h(s.el, 'hm-zoom', { left: px(x), top: px(y), width: px(w), height: px(ch * k), rotate: (o.rot || 0) + 'deg', backgroundImage: `url(${src})`, backgroundSize: `${nw * k}px auto`, backgroundPosition: `${-cx * k}px ${-cy * k}px` });
+  if (o.tape !== false) tape(c, w / 2 - 60, -18, 120, -3);
+  if (o.cap) h(c, 'hm-zoom-cap', {}, o.cap);
+  drop(s, c, o.at || 0, o.rot || 0);
+  return c;
+}
+// GitHub Actions 실제 기록(#91)의 세 단계를 크게: 테스트 → 배포 → 공개 사이트 다시 확인
+export function jobs(s, x, y, at = 0, gap = 345, down = false) {
+  [['테스트', '1분 49초'], ['배포', '14초'], ['다시 확인', '30초']].forEach(([a, b], i) => {
+    s.pop(h(s.el, 'hm-job', { left: px(down ? x : x + i * gap), top: px(down ? y + i * gap : y) }, `<i>✓</i><b>${a}</b><small>${b}</small>`), at + i * 350);
+    if (i < 2) down ? arrow(s, x + 18, y + i * gap + gap - 34, 36, at + 200 + i * 350, 90) : arrow(s, x + i * gap + gap - 66, y + 22, 50, at + 200 + i * 350, 0);
+  });
 }
 // 노란 포스트잇
 export function memo(s, x, y, w, html, o = {}) {
