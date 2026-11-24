@@ -82,6 +82,9 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      # 올린 배포 파일이 바로 조회되지 않아 「No artifacts named github-pages」로 실패하는 일이 잦아서, 잠깐 기다렸다가 배포해요
+      - name: 배포 파일이 조회될 때까지 잠깐 기다리기
+        run: sleep 30
       - id: deployment
         uses: actions/deploy-pages@v4
 
