@@ -169,11 +169,13 @@ test.describe('H. 챗봇 누티 (가짜 AI)', () => {
 
   test.describe('AI 연결 실패', () => {
     test.use({ chatReply: null });
-    test('H2 AI 서버 오류: 안내 문구가 나오고 다시 물을 수 있다', P1, async ({ page, errors }) => {
+    test('H2 AI 서버 오류: 잠깐 생각한 뒤 모은 자료로 답하고, 다시 물을 수 있다', P1, async ({ page, errors }) => {
       await openApp(page, '#/chat');
       await page.locator('#chat-form input[name="q"]').fill('학생식당 어디야');
       await page.locator('#chat-form input[name="q"]').press('Enter');
-      await expect(page.locator('.chat-msg.bot.error')).toContainText('응답 오류');
+      await expect(page.locator('.chat-msg.bot').last()).toContainText('생각하는 중');
+      await expect(page.locator('.chat-msg.bot').last()).toContainText('학생식당', { timeout: 10000 });
+      await expect(page.locator('.chat-msg.bot.error')).toHaveCount(0);
       await expect(page.locator('#chat-form button[type="submit"]')).toBeEnabled();
       // 서버가 500 을 돌려준 것은 의도한 상황
       errors.splice(0, errors.length, ...errors.filter(e => !/500/.test(e)));

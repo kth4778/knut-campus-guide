@@ -285,6 +285,30 @@ function connectStore(options) {
   });
 }
 
+// LLM(Ollama)에 닿지 않을 때(공개 사이트 등): 찾은 자료로 누티 말투의 답을 만들어, 생각하는 시간을 두고 한 글자씩 보여 줘요
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function localAnswer(question, found) {
+  if (!found.length) return '가이드 자료에는 아직 없는 내용이에요. 학교 홈페이지나 에브리타임에서 한 번 확인해 보시는 걸 추천드려요!';
+  const line = p => {
+    const menu = (p.menus ?? []).find(m => m.name && m.min);
+    const hours = (p.hours ?? []).map(h => h.raw).find(Boolean);
+    let why = (p.reasons ?? []).find(r => r && r.length <= 70) ?? (p.reasons ?? [])[0] ?? '';
+    if (why.length > 70) why = why.slice(0, 68).replace(/\s\S*$/, '') + '…';
+    const area = p.area && !/없음/.test(p.area) ? `(${p.area})` : '';
+    return [`「${p.name}」`, area, why && `— ${why.replace(/[.。]$/, '')}${why.endsWith('…') ? '' : '.'}`,
+      menu && `${menu.name} ${menu.min.toLocaleString('ko-KR')}원부터예요.`, hours && `운영: ${hours}`].filter(Boolean).join(' ');
+  };
+  const top = found.slice(0, 3);
+  return [`학생들이 모은 자료에서 찾아봤어요!`, ...top.map((p, i) => `${i + 1}. ${line(p)}`),
+    `아래 장소 칩을 누르면 자세한 정보도 볼 수 있어요.`].join('\n');
+}
+async function typeOut(root, answer, text) {
+  await wait(1200 + Math.random() * 1000);
+  answer.content = '';
+  for (let i = 0; i < text.length; i += 2) { answer.content = text.slice(0, i + 2); paint(root); await wait(18 + Math.random() * 22); }
+  answer.content = text;
+}
+
 async function ask(root, question) {
   if (busy || !question.trim()) return;
   if (MATCH_RE.test(question)) { openMatch(root, question.trim()); return; }
@@ -322,11 +346,8 @@ async function ask(root, question) {
     }
     if (!text.trim()) answer.content = '답을 만들지 못했어요. 다시 물어봐 주세요.';
   } catch (error) {
-    answer.error = true;
-    answer.refs = [];
-    answer.content = error instanceof TypeError
-      ? `LLM에 연결하지 못했어요. 내 컴퓨터에서 Ollama가 켜져 있는지, 아래 'LLM 연결'의 주소(${endpoint})가 맞는지 확인해 주세요.`
-      : error.message;
+    // LLM에 연결되지 않거나 모델이 없으면 모은 자료로 답해요(공개 사이트에서도 누티가 동작하게)
+    await typeOut(root, answer, localAnswer(question, found));
   } finally {
     busy = false;
     messages = messages.slice(-40);
