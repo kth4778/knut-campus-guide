@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KNUTIPS 발표자 화면</title>
+<link rel="stylesheet" href="css/presenter.css?v=1795443738">
+</head>
+<body>
+<header>
+  <b class="brand">KNUTIPS 발표자 화면</b>
+  <button id="openAud" class="primary">청중 화면 열기</button>
+  <button id="prev">◀ 이전</button><span id="num">1 / 70</span><button id="next">다음 ▶</button>
+  <button id="black">검은 화면 (B)</button>
+  <span class="sp"></span>
+  <span id="speaker"></span>
+
+</header>
+<main>
+  <section class="now"><h2>지금 청중 화면</h2><div class="frame"><iframe id="live" title="지금 화면"></iframe></div></section>
+  <aside>
+    <section class="next"><h2>다음 장</h2><div class="frame"><iframe id="nextF" title="다음 장"></iframe></div></section>
+    <section class="notes"><h2>대본 <small>— 눌러서 바로 고칠 수 있어요(자동 저장)</small> <button id="resetNote">이 장 원래대로</button> <button id="saveFile">고친 대본 파일로 받기</button></h2><div class="who" id="who"></div><div id="notes" contenteditable="true" spellcheck="false"></div><div id="saved"></div></section>
+  </aside>
+</main>
+<script type="module" src="js/presenter.js?v=1795489195"></script>
+</body>
+</html>

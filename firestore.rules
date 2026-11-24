@@ -47,5 +47,15 @@ service cloud.firestore {
           && request.resource.data.at == request.time;
       }
     }
+
+    // 발표 대본(ppt/ 의 「대본」 패널·발표자 창): 장마다 문서 하나. 익명 로그인한 사람이 읽고 고친다
+    match /deckNotes/{slide} {
+      allow read: if signedIn();
+      allow delete: if signedIn();
+      allow create, update: if signedIn() && slide.size() <= 40
+        && request.resource.data.keys().hasOnly(['text', 'by', 'at'])
+        && shortText(request.resource.data.text, 3000) && request.resource.data.text.size() >= 1
+        && shortText(request.resource.data.by, 20) && shortText(request.resource.data.at, 40);
+    }
   }
 }
