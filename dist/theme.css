@@ -33,19 +33,9 @@
 [data-theme="light"] .setting-row.danger small{color:#b06a6a}
 [data-theme="light"] .comment-sheet::backdrop{background:#0006}
 
-/* MOA (moa.css) */
-[data-theme="light"] .moa-hero{background:linear-gradient(135deg,#e8eefc,#f6f8fc)}
-[data-theme="light"] .moa-type{background:#e3ecfd;color:#2f4f8f}
-[data-theme="light"] .moa-type.taxi{background:#fff1c7;color:#7a5a00}
-[data-theme="light"] .moa-type.pickup{background:#ffe6d6;color:#8a4a28}
+/* MOA (moa.css) — 새 디자인의 화이트 모드 색은 moa.css 끝에 함께 있어요 */
 [data-theme="light"] .moa-time.hot{color:#d64545}
-[data-theme="light"] .moa-where{color:#39424e}
 [data-theme="light"] .moa-host,[data-theme="light"] .moa-preview tr:last-child td{color:#b5541b}
-[data-theme="light"] .moa-btn.go,[data-theme="light"] .moa-new-btn{background:#3566d4;color:#fff}
-[data-theme="light"] .moa-btn.joined{background:#dcf3e3;color:#1f7a3d}
-[data-theme="light"] .moa-pay{background:#fff1e6;color:#7a4a2a}
-[data-theme="light"] .moa-pay b{color:#c45a1a}
-[data-theme="light"] .moa-pay small{color:#9a6a4a}
 
 /* 계정 · 챗봇 · 언어 메뉴 */
 [data-theme="light"] .story.seen .story-ring{background:#d5d9de}

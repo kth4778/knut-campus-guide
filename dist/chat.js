@@ -30,7 +30,7 @@ const sentTo = () => store
   ? Object.fromEntries((requests ?? []).filter(r => r.from === store.uid).map(r => [r.to, STATUS[r.status]]))
   : Object.fromEntries(read(APPLIED, []).map(id => [id, STATUS.pending]));
 const inboxCount = () => (requests ?? []).filter(r => store && r.to === store.uid && r.status === 'pending').length;
-const inboxChip = () => `<button type="button" class="chip chat-match-chip mm-inbox-chip" data-chat="match-inbox" ${store ? '' : 'hidden'}>📬 밥 신청함${inboxCount() ? ` <b>${inboxCount()}</b>` : ''}</button>`;
+const inboxChip = () => `<button type="button" class="chip chat-match-chip mm-inbox-chip" data-chat="match-inbox" ${store ? '' : 'hidden'}><img class="chip-art" src="assets/moa/inbox.webp" alt="">밥 신청함${inboxCount() ? ` <b>${inboxCount()}</b>` : ''}</button>`;
 
 export function chatPage(header) {
   if (chatOptions) connectStore(chatOptions);
@@ -39,7 +39,7 @@ export function chatPage(header) {
     <main class="chat-page">
       <div class="chat-log" id="chat-log" aria-live="polite">${intro() + messages.map(bubble).join('')}</div>
       ${stickerPanel()}
-      <div class="chat-suggest"><button type="button" class="chip chat-match-chip" data-chat="match">🍚 혼밥 친구 찾기</button>${inboxChip()}${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
+      <div class="chat-suggest"><button type="button" class="chip chat-match-chip" data-chat="match"><img class="chip-art" src="assets/moa/match.webp" alt="">혼밥 친구 찾기</button>${inboxChip()}${SUGGEST.map(q => `<button type="button" class="chip" data-chat="ask" data-q="${esc(q)}">${esc(q)}</button>`).join('')}</div>
       <form class="chat-form" id="chat-form">
         ${stickerButton()}
         <input name="q" aria-label="누티에게 질문" placeholder="학교생활 무엇이든 물어보세요" autocomplete="off" maxlength="300" required>
@@ -62,7 +62,7 @@ function intro() {
   const lines = [
     {sticker:'hello'},
     {text:`안녕하세요! 저는 한국교통대학교 친구 누티(Nuti)예요 🍎`},
-    {text:`이런 걸 도와드릴 수 있어요\n🍚 학교 앞 맛집·카페 추천\n🖨️ 프린트·복사 같은 생활꿀팁\n📚 공부하기 좋은 곳, 쉬기 좋은 곳\n🚌 버스 정류장·교통 정보\n🤝 혼밥러를 위한 밥친구 매칭\n${count ? `충주캠퍼스 장소·꿀팁 ${count}개를 보고 답해 드려요.` : ''}`},
+    {text:`이런 걸 도와드릴 수 있어요\n· 학교 앞 맛집·카페 추천\n· 프린트·복사 같은 생활꿀팁\n· 공부하기 좋은 곳, 쉬기 좋은 곳\n· 버스 정류장·교통 정보\n· 혼밥러를 위한 밥친구 매칭\n${count ? `충주캠퍼스 장소·꿀팁 ${count}개를 보고 답해 드려요.` : ''}`},
     {sticker:'together'},
     {text:'궁금한 걸 물어보거나, 아래 이모티콘 버튼으로 저한테 이모티콘을 보내 보세요!'},
   ];
@@ -233,7 +233,7 @@ async function applyBuddy(root, button, options) {
   button.disabled = true;
   try {
     await store.sendRequest(id, {myNick:loadProfile().nick, toNick:pick.buddy.nick, place:pick.place});
-    botSay(root, `${pick.buddy.nick}님에게 같이 먹자고 신청했어요! 수락하면 「📬 밥 신청함」에서 채팅을 열어 만날 시간과 장소를 정할 수 있어요.`);
+    botSay(root, `${pick.buddy.nick}님에게 같이 먹자고 신청했어요! 수락하면 「밥 신청함」에서 채팅을 열어 만날 시간과 장소를 정할 수 있어요.`);
   } catch (err) {
     button.disabled = false;
     options.toast(`신청을 보내지 못했어요. (${err.code || err.message})`);
@@ -273,7 +273,7 @@ function connectStore(options) {
       const acceptedNow = list.filter(r => r.from === s.uid && r.status === 'accepted' && known && known.get(r.id) === 'pending');
       known = new Map(list.map(r => [r.id, r.status]));
       requests = list;
-      if (fresh.length) options.toast(`🍚 ${fresh[0].fromNick}님이 같이 밥 먹자고 신청했어요!`);
+      if (fresh.length) options.toast(`${fresh[0].fromNick}님이 같이 밥 먹자고 신청했어요!`);
       if (acceptedNow.length) options.toast(`🎉 ${acceptedNow[0].toNick}님이 밥 신청을 수락했어요!`);
       const root = document.querySelector('.chat-page')?.parentElement;
       if (!root) return;

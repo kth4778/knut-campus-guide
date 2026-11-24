@@ -71,7 +71,7 @@ test.describe('F. MOA', () => {
 
   test('F5 픽업 N빵: 내가 참여하면 1인 금액이 다시 계산되어 줄어든다', P1, async ({ page }) => {
     await openApp(page, '#/moa');
-    const pickup = page.locator('.moa-card', { hasText: '🍕 픽업' }).first();
+    const pickup = page.locator('.moa-card.k-pickup').first();
     const before = won(await pickup.locator('.moa-nums b').textContent());
     await pickup.locator('[data-moa="join"]').click();
     await page.locator('dialog.moa-sheet input[name="nick"]').fill('테스터');

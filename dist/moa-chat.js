@@ -4,6 +4,7 @@
 // 나중에 Firebase 같은 서버를 붙이면 load/save 부분만 바꾸면 돼요.
 
 import {stickerImg, stickerButton, stickerPanel, STICKERS} from './stickers.js';
+import {ICON, avatar, artImg} from './ui-icons.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORE = 'knut-campus-guide:moa-chats';
@@ -12,8 +13,6 @@ const ME = 'me';
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
 const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
 
-const FACES = ['🐻', '🦊', '🐰', '🐱', '🐶', '🐼', '🐧', '🐯'];
-const COLORS = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#64748b'];
 // 같이 참여한 학우의 자동 답장 (데모)
 const REPLIES = {
   taxi:['좋아요! 정문 앞에서 봬요 🙌', '저 2분 정도 늦을 수도 있어요', '택시는 제가 카카오T로 부를게요', '도착하면 1/N로 송금할게요'],
@@ -38,7 +37,7 @@ export const isMember = fund => (fund?.participantUids || []).includes(ME) || fu
 const others = fund => (fund.participants || []).filter(p => p.uid !== ME);
 const face = (fund, nick) => {
   const k = Math.max(0, others(fund).findIndex(p => p.nick === nick));
-  return [FACES[(k * 3 + fund.id.length) % 8], COLORS[(k + fund.id.length) % 8]];
+  return avatar(k * 3 + fund.id.length);
 };
 
 function chatOf(fund) {
@@ -59,8 +58,8 @@ export const orderTotal = fund => chatOf(fund).orders.reduce((sum, o) => sum + (
 // 모집자 계좌 (참여자에게만 보여요)
 function accountHtml(fund) {
   const a = fund.account;
-  if (!a?.number) return fund.hostUid === ME ? '<p class="room-account none">💳 계좌를 등록하지 않았어요. 모집글을 새로 올릴 때 등록할 수 있어요.</p>' : '';
-  return `<div class="room-account"><span>💳 ${esc(fund.host?.nick || '모집자')}님 계좌</span><b>${esc(a.bank)} ${esc(a.number)}</b><small>예금주 ${esc(a.holder || '-')}</small>
+  if (!a?.number) return fund.hostUid === ME ? '<p class="room-account none">계좌를 등록하지 않았어요. 모집글을 새로 올릴 때 등록할 수 있어요.</p>' : '';
+  return `<div class="room-account"><span>${ICON.card}${esc(fund.host?.nick || '모집자')}님 계좌</span><b>${esc(a.bank)} ${esc(a.number)}</b><small>예금주 ${esc(a.holder || '-')}</small>
     <button type="button" class="pill" data-copy-account="${esc(`${a.bank} ${a.number}`)}">복사</button></div>`;
 }
 
@@ -83,9 +82,9 @@ function ordersHtml(fund, chat) {
         <br><small>+ 배달비 ${won(each)}</small></span>
       <b>${won(sum + each)}<small>${host ? '모집자 부담분' : '보낼 돈'}</small></b></li>`;
   }).join('');
-  return `<details class="room-orders" open><summary>🧾 주문 모음 · ${won(total)}${min ? ` / 최소주문 ${won(min)}` : ''}</summary>
-      ${min ? `<div class="moa-bar"><i style="width:${Math.min(100, total / min * 100)}%"></i></div><p class="order-note">${total >= min ? '최소주문을 채웠어요! 🎉' : `최소주문까지 ${won(min - total)} 남았어요`}</p>` : ''}
-      <p class="order-fee">🛵 배달비 <b>${won(fee)}</b> 고정 → 참여자 ${count}명이 <b>${won(each)}</b>씩 자동 분배</p>
+  return `<details class="room-orders" open><summary>${ICON.receipt}주문 모음 · ${won(total)}${min ? ` / 최소주문 ${won(min)}` : ''}</summary>
+      ${min ? `<div class="moa-bar"><i style="width:${Math.min(100, total / min * 100)}%"></i></div><p class="order-note">${total >= min ? '최소주문을 채웠어요!' : `최소주문까지 ${won(min - total)} 남았어요`}</p>` : ''}
+      <p class="order-fee">배달비 <b>${won(fee)}</b> 고정 → 참여자 ${count}명이 <b>${won(each)}</b>씩 자동 분배</p>
       <ul class="order-list">${rows}</ul>
       <p class="order-note">사람이 들어오거나 나가면 배달비 몫이 자동으로 다시 계산돼요. 보낼 돈은 모집자 계좌로 보내 주세요.</p>
       <form class="order-form" id="order-form"><input name="menu" placeholder="내 메뉴 (예: 후라이드 반마리)" maxlength="30" required><input name="price" type="number" inputmode="numeric" min="100" step="100" placeholder="가격" required><button type="submit" class="primary">담기</button></form>
@@ -96,18 +95,18 @@ function ordersHtml(fund, chat) {
 export function chatListHtml(myFunds, route) {
   const rows = myFunds.map(fund => ({fund, chat:chatOf(fund)}))
     .sort((a, b) => (b.chat.messages.at(-1)?.at ?? 0) - (a.chat.messages.at(-1)?.at ?? 0));
-  const typeIcon = fund => fund.type === 'taxi' ? '🚕' : fund.mode === 'pickup' ? '🍕' : '🛵';
-  return `<div class="moa-hero chat-hero"><span>💬</span><div><b>참여자끼리 이야기해요</b><small>모집에 참여하면 그 모집의 채팅방이 열려요</small></div><p><strong>${rows.length}</strong><small>내 채팅방</small></p></div>
+  const typeIcon = fund => artImg(fund.type === 'taxi' ? 'taxi' : fund.mode === 'pickup' ? 'pickup' : 'delivery');
+  return `<div class="moa-hero chat-hero"><div><b>참여자끼리<br>이야기해요</b><small>모집에 참여하면 그 모집의<br>채팅방이 열려요</small><p><strong>${rows.length}</strong><small>개 내 채팅방</small></p></div>${artImg('chatEmpty', 'moa-hero-art')}</div>
     ${rows.length ? `<div class="room-list">${rows.map(({fund, chat}) => {
       const last = chat.messages.at(-1);
       const preview = last ? (last.system ? last.text : `${last.mine ? '나' : last.who}: ${last.sticker ? '(이모티콘)' : last.text}`) : '';
       return `<a class="room-row" href="${route('moa-chat', {id:fund.id})}">
         <span class="room-topic">${typeIcon(fund)}</span>
         <span class="room-text"><strong>${esc(fund.title)}</strong><small>${esc(preview)}</small></span>
-        <span class="room-meta"><small>${last ? timeAgo(last.at) : ''}</small><small>👥 ${(fund.participantUids || []).length}</small></span>
+        <span class="room-meta"><small>${last ? timeAgo(last.at) : ''}</small><small class="room-count">${ICON.users}${(fund.participantUids || []).length}</small></span>
       </a>`;
     }).join('')}</div>`
-    : `<div class="empty"><strong>아직 채팅방이 없어요</strong><p>모집에 참여하거나 직접 모집하면<br>참여자끼리 쓰는 채팅방이 생겨요.</p><a class="primary" href="${route('moa')}">모집 보러 가기</a></div>`}
+    : `<div class="empty moa-empty"><img src="assets/nuti/curious.webp" alt="" aria-hidden="true"><strong>아직 채팅방이 없어요</strong><p>모집에 참여하거나 직접 모집하면<br>참여자끼리 쓰는 채팅방이 생겨요.</p><a class="primary" href="${route('moa')}">모집 보러 가기</a></div>`}
     <p class="moa-note">데모 채팅방이에요. 대화는 이 브라우저에만 저장되고, 다른 참여자의 답장은 예시로 자동 생성돼요.</p>`;
 }
 
@@ -115,15 +114,14 @@ function bubble(fund, m) {
   if (m.system) return `<p class="chat-system">${esc(m.text)}</p>`;
   const body = m.sticker ? stickerImg(m.sticker) : `<p>${esc(m.text)}</p>`;
   if (m.mine) return `<div class="room-msg me${m.sticker ? ' sticker-msg' : ''}">${body}<time>${clock(m.at)}</time></div>`;
-  const [icon, color] = face(fund, m.who);
-  return `<div class="room-msg${m.sticker ? ' sticker-msg' : ''}"><i style="background:${color}">${icon}</i><div><small>${esc(m.who)}</small>${body}</div><time>${clock(m.at)}</time></div>`;
+  return `<div class="room-msg${m.sticker ? ' sticker-msg' : ''}"><i><img src="${face(fund, m.who)}" alt=""></i><div><small>${esc(m.who)}</small>${body}</div><time>${clock(m.at)}</time></div>`;
 }
 
 // 채팅방 화면. header(title) 는 app.js 의 위쪽 막대를 만들어 줘요
 export function moaChatPage(fund, header, route) {
   if (!fund) return `${header('채팅방')}<main class="scroll empty">모집을 찾을 수 없어요.</main>`;
   if (!isMember(fund)) {
-    return `${header(fund.title)}<main class="scroll empty room-locked"><span aria-hidden="true">🔒</span>
+    return `${header(fund.title)}<main class="scroll empty room-locked">${artImg('chatEmpty')}
       <strong>참여한 사람만 들어올 수 있어요</strong><p>이 모집에 참여하면 참여자끼리 쓰는 채팅방이 열려요.</p>
       <a class="primary" href="${route('moa')}">모집 보러 가기</a></main>`;
   }
@@ -131,7 +129,7 @@ export function moaChatPage(fund, header, route) {
   const names = ['나', ...others(fund).map(p => p.nick)].join(', ');
   return `${header(fund.title)}
     <main class="room-page" data-fund="${esc(fund.id)}">
-      <p class="room-members">👥 참여자 ${(fund.participantUids || []).length}명 · ${esc(names)}</p>
+      <p class="room-members">${ICON.users}참여자 ${(fund.participantUids || []).length}명 · ${esc(names)}</p>
       <div class="room-panels">${accountHtml(fund)}${isDelivery(fund) ? ordersHtml(fund, chat) : ''}</div>
       <div class="room-log" id="room-log">${chat.messages.map(m => bubble(fund, m)).join('')}</div>
       ${stickerPanel()}
@@ -223,7 +221,7 @@ export function initMoaChat(root, {fundById, toast, onChange}) {
       const me = (fund.participants || []).find(p => p.uid === ME);
       chat.orders.push({uid:ME, nick:me?.nick || '나', menu, price, at:Date.now()});
       save();
-      send(fund, `🧾 ${menu} ${won(price)} 담았어요`);
+      send(fund, `${menu} ${won(price)} 담았어요`);
       onChange?.();
       return;
     }

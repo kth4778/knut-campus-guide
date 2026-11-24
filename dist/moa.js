@@ -2,6 +2,7 @@
 // 모집글은 이 브라우저(localStorage)에만 저장돼요. 다른 사람에게는 보이지 않아요.
 
 import {chatListHtml, isMember, noteJoined, orderTotal, feeShare} from './moa-chat.js';
+import {ICON, avatar, artImg} from './ui-icons.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const won = n => (+n || 0).toLocaleString('ko-KR') + '원';
@@ -24,8 +25,6 @@ export const SPOT_LL = {
 };
 export const SPOTS = Object.keys(SPOT_LL);
 export const spot = label => ({label, lat:SPOT_LL[label][0], lng:SPOT_LL[label][1]});
-const NICKS = ['🐻', '🦊', '🐰', '🐱', '🐶', '🐼', '🐧', '🐯'];
-const COLORS = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6', '#64748b'];
 
 // 처음 열었을 때 보여 줄 예시 모집글
 function seed() {
@@ -57,8 +56,8 @@ let filter = 'all';
 let tab = 'funds'; // 'funds' 모집 · 'chat' 채팅방
 const hashRoute = (page, params = {}) => { const q = new URLSearchParams(params).toString(); return `#/${page}${q ? '?' + q : ''}`; };
 const tabsHtml = () => `<nav class="moa-tabs" aria-label="MOA 메뉴">
-    <a href="${hashRoute('moa')}" ${tab === 'funds' ? 'aria-current="page"' : ''}>🛵 모집</a>
-    <a href="${hashRoute('moa', {tab:'chat'})}" ${tab === 'chat' ? 'aria-current="page"' : ''}>💬 채팅방</a>
+    <a href="${hashRoute('moa')}" ${tab === 'funds' ? 'aria-current="page"' : ''}>${ICON.users}모집</a>
+    <a href="${hashRoute('moa', {tab:'chat'})}" ${tab === 'chat' ? 'aria-current="page"' : ''}>${ICON.chat}채팅방</a>
   </nav>`;
 let mineOnly = false;
 
@@ -87,24 +86,31 @@ const placeLabel = p => p?.label || p || '';
 const kindOf = f => isPickup(f) ? 'pickup' : f.type;
 
 function avatars(f, people) {
-  return people.slice(0, 6).map((p, k) => `<i style="background:${COLORS[(k + f.id.length) % 8]}" title="${esc(p.nick)}">${NICKS[(k * 3 + f.id.length) % 8]}</i>`).join('');
+  return people.slice(0, 6).map((p, k) => `<i title="${esc(p.nick)}"><img src="${avatar(k * 3 + f.id.length)}" alt=""></i>`).join('');
 }
 // 채팅방 버튼은 참여한 사람(모집자 포함)에게만 보여요
-const chatButton = f => isMember(f) ? '<button type="button" class="moa-btn chat" data-moa="chat" aria-label="참여자 채팅방">💬</button>' : '';
+const chatButton = f => isMember(f) ? `<button type="button" class="moa-btn chat" data-moa="chat" aria-label="참여자 채팅방">${ICON.chat}</button>` : '';
 function joinButton(f, state, v) {
   if (state.end) return '<span class="moa-btn ended">마감</span>';
   if (v.host) return '<button type="button" class="moa-btn joined" data-moa="close">내 모집 · 마감하기</button>';
   return `<button type="button" class="moa-btn ${v.me ? 'joined' : v.full ? '' : 'go'}" data-moa="join" ${!v.me && v.full ? 'disabled' : ''}>${v.me ? '참여 중 ✓' : v.full ? '정원 찼어요' : '참여하기'}</button>`;
 }
 
+const TYPE_LABEL = {delivery:'배달', pickup:'픽업', taxi:'택시'};
+// 카드 머리: 그림 아이콘 + 분류 + 제목 + 남은 시간
+const cardHead = (f, kind, state) => `<div class="moa-top">
+    <span class="moa-ico ${kind}">${artImg(kind)}</span>
+    <div class="moa-head"><span class="moa-type ${kind}">${TYPE_LABEL[kind]}</span><strong>${esc(f.title)}</strong></div>
+    <span class="moa-time${state.hot ? ' hot' : ''}">${ICON.clock}${state.text}</span></div>`;
+
 function pickupCard(f) {
   const state = timeLeft(f), v = numbers(f), split = pickSplit(f, v.n), fee = +f.fee || 0;
-  return `<article class="moa-card" data-id="${esc(f.id)}">
-    <div class="moa-top"><span class="moa-type pickup">🍕 픽업</span><strong>${esc(f.title)}</strong><span class="moa-time${state.hot ? ' hot' : ''}">${state.text}</span></div>
-    <p class="moa-where">🏪 ${esc(f.shop || '가게')} → 📍 나눌 곳 ${esc(placeLabel(f.place))}</p>
-    <div class="moa-bar"><i style="width:${v.n / v.max * 100}%;background:linear-gradient(90deg,#f08a3c,#c0562b)"></i></div>
+  return `<article class="moa-card k-pickup" data-id="${esc(f.id)}">
+    ${cardHead(f, 'pickup', state)}
+    <p class="moa-where">${ICON.store}${esc(f.shop || '가게')} ${ICON.arrow} 나눌 곳 ${esc(placeLabel(f.place))}</p>
+    <div class="moa-bar"><i style="width:${v.n / v.max * 100}%"></i></div>
     <p class="moa-nums"><span>음식 ${won(f.foodTotal)} · 교통비 ${won(fee)}</span><span>참여자 1인 <b>${won(split.other)}</b></span></p>
-    <p class="moa-split"><span>🍕 음식 ${won(split.food)}${split.feeEach ? ` + 🚕 교통비 ${won(split.feeEach)}` : ''}</span><span class="moa-host">픽업 ${esc(f.host?.nick || '모집자')}: ${won(split.picker)} ${f.pickerFree ? '(교통비 면제)' : '(교통비 같이 부담)'}</span></p>
+    <p class="moa-split"><span>음식 ${won(split.food)}${split.feeEach ? ` + 교통비 ${won(split.feeEach)}` : ''}</span><span class="moa-host">픽업 ${esc(f.host?.nick || '모집자')}: ${won(split.picker)} ${f.pickerFree ? '(교통비 면제)' : '(교통비 같이 부담)'}</span></p>
     <div class="moa-bottom"><span class="moa-people">${avatars(f, v.people)}</span><small>${v.n}/${v.max}명 · 사람이 늘면 1인 금액이 줄어요</small>${chatButton(f)}${joinButton(f, state, v)}</div>
   </article>`;
 }
@@ -115,10 +121,10 @@ export function fundCard(f) {
   const fare = +f.fare || 0, fee = +f.fee || 0, min = +f.minOrder || 0, taxi = f.type === 'taxi';
   const share = taxi ? (fare ? won(Math.ceil(fare / n / 100) * 100) : '타고 나서 1/N') : won(feeShare(f).each);
   const percent = taxi ? v.n / v.max * 100 : min ? Math.min(100, v.sum / min * 100) : v.n / v.max * 100;
-  return `<article class="moa-card" data-id="${esc(f.id)}">
-    <div class="moa-top"><span class="moa-type ${f.type}">${taxi ? '🚕 택시' : '🛵 배달'}</span><strong>${esc(f.title)}</strong><span class="moa-time${state.hot ? ' hot' : ''}">${state.text}</span></div>
-    <p class="moa-where">${taxi ? `📍 ${esc(placeLabel(f.place))} → ${esc(placeLabel(f.dest))}` : `📍 받는 곳 ${esc(placeLabel(f.place))}`}${f.host?.nick ? ` · 모집 ${esc(f.host.nick)}` : ''}</p>
-    <div class="moa-bar"><i style="width:${percent}%;${taxi ? 'background:linear-gradient(90deg,#f5c542,#e0a526)' : ''}"></i></div>
+  return `<article class="moa-card k-${f.type}" data-id="${esc(f.id)}">
+    ${cardHead(f, f.type, state)}
+    <p class="moa-where">${ICON.pin}${taxi ? `${esc(placeLabel(f.place))} ${ICON.arrow} ${esc(placeLabel(f.dest))}` : `받는 곳 ${esc(placeLabel(f.place))}`}${f.host?.nick ? `<span class="moa-by">모집 ${esc(f.host.nick)}</span>` : ''}</p>
+    <div class="moa-bar"><i style="width:${percent}%"></i></div>
     <p class="moa-nums">${taxi ? `<span>${fare ? '택시비 ' + won(fare) : '택시비는 타고 나서'}</span><span>1인 <b>${share}</b></span>`
       : `<span>${min ? `최소주문 ${won(min)} 중 ${won(Math.min(min, v.sum))}` : '최소주문 없음'}</span><span>배달비 1인 <b>${share}</b></span>`}</p>
     <div class="moa-bottom"><span class="moa-people">${avatars(f, v.people)}</span><small>${taxi ? `${v.n}/${v.max}명` : `${v.n}명 참여`}</small>${chatButton(f)}${joinButton(f, state, v)}</div>
@@ -128,14 +134,14 @@ export function fundCard(f) {
 function listHtml() {
   if (tab === 'chat') return tabsHtml() + chatListHtml(funds.filter(isMember), hashRoute);
   const open = funds.filter(f => !timeLeft(f).end);
-  const options = [['all', '전체'], ['delivery', '🛵 배달'], ['pickup', '🍕 픽업'], ['taxi', '🚕 택시']];
+  const options = [['all', '전체'], ['delivery', '배달'], ['pickup', '픽업'], ['taxi', '택시']];
   const list = funds
     .filter(f => (filter === 'all' || kindOf(f) === filter) && (!mineOnly || numbers(f).me) && f.deadline > Date.now() - 24 * 3600e3)
     .sort((a, b) => timeLeft(a).end - timeLeft(b).end || a.deadline - b.deadline);
-  return `${tabsHtml()}<div class="moa-hero"><span>🛵🚕</span><div><b>같이 시키고, 같이 타요</b><small>배달비·최소주문, 택시비를 학우들과 나눠요</small></div><p><strong>${open.length}</strong><small>모집 중</small></p></div>
-    <div class="chips">${options.map(([value, label]) => `<button type="button" class="chip" data-moa="filter" data-value="${value}" aria-pressed="${filter === value}">${label} ${value === 'all' ? open.length : open.filter(f => kindOf(f) === value).length}</button>`).join('')}
+  return `${tabsHtml()}<div class="moa-hero"><div><b>같이 시키고,<br>같이 타요</b><small>배달비·최소주문, 택시비를<br>학우들과 나눠요</small><p><strong>${open.length}</strong><small>개 모집 중</small></p></div>${artImg('hero', 'moa-hero-art')}</div>
+    <div class="chips moa-chips">${options.map(([value, label]) => `<button type="button" class="chip" data-moa="filter" data-value="${value}" aria-pressed="${filter === value}">${value === 'all' ? '' : artImg(value, 'chip-art')}${label} <b>${value === 'all' ? open.length : open.filter(f => kindOf(f) === value).length}</b></button>`).join('')}
       <button type="button" class="chip" data-moa="mine" aria-pressed="${mineOnly}">내 참여</button></div>
-    <button type="button" class="moa-new-btn" data-moa="new">＋ 모집하기</button>
+    <button type="button" class="moa-new-btn" data-moa="new">${ICON.plus}모집하기</button>
     <div class="moa-list">${list.length ? list.map(fundCard).join('') : `<div class="empty">${mineOnly ? '참여한 모집이 없어요.' : '지금 모집 중인 글이 없어요.<br>먼저 모집해 보세요!'}</div>`}</div>
     <p class="moa-note">모집글은 이 브라우저에만 저장돼요. 다른 사람에게는 보이지 않아요.</p>`;
 }
@@ -167,12 +173,12 @@ function sheet(html) {
 // 참여: 닉네임만 받고 참여 (배달 메뉴·가격은 채팅방에서 올려요)
 function askJoin(f, toast) {
   const pickup = isPickup(f), after = pickup ? pickSplit(f, numbers(f).n + 1) : null;
-  const dialog = sheet(`<div class="sheet-top"><h2>${f.type === 'taxi' ? '🚕 같이 타기' : pickup ? '🍕 같이 먹기' : '🛵 같이 시키기'}</h2></div>
+  const dialog = sheet(`<div class="sheet-top"><h2 class="moa-sheet-title">${artImg(f.type === 'taxi' ? 'taxi' : pickup ? 'pickup' : 'delivery')}${f.type === 'taxi' ? '같이 타기' : pickup ? '같이 먹기' : '같이 시키기'}</h2></div>
     <form class="moa-form">
       <p class="moa-sub">${esc(f.title)}</p>
       ${pickup ? `<p class="moa-pay">내가 낼 돈 (지금 참여하면)<b>${won(after.other)}</b><small>음식 ${won(after.food)}${after.feeEach ? ` + 교통비 ${won(after.feeEach)}` : ''} · ${after.n}명 기준, 사람이 더 오면 줄어요</small></p>` : ''}
       <label>닉네임<input name="nick" maxlength="12" placeholder="예) 치킨러버" value="${esc(myNick())}" required></label>
-      ${f.type === 'delivery' && !pickup ? '<p class="moa-help">참여한 뒤 💬 채팅방에서 먹을 메뉴와 가격을 올리면 주문이 모여요.</p>' : ''}
+      ${f.type === 'delivery' && !pickup ? '<p class="moa-help">참여한 뒤 참여자 채팅방에서 먹을 메뉴와 가격을 올리면 주문이 모여요.</p>' : ''}
       <div class="moa-actions"><button type="button" class="pill" data-moa="cancel">취소</button><button class="primary" type="submit">참여하기</button></div>
     </form>`);
   dialog.querySelector('form').addEventListener('submit', event => {
@@ -187,7 +193,7 @@ function askJoin(f, toast) {
     noteJoined(f, nick);
     dialog.close();
     refreshMoa();
-    toast('참여했어요! 💬 참여자 채팅방이 열렸어요.');
+    toast('참여했어요! 참여자 채팅방이 열렸어요.');
   });
 }
 
@@ -255,7 +261,7 @@ export function openNewFund(toast, preset = {}) {
     `<button type="button" class="chip" data-seg="${name}" data-value="${esc(value)}" aria-pressed="${String(value) === String(current)}">${esc(label)}</button>`).join('')}</div>`;
   // 정해진 곳 + 📍 지도에서 고르기 + 🎯 내 위치
   const spotSeg = key => seg(key, [...(key === 'dest' ? SPOTS.slice(7) : SPOTS.slice(0, 8)).map(label => [label, label]),
-    ['__map', st.picked[key] ? '📍 지도에서 고른 곳 ✓' : '📍 지도에서'], ['__me', st.here[key] ? '🎯 내 위치 ✓' : '🎯 내 위치']], st[key]);
+    ['__map', st.picked[key] ? '지도에서 고른 곳 ✓' : '지도에서 고르기'], ['__me', st.here[key] ? '내 위치 ✓' : '내 위치']], st[key]);
   const mapBox = key => st.pick === key ? `<div class="pick-map"><div id="pick-map"></div><span class="pick-pin" aria-hidden="true">📍</span>
       <button type="button" class="primary pick-ok" data-pick-ok>이 위치로</button></div><p class="moa-help">지도를 움직여 핀을 받을 곳에 맞춰 주세요.</p>` : '';
   const placeOf = key => st[key] === '__me' && st.here[key] ? {label:'내 위치', ...st.here[key]}
@@ -265,7 +271,8 @@ export function openNewFund(toast, preset = {}) {
     dropMap();
     const taxi = st.type === 'taxi', pickup = st.type === 'pickup';
     form.innerHTML = `
-      <label>무엇을 같이 할까요?</label>${seg('type', [['delivery', '🛵 배달 같이 시키기'], ['pickup', '🍕 픽업해서 같이 먹기'], ['taxi', '🚕 택시 같이 타기']], st.type)}
+      <label>무엇을 같이 할까요?</label><div class="moa-kinds">${[['delivery', '배달 같이 시키기'], ['pickup', '픽업해서 같이 먹기'], ['taxi', '택시 같이 타기']].map(([value, label]) =>
+        `<button type="button" class="moa-kind" data-seg="type" data-value="${value}" aria-pressed="${st.type === value}">${artImg(value)}<span>${label}</span></button>`).join('')}</div>
       ${pickup ? '<p class="moa-help">내가 가게에서 사 와서 나눠요. 음식값은 N빵, 교통비는 아래에서 정해요.</p>' : ''}
       <label>제목<input name="title" maxlength="60" placeholder="${taxi ? '예) 충주역 같이 가요' : pickup ? '예) 파파프라이데이 피자 같이 먹어요' : '예) 치킨 같이 시켜요'}"></label>
       ${pickup ? '<label>가게<input name="shop" maxlength="40" placeholder="예) 파파존스 충주점"></label>' : ''}
@@ -278,10 +285,10 @@ export function openNewFund(toast, preset = {}) {
         <div class="moa-preview"></div>`
       : `<label>배달비 (원, 고정 · 참여자끼리 자동으로 나눠요)<input name="money" type="number" inputmode="numeric" min="0" step="100" placeholder="예) 4000" required></label>
         <label>최소주문금액 (원, 없으면 비워두기)<input name="minOrder" type="number" inputmode="numeric" min="0" placeholder="예) 20000"></label>
-        <p class="moa-help">🧾 각자 먹을 메뉴와 가격은 참여자 채팅방에서 올리면 자동으로 모여요. 👥 인원 제한은 없어요.</p>`}
+        <p class="moa-help">각자 먹을 메뉴와 가격은 참여자 채팅방에서 올리면 자동으로 모여요. 인원 제한은 없어요.</p>`}
       ${st.type !== 'delivery' ? `<label>정원 (나 포함)</label>${seg('max', (pickup ? [2, 3, 4, 5, 6, 8] : [2, 3, 4, 5, 6]).map(n => [n, n + '명']), st.max)}` : ''}
       <label>${taxi ? '출발 시각' : pickup ? '픽업 출발 시각' : '주문 시각'}<input name="at" type="time" step="300" required></label>
-      <fieldset class="moa-account"><legend>💳 송금 받을 계좌 <small>(선택 · 참여자 채팅방에만 보여요)</small></legend>
+      <fieldset class="moa-account"><legend>송금 받을 계좌 <small>(선택 · 참여자 채팅방에만 보여요)</small></legend>
         <div class="account-row"><input name="bank" maxlength="12" placeholder="은행"><input name="number" maxlength="24" inputmode="numeric" placeholder="계좌번호"></div>
         <input name="holder" maxlength="12" placeholder="예금주"></fieldset>
       <label>닉네임<input name="nick" maxlength="12" placeholder="예) 치킨러버"></label>

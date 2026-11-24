@@ -31,8 +31,8 @@ export async function mountMealRoom(root, id) {
   if (!head.isConnected) return;
   if (!room) return fail('이 채팅방을 찾을 수 없거나 들어갈 수 없어요.');
   const other = room.from === store.uid ? room.toNick : room.fromNick;
-  head.innerHTML = `<p class="mm-title">🍚 ${esc(other)}님과 밥약속</p>
-    ${room.place ? `<a class="chip mm-place" href="#/place?id=${esc(room.place.id)}">🍽️ 추천 식당 · ${esc(room.place.name)}</a>` : ''}
+  head.innerHTML = `<p class="mm-title">${esc(other)}님과 밥약속</p>
+    ${room.place ? `<a class="chip mm-place" href="#/place?id=${esc(room.place.id)}">추천 식당 · ${esc(room.place.name)}</a>` : ''}
     ${room.status === 'accepted' ? '' : '<p class="mm-sub">상대가 아직 신청을 수락하지 않았어요. 수락하면 채팅할 수 있어요.</p>'}
     <p class="mm-sub">처음 만나는 학우예요. 연락처·계좌 같은 개인정보는 보내지 말고, 사람 많은 곳에서 만나요.</p>`;
   form.hidden = room.status !== 'accepted';

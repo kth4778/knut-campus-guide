@@ -84,3 +84,28 @@
 .chat-msg.bot{flex-wrap:wrap}
 .chat-msg.bot>p{flex:0 1 auto;min-width:0;max-width:calc(100% - 46px)}
 .chat-msg.bot>.chat-refs{flex:1 0 100%;padding-left:45px;margin-top:-1px}
+
+/* ===== 혼밥 친구 매칭 새 디자인: 말풍선 안에 끼지 않고 화면 폭 카드로, 누티 그림 머리 ===== */
+.match-box{margin-left:0;padding:16px;border-radius:22px;background:var(--surface);gap:12px;font-size:13.5px}
+.mm-hero{display:flex;align-items:center;gap:12px}
+.mm-hero>img{width:68px;height:68px;object-fit:contain;flex:none}
+.mm-hero>div{display:grid;gap:4px;min-width:0}
+.mm-hero .mm-sub{margin-top:0}
+.mm-title{font-size:16px;letter-spacing:-.01em}
+.match-form legend{font-size:12.5px;color:var(--text)}
+.mm-chips span{padding:7px 13px;border-radius:999px;font-size:13px}
+.mm-chips input:checked+span{border-color:var(--brand,var(--accent));background:var(--brand,var(--accent));color:var(--brand-ink,#0c2142)}
+.match-form .primary{min-height:46px;border-radius:14px;font-size:15px}
+.mm-buddy{gap:9px;padding:14px;border-radius:18px;background:var(--bg);box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 16px rgba(0,0,0,.05)}
+.mm-head{gap:11px}
+.mm-head b{font-size:15px}
+.mm-face{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none;background:var(--surface)}
+.mm-tags span{padding:3px 9px;border-radius:999px;font-size:11.5px}
+.mm-quote{font-size:13.5px}
+.mm-reason{display:flex;gap:6px;align-items:flex-start;background:color-mix(in srgb,#f2b705 14%,var(--bg))}
+.mm-reason .ui-ico{color:#c48d00;margin-top:2px}
+.mm-place{display:inline-flex;align-items:center;gap:5px}
+.mm-apply{min-height:44px;border-radius:14px;font-size:14px}
+.chat-match-chip{display:inline-flex;align-items:center;gap:5px}
+[data-theme="light"] .match-box{background:#f7f5f4}
+[data-theme="light"] .mm-buddy{background:#fff;border-color:#eeeae8}

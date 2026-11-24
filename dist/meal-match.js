@@ -6,6 +6,8 @@
 // Firebase(meal-store.js)가 연결되면 실제 학우들이 올린 밥친구 카드에서 고르고, 신청·수락·채팅도 실제로 오가요.
 // 연결 설정이 없으면 예시 학우로 동작하는 데모예요 (신청은 이 브라우저(localStorage)에만 남아요).
 
+import {ICON, avatarOfEmoji, artImg} from './ui-icons.js';
+
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PROFILE = 'knut-campus-guide:meal-profile';
 const read = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } };
@@ -59,9 +61,9 @@ export function matchFormCard(online) {
   const p = loadProfile();
   return `<div class="match-box">
     <form class="match-form">
-      <p class="mm-title">🍚 혼밥 친구 찾기</p>
+      <div class="mm-hero">${artImg('match')}<div><p class="mm-title">혼밥 친구 찾기</p>
       <p class="mm-sub">${online ? '언제, 무엇을, 어디서 먹고 싶은지 골라 주세요. 밥친구 카드를 올린 학우들 중에서 누티가 잘 맞는 사람을 찾아 드려요.'
-        : '언제, 무엇을, 어디서 먹고 싶은지 골라 주세요. 누티가 잘 맞는 학우를 찾아 드려요. (지금은 예시 학우로 보여 주는 데모예요)'}</p>
+        : '언제, 무엇을, 어디서 먹고 싶은지 골라 주세요. 누티가 잘 맞는 학우를 찾아 드려요. (지금은 예시 학우로 보여 주는 데모예요)'}</p></div></div>
       ${online ? `<div class="mm-me">
         <label class="mm-intro"><span>닉네임</span><input name="nick" maxlength="12" required value="${esc(p.nick)}" placeholder="예) 학식러"></label>
         <label class="mm-intro"><span>학과</span><input name="dept" maxlength="20" value="${esc(p.dept)}" placeholder="예) 컴퓨터공학과"></label>
@@ -101,17 +103,17 @@ export function matchResultCard(m, sent) {
     if (!b) return '';
     const done = sent[b.id];
     return `<article class="mm-buddy">
-      <div class="mm-head"><span class="mm-face" aria-hidden="true">${b.face}</span><div><b>${esc(b.nick)}</b><small>${esc(b.dept)} ${yearText(b.year)}</small></div></div>
+      <div class="mm-head"><img class="mm-face" src="${avatarOfEmoji(b.face)}" alt=""><div><b>${esc(b.nick)}</b><small>${esc(b.dept)} ${yearText(b.year)}</small></div></div>
       <p class="mm-tags">${[listText(b.days), b.times.join('·'), b.foods.join('·'), b.areas.join('·'), b.mood].map(t => `<span>${esc(t)}</span>`).join('')}</p>
       <p class="mm-quote">“${esc(b.intro)}”</p>
-      <p class="mm-reason">💡 ${esc(pick.reason)}</p>
-      ${pick.place ? `<a class="chip mm-place" href="#/place?id=${esc(pick.place.id)}">🍽️ 같이 가기 좋은 곳 · ${esc(pick.place.name)}</a>` : ''}
+      <p class="mm-reason">${ICON.bulb}<span>${esc(pick.reason)}</span></p>
+      ${pick.place ? `<a class="chip mm-place" href="#/place?id=${esc(pick.place.id)}">${ICON.fork}같이 가기 좋은 곳 · ${esc(pick.place.name)}</a>` : ''}
       <button type="button" class="${done ? 'pill' : 'primary'} mm-apply" data-chat="match-apply" data-buddy="${b.id}" ${done ? 'disabled' : ''}>${done ? esc(done) : '같이 먹자 신청'}</button>
     </article>`;
   }).join('');
   return `<div class="match-box mm-result">
-    <p class="mm-title">${esc(m.content)}</p>
-    ${m.note ? `<p class="mm-sub">${esc(m.note)}</p>` : ''}
+    <div class="mm-hero">${artImg('match')}<div><p class="mm-title">${esc(m.content)}</p>
+    ${m.note ? `<p class="mm-sub">${esc(m.note)}</p>` : ''}</div></div>
     ${picks}
     ${m.picks?.length ? '<button type="button" class="pill mm-again" data-chat="match">조건 바꿔서 다시 찾기</button>' : ''}
   </div>`;
@@ -125,14 +127,14 @@ export const findPick = (messages, id) => {
 // 밥 신청함: 받은 신청(수락·거절), 수락된 밥약속(채팅 열기), 보낸 신청(기다리는 중)
 const ago = at => { const m = Math.round((Date.now() - at) / 6e4); return m < 1 ? '방금' : m < 60 ? `${m}분 전` : m < 1440 ? `${Math.round(m / 60)}시간 전` : `${Math.round(m / 1440)}일 전`; };
 export function inboxCard(requests, uid) {
-  if (!requests) return '<div class="match-box"><p class="mm-title">📬 밥 신청함</p><p class="mm-sub">불러오는 중…</p></div>';
+  if (!requests) return `<div class="match-box"><div class="mm-hero">${artImg('inbox')}<div><p class="mm-title">밥 신청함</p><p class="mm-sub">불러오는 중…</p></div></div></div>`;
   const row = (r, body) => `<article class="mm-req"><div><b>${esc(r.from === uid ? r.toNick : r.fromNick)}</b><small>${ago(r.at)}${r.place ? ' · ' + esc(r.place.name) : ''}</small></div>${body}</article>`;
   const incoming = requests.filter(r => r.to === uid && r.status === 'pending');
   const accepted = requests.filter(r => r.status === 'accepted');
   const waiting = requests.filter(r => r.from === uid && r.status !== 'accepted');
   const section = (title, list, body) => list.length ? `<p class="mm-sec">${title}</p>${list.map(r => row(r, body(r))).join('')}` : '';
   return `<div class="match-box mm-inbox">
-    <p class="mm-title">📬 밥 신청함</p>
+    <div class="mm-hero">${artImg('inbox')}<div><p class="mm-title">밥 신청함</p></div></div>
     ${section('나에게 온 신청', incoming, r => `<div class="mm-req-act"><button type="button" class="primary" data-chat="match-accept" data-req="${esc(r.id)}">수락</button><button type="button" class="pill" data-chat="match-decline" data-req="${esc(r.id)}">거절</button></div>`)}
     ${section('같이 먹기로 한 학우', accepted, r => `<a class="primary mm-room" href="#/meal-room?id=${encodeURIComponent(r.id)}">채팅 열기</a>`)}
     ${section('내가 보낸 신청', waiting, r => `<span class="mm-state">${r.status === 'declined' ? '거절됨' : '기다리는 중'}</span>`)}

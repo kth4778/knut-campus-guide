@@ -127,3 +127,88 @@
 .order-list .items small{font-size:11px}
 .order-list b{display:grid;justify-items:end;font-size:13px}
 .order-list b small{font-size:10px;font-weight:500;color:var(--muted)}
+
+/* ===== MOA 새 디자인: gpt-image 그림 아이콘 + 선 아이콘, 종류별 색(배달 빨강 · 픽업 주황 · 택시 노랑) ===== */
+.ui-ico{width:1.15em;height:1.15em;flex:none;vertical-align:-.2em}
+.moa-page{--mo-red:var(--brand,#e45b62);--mo-orange:#e8772e;--mo-yellow:#e7a91a;--mo-card:var(--bg);--mo-soft:var(--surface)}
+.moa-tabs{display:flex;gap:6px;margin:10px 12px 0;padding:4px;border:0;border-radius:14px;background:var(--surface)}
+.moa-tabs a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:38px;border:0;border-radius:11px;font-size:13.5px}
+.moa-tabs a[aria-current="page"]{background:var(--bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.moa-hero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;margin:12px 12px 4px;padding:16px 0 16px 18px;min-height:132px;overflow:hidden;border:0;border-radius:22px;background:linear-gradient(135deg,#3b1d22,#24161a)}
+.moa-hero>div{position:relative;z-index:1;display:grid;gap:5px;flex:0 1 auto;min-width:0}
+.moa-hero b{font-size:19px;line-height:1.25;letter-spacing:-.02em}
+.moa-hero small{font-size:12px;line-height:1.45;color:var(--muted)}
+.moa-hero p{display:flex;align-items:baseline;gap:3px;justify-items:start;margin-top:4px}
+.moa-hero p strong{font-size:26px;font-weight:900;color:var(--mo-red);line-height:1}
+.moa-hero p small{font-size:12px;font-weight:700}
+.moa-hero-art{width:170px;max-width:52%;height:auto;margin:-8px -4px -14px 0;flex:none}
+.moa-chips{padding-top:6px}
+.moa-chips .chip{display:inline-flex;align-items:center;gap:5px}
+.moa-chips .chip b{font-weight:800;opacity:.7}
+.chip-art{width:20px;height:20px;object-fit:contain;flex:none}
+.moa-new-btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;border-radius:14px;background:var(--mo-red);color:#fff;font-size:15px}
+.moa-list{gap:12px}
+.moa-card{gap:10px;padding:14px;border-radius:20px;background:var(--mo-card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 16px rgba(0,0,0,.05)}
+.moa-top{display:grid;grid-template-columns:52px minmax(0,1fr) auto;align-items:center;gap:10px}
+.moa-ico{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;background:color-mix(in srgb,var(--mo-red) 12%,var(--mo-card))}
+.moa-ico.pickup{background:color-mix(in srgb,var(--mo-orange) 14%,var(--mo-card))}
+.moa-ico.taxi{background:color-mix(in srgb,var(--mo-yellow) 18%,var(--mo-card))}
+.moa-ico img{width:44px;height:44px;object-fit:contain}
+.moa-head{display:grid;gap:3px;min-width:0}
+.moa-head strong{font-size:15px;font-weight:800;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.moa-type{justify-self:start;padding:2px 8px;font-size:11px;font-weight:800;border-radius:999px;background:color-mix(in srgb,var(--mo-red) 14%,transparent);color:var(--mo-red)}
+.moa-type.pickup{background:color-mix(in srgb,var(--mo-orange) 16%,transparent);color:var(--mo-orange)}
+.moa-type.taxi{background:color-mix(in srgb,var(--mo-yellow) 22%,transparent);color:#a86f00}
+.moa-time{display:inline-flex;align-items:center;gap:3px;align-self:start;font-size:11.5px;font-weight:650;color:var(--muted)}
+.moa-time.hot{color:#e5484d}
+.moa-where{display:flex;align-items:center;flex-wrap:wrap;gap:4px;font-size:12.5px;color:var(--muted)}
+.moa-where .ui-ico{color:var(--mo-red)}
+.k-pickup .moa-where .ui-ico{color:var(--mo-orange)}
+.k-taxi .moa-where .ui-ico{color:#c08a00}
+.moa-where .ui-ico+.ui-ico,.moa-where .ui-ico:not(:first-child){color:var(--muted)}
+.moa-by{margin-left:auto;font-size:11.5px}
+.moa-bar{height:8px;border-radius:999px;background:var(--surface)}
+.moa-bar i{border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--mo-red) 55%,#fff),var(--mo-red))}
+.k-pickup .moa-bar i{background:linear-gradient(90deg,#f6b37b,var(--mo-orange))}
+.k-taxi .moa-bar i{background:linear-gradient(90deg,#f7d56b,var(--mo-yellow))}
+.moa-nums{align-items:baseline}
+.moa-nums b{font-size:17px;font-weight:900;color:var(--text)}
+.moa-split{font-size:11.5px}
+.moa-host{color:var(--mo-orange)}
+.moa-bottom{gap:8px;padding-top:2px}
+.moa-people i{width:28px;height:28px;margin-left:-8px;border:2px solid var(--mo-card);background:var(--surface);overflow:hidden}
+.moa-people i img{width:100%;height:100%;object-fit:cover;display:block}
+.moa-btn{display:inline-flex;align-items:center;gap:4px;min-height:36px;padding:0 14px;border-radius:12px;font-size:13px}
+.moa-btn.go{background:var(--mo-red);color:#fff}
+.moa-btn.joined{background:color-mix(in srgb,#22a06b 16%,var(--mo-card));color:#1a8a5a}
+.moa-btn.chat{padding:0 10px;background:var(--surface);color:var(--text)}
+.moa-btn.chat .ui-ico{width:18px;height:18px}
+.moa-sheet-title{display:flex;align-items:center;justify-content:center;gap:8px}
+.moa-sheet-title img{width:34px;height:34px;object-fit:contain}
+.moa-kinds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.moa-kind{display:grid;justify-items:center;gap:4px;padding:10px 4px 9px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);font-size:12px;font-weight:750;color:var(--muted);line-height:1.3;text-align:center}
+.moa-kind img{width:46px;height:46px;object-fit:contain}
+.moa-kind[aria-pressed="true"]{border-color:var(--mo-red,var(--brand));color:var(--text);background:color-mix(in srgb,var(--brand,#e45b62) 8%,var(--bg))}
+.moa-pay{background:color-mix(in srgb,#e8772e 12%,var(--bg));color:var(--text)}
+.moa-pay b{color:#e8772e}
+.moa-pay small{color:var(--muted)}
+.moa-empty img{width:120px;height:auto;margin:0 auto 6px;display:block}
+.room-locked img{width:120px;height:auto}
+.room-topic{width:48px;height:48px;border-radius:15px;background:var(--surface)}
+.room-topic img{width:38px;height:38px;object-fit:contain}
+.room-count{display:inline-flex;align-items:center;gap:3px}
+.room-msg>i{overflow:hidden;background:var(--surface)}
+.room-msg>i img{width:100%;height:100%;object-fit:cover}
+.room-members{display:flex;align-items:center;gap:5px}
+.room-account span,.room-orders summary{display:inline-flex;align-items:center;gap:5px}
+.chat-hero{background:linear-gradient(135deg,#1f2a3f,#161d2b)}
+
+/* 화이트 모드: 따뜻한 크림 배너, 흰 카드 */
+[data-theme="light"] .moa-hero{background:linear-gradient(135deg,#fdf1ec 0%,#fbe3dd 100%)}
+[data-theme="light"] .chat-hero{background:linear-gradient(135deg,#f3f1fb 0%,#e9eaf7 100%)}
+[data-theme="light"] .moa-hero b{color:#1b1b1f}
+[data-theme="light"] .moa-hero small{color:#6b5a58}
+[data-theme="light"] .moa-card{background:#fff;border-color:#eeeae8}
+[data-theme="light"] .moa-tabs{background:#f3f1f0}
+[data-theme="light"] .moa-tabs a[aria-current="page"]{background:#fff}
+[data-theme="light"] .moa-type.taxi{color:#9a6500}
