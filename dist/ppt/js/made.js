@@ -2,7 +2,7 @@
 // 실제 앱 화면 · 팀이 찍은 사진 · 학교 공식 페이지 캡처 · 실제 카드뉴스 · 실제 로고 · 실제 테스트 이름만 쓴다.
 // 숫자·문구는 발표 대본(data/deck-order.json)에 있는 검증된 값만.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, clip, ring, under, arrow, swipe, num, device, ticker, divider, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795490889';
+import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, clip, ring, under, arrow, swipe, num, device, ticker, divider, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795494651';
 
 // 영상 속 폰이 화면 높이를 거의 채우게(원래의 약 1.26배)
 const ST = [987, 3, 907, 1134];
@@ -34,7 +34,7 @@ export const MADE = {
     const s = scene(root), el = s.el;
     s.rise(h(el, 'hm-kicker', { left: '150px', top: '170px' }, '도메인 특화 AI 데이터 스토리텔링'), 0);
     s.pop(brand(el, 150, 262, 140), 100);
-    s.rise(h(el, 'hm-sub', { left: '156px', top: '450px', fontSize: '44px', color: '#1E2430', fontWeight: '700' }, '교통대 생활 정보를, <em>인스타처럼</em> 넘겨 보다'), 320);
+    s.rise(h(el, 'hm-sub', { left: '156px', top: '450px', fontSize: '44px', color: '#1E2430', fontWeight: '700' }, '교통대 생활 정보, <em>인스타처럼</em> 넘겨 보는 앱'), 320);
     photo(s, PHOTO('library-w20'), 150, 580, 400, 270, { rot: -4, cap: '도서관', at: 500 });
     photo(s, PHOTO('cafeteria'), 600, 610, 380, 250, { rot: 3, cap: '학생식당', at: 650 });
     s.rise(h(el, 'hm-sub', { left: '156px', top: '985px', fontSize: '26px' }, '서론 김태현 · 시연 고다은 · 결론 김준석'), 800);
@@ -68,7 +68,7 @@ export const MADE = {
   4(root) {
     // 에타에 실제로 올라온 글(수집한 꿀팁 원문)로 질문을 받친다. 「몇 층」은 에타 근거가 없어 학교 캠퍼스맵 층별 안내로
     const s = scene(root), el = s.el;
-    title(s, 150, 110, '기획 배경', '「그거 <em>어디서</em> 봐?」', '에타에 실제로 올라온 글을 모아 보니, 질문은 세 가지로 모였습니다', { size: 96 });
+    title(s, 150, 110, '기획 배경', '「그거 <em>어디서</em> 봐?」', '에타 실제 글 분석 — 질문은 결국 세 가지', { size: 96 });
     const Q = [
       ['밥 어디서<br>먹지?', '에타 배달 맛집 글', '"꼬끼오랑 도란도락 말고 또 있을까요?"', 'everytime', -4],
       ['버스<br>언제 와?', '에타 꿀팁 글', '"999번 시간이 헷갈린다면 에브리타임에 999만 치면 시간표가 나오니 기억해둘것"', 'everytime', 3],
@@ -85,8 +85,8 @@ export const MADE = {
   // 5는 아래(공식 페이지 65장 캡처)
   6(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 130, '흩어진 정보 ②', '대학본부 한 건물에 <em>8개 층 · 19곳</em>', '어느 층에 무엇이 있는지 한눈에 알기 어렵습니다', { size: 76 });
-    photo(s, PHOTO('hq-entrance'), 110, 360, 700, 480, { rot: -3, cap: '대학본부 · 팀이 찍은 사진', at: 300 });
+    title(s, 150, 130, '흩어진 정보 ②', '대학본부 한 건물에 <em>8개 층 · 19곳</em>', '어느 층에 무엇이 있는지 한눈에 파악 어려움', { size: 76 });
+    photo(s, 'media/rich/floors.webp', 110, 360, 660, 440, { rot: -3, cap: '「교무과는 몇 층이지?」', at: 300 });
     // 학교 캠퍼스맵 층별 안내(앱 데이터, 2026-11-18 수집) — 8개 층 합계 19곳
     const F = REAL.hq_floors;
     swipe(s, 930, 545, 480, 44, 1500);
@@ -124,7 +124,7 @@ export const MADE = {
       if (k === 'ph') P(s, src, x, y, 520, r, 100 + i * 90);
       else photo(s, src, x, y, w, hh, { rot: r, at: 100 + i * 90, tape: i % 2 === 0 });
     });
-    s.rise(h(el, 'hm-title', { left: '0', width: '1920px', textAlign: 'center', top: '390px', fontSize: '96px' }, '정보가 없는 게 아니라,<br><em>모여 있지 않았습니다</em>'), 1100);
+    s.rise(h(el, 'hm-title', { left: '0', width: '1920px', textAlign: 'center', top: '390px', fontSize: '96px' }, '정보 부족이 아닌,<br><em>정보 분산</em>의 문제'), 1100);
     return s;
   },
 
@@ -143,8 +143,8 @@ export const MADE = {
   // ---------- 03 해결 ① 피드 ----------
   16(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 200, '해결 ①', '피드와 <em>검색</em>', '532개 게시물이 하나의 흐름으로', { size: 110 });
-    num(s, 150, 560, 532, { size: 240, label: '게시물', at: 600 });
+    title(s, 150, 200, '해결 ①', '피드와 <em>검색</em>', '게시물 532개, 하나의 흐름', { size: 110 });
+    num(s, 150, 560, 532, { size: 240, label: '게시물 = 장소·꿀팁 484 + 제휴 48', at: 600 });
     [0, 1, 2].forEach(c => {
       const ids = Array.from({ length: 12 }, (_, i) => (i * 5 + c * 17) % 65);
       ticker(s, 800 + c * 370, 0, 350, 1080, ids, (p, i) => img(p, CARD(i), '', { display: 'block', width: '100%', borderRadius: '6px', marginBottom: '18px', boxShadow: '0 10px 20px rgba(30,35,55,.15)' }), 200 + c * 150, 30000 + c * 5000);
@@ -153,7 +153,7 @@ export const MADE = {
   },
   17(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'feed-swipe', '피드', '카드뉴스를 옆으로<br><em>넘겨</em> 봅니다', '게시물 532개 모두 카드뉴스', 2);
+    const y = clipSlide(s, 'feed-swipe', '피드', '카드뉴스,<br>옆으로 <em>넘겨 보기</em>', '게시물 532개 전부 카드뉴스', 2);
     [12, 20, 33].forEach((c, i) => photo(s, CARD(c), 150 + i * 250, y, 240, 300, { rot: (i - 1) * 5, at: 800 + i * 150, tape: false }));
     arrow(s, 250, y + 360, 420, 1400, -3);
     return s;
@@ -185,14 +185,15 @@ export const MADE = {
   },
   20(root) {
     const s = scene(root), el = s.el;
-    const y = clipSlide(s, 'search-type', '검색', '「장학금」 → <em>15건</em>', '흩어진 공지가 한 목록에', 1);
-    num(s, 150, y + 40, 15, { size: 330, at: 900, fmt: v => Math.round(v) + '건' });
-    ring(s, 100, y + 40, 680, 420, 2000);
+    const y = clipSlide(s, 'search-type', '검색', '「장학금」 → <em>15건</em>', '흩어진 공지, 한 목록으로', 1);
+    num(s, 150, y + 10, 15, { size: 300, at: 900, fmt: v => Math.round(v) + '건' });
+    ring(s, 100, y + 10, 640, 380, 2000);
+    note(s, 130, y + 400, 700, '<div style="font-size:27px;line-height:1.6"><b>학교 홈페이지</b> — 장학금 꿀팁이 <b>페이지 4개</b>에 따로<br><b style="color:#8b1a1f">KNUTIPS</b> — 검색 한 번에 <b style="background:#FFF1A8">한 목록 15건</b></div>', { rot: -1.5, at: 1400, tape: false });
     return s;
   },
   21(root) {
     const s = scene(root), el = s.el;
-    const y = clipSlide(s, 'search-open', '검색', '서버 없이 <em>바로</em>', '자료 파일 하나를 브라우저가 바로 찾아요', 1);
+    const y = clipSlide(s, 'search-open', '검색', '서버 없이 <em>바로</em>', '자료 파일 하나 → 브라우저 안에서 바로 검색', 1);
     const R = REAL.record, q = v => `<span class="v">${typeof v === 'string' ? '"' + v + '"' : v}</span>`;
     const code = h(el, 'hm-code', { left: '130px', top: px(y + 40), rotate: '-1deg' },
       `<span class="c">// places.json · ${REAL.placesKB}KB · 484개 중 하나</span>\n{\n` +
@@ -205,12 +206,21 @@ export const MADE = {
   },
   22(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 120, '정리', '넘기고, 찾고, <em>바로 열기</em>', '피드 하나로 학교 정보를', { size: 88 });
-    [[532, '게시물'], [680, '카드뉴스 그림'], [15, '「장학금」 검색 결과']].forEach(([v, l], i) => num(s, 150 + i * 600, 400, v, { size: 210, label: l, at: 400 + i * 250 }));
-    const row = h(el, '', { position: 'absolute', left: '0', top: '715px', display: 'flex', gap: '20px', width: 'max-content' });
-    for (let k = 0; k < 2; k++) for (let i = 0; i < 24; i++) img(row, CARD((i * 3) % 65), '', { width: '270px', height: '338px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 10px 20px rgba(30,35,55,.14)' });
-    s.fade(row, 900, 600);
-    s.custom(row, [{ transform: 'translateX(0)' }, { transform: 'translateX(-50%)' }], 900, 60000, 'linear');
+    title(s, 150, 100, '정리', '넘기고, 찾고, <em>바로 열기</em>', null, { size: 88 });
+    const C = [
+      [532, '개', '게시물', '= 장소·꿀팁 484 + 제휴 48', '피드에 올라오는 글 하나하나'],
+      [680, '장', '카드뉴스 그림', '게시물 101개는 2~4장짜리', '글 대신 옆으로 넘겨 보는 그림'],
+      [15, '건', '「장학금」 검색', '홈페이지에선 장학금 꿀팁이 페이지 4개에', '검색 한 번에 한 목록으로'],
+    ];
+    C.forEach(([v, u, l, eq, mean], i) => {
+      const n = note(s, 120 + i * 580, 290, 530, `<div style="font-size:30px;font-weight:800;color:#4A5260">${l}</div><div style="display:flex;align-items:baseline;gap:8px"><b class="n" style="font-size:130px;font-weight:900;letter-spacing:-.05em;line-height:1.05"></b><span style="font-size:46px;font-weight:900">${u}</span></div><div style="font-size:25px;font-weight:700;margin-top:6px">${eq}</div><div style="font-size:27px;font-weight:800;margin-top:14px;color:#8b1a1f">→ ${mean}</div>`, { rot: [-1.5, 1, -1][i], at: 300 + i * 300 });
+      n.style.minHeight = '330px';
+      s.count(n.querySelector('.n'), v, 400 + i * 300, 1000);
+    });
+    const row = h(el, '', { position: 'absolute', left: '0', top: '720px', display: 'flex', gap: '18px', width: 'max-content' });
+    for (let k = 0; k < 2; k++) for (let i = 0; i < 24; i++) img(row, CARD((i * 3) % 65), '', { width: '230px', height: '288px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 10px 20px rgba(30,35,55,.14)' });
+    s.fade(row, 1300, 600);
+    s.custom(row, [{ transform: 'translateX(0)' }, { transform: 'translateX(-50%)' }], 1300, 60000, 'linear');
     return s;
   },
 
@@ -224,7 +234,7 @@ export const MADE = {
   },
   24(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'map-tap', '지도', '교내 건물 <em>34동</em>이<br>지도 위에', '이름표를 누르면 그 건물 화면으로', 2);
+    const y = clipSlide(s, 'map-tap', '지도', '교내 건물 <em>34동</em>이<br>지도 위에', '이름표 선택 → 그 건물 화면', 2);
     memo(s, 150, y + 30, 420, '이름표 누르면<br>→ 건물 화면', { rot: -3, at: 900, size: 44, pin: true, mh: 250 });
     return s;
   },
@@ -236,7 +246,7 @@ export const MADE = {
   },
   26(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'building-floor', '3D 층', '<em>6층</em>을 누르면', '다섯 곳이 나옵니다', 1);
+    const y = clipSlide(s, 'building-floor', '3D 층', '<em>6층</em> 선택', '그 층 부서 다섯 곳 표시', 1);
     memo(s, 130, y + 10, 460, '6층<br><span style="font-size:36px;font-weight:700;line-height:1.6">교무과<br>기획과<br>총무과<br>재무과<br>동문회</span>', { rot: -3, at: 800, size: 56, pin: true });
     return s;
   },
@@ -266,17 +276,18 @@ export const MADE = {
   },
   28(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'bus-stops', '버스', '정류장 <em>20곳</em>', '국토교통부 TAGO 공공데이터', 1);
-    const n = note(s, 130, y + 30, 600, '', { rot: -2, at: 800, src: '공공데이터포털 · 버스 도착 정보' });
+    const y = clipSlide(s, 'bus-stops', '버스', '정류장 <em>20곳</em>', '학교 안·정문 앞 정류장 — 국토교통부 TAGO 공공데이터', 1);
+    const n = note(s, 130, y + 30, 600, '<div style="font-size:24px;margin-top:10px;line-height:1.5">예) 한국교통대(정문) · (대학본부)<br>(체육관) · (스마트ICT관) …</div>', { rot: -2, at: 800, src: '공공데이터포털 · 버스 도착 정보' });
     n.prepend(img(n, LOGO('molit-h'), '', { height: '80px', display: 'block' }));
-    photo(s, SCR('B5-map-bus'), 170, y + 250, 600, 220, { rot: 2, cap: '정류장 핀 · 실제 앱 지도', at: 1100, pos: 'center 45%' });
+    photo(s, SCR('B5-map-bus'), 170, y + 320, 600, 220, { rot: 2, cap: '정류장 핀 · 실제 앱 지도', at: 1100, pos: 'center 45%' });
     return s;
   },
   29(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 130, '실시간', '정류장을 누르면<br><em>도착 시간</em>', '버스 위치는 10~20초마다 새로', { size: 84, lines: 2 });
-    num(s, 120, 590, 0, { size: 170, fmt: () => '10~20초', at: 500 });
-    ring(s, 70, 540, 800, 300, 1200);
+    title(s, 150, 130, '실시간', '정류장 선택 →<br><em>도착 시간</em>', '버스 위치 10~20초마다 갱신', { size: 84, lines: 2 });
+    num(s, 120, 560, 0, { size: 170, fmt: () => '10~20초', at: 500 });
+    ring(s, 70, 510, 800, 300, 1200);
+    note(s, 130, 840, 700, '<div style="font-size:27px;line-height:1.55"><b>10~20초마다</b> 버스 위치 새로 받기<br>→ 지도 속 버스 <b style="background:#FFF1A8">거의 실시간</b> 이동</div>', { rot: -1.5, at: 1500, tape: false });
     P(s, 'B6-bus-sheet', 960, 70, 940, -4, 400);
     P(s, 'B7-bus-live', 1420, 90, 940, 3, 600);
     return s;
@@ -294,14 +305,15 @@ export const MADE = {
   },
   31(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'moa-list', 'MOA · 배달·택시 같이하기', '같이 탈 사람 <em>모으기</em>', '충주터미널 택시', 1);
-    num(s, 130, y + 30, 3300, { size: 210, label: '1인 금액', at: 900, fmt: v => Math.round(v).toLocaleString('ko-KR') + '원' });
-    ring(s, 70, y, 860, 250, 2000);
+    const y = clipSlide(s, 'moa-list', 'MOA · 배달·택시 같이하기', '같이 탈 사람 <em>모으기</em>', '정문 → 충주터미널 택시, 지금 3명', 1);
+    num(s, 130, y + 10, 3300, { size: 190, label: '1인 금액 = 택시비 9,800원 ÷ 3명 (100원 단위 올림)', at: 900, fmt: v => Math.round(v).toLocaleString('ko-KR') + '원' });
+    ring(s, 70, y - 20, 820, 240, 2000);
+    note(s, 130, y + 330, 680, '<div style="font-size:30px;line-height:1.6">혼자 <b>9,800원</b> → 셋이 <b style="background:#FFF1A8">1인 3,300원</b><br>1인당 6,500원 절약</div>', { rot: -1.5, at: 1600, tape: false });
     return s;
   },
   32(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'moa-join', 'MOA · N빵 자동 계산', '3명 3,300원 →<br>4명 <em>2,500원</em>', '참여하면 바로 다시 계산', 2);
+    const y = clipSlide(s, 'moa-join', 'MOA · N빵 자동 계산', '3명 3,300원 →<br>4명 <em>2,500원</em>', '참여 즉시 1인 금액 재계산', 2);
     zoom(s, SCR('C1-moa'), 1170, [36, 1500, 1098, 255], 130, y + 40, 720, { rot: -1.5, at: 800, cap: '참여 전 · 3명 → 1인 3,300원' });
     arrow(s, 430, y + 255, 70, 1300, 90);
     zoom(s, SCR('C3-moa-joined'), 1170, [36, 1500, 1098, 255], 130, y + 340, 720, { rot: 1, at: 1500, cap: '내가 참여 · 4명 → 1인 2,500원' });
@@ -309,13 +321,13 @@ export const MADE = {
   },
   33(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'moa-chat', 'MOA · 참여자 채팅', '참여자끼리만 쓰는<br><em>채팅방</em>', '만날 곳과 시간을 정해요', 2);
+    const y = clipSlide(s, 'moa-chat', 'MOA · 참여자 채팅', '참여자 전용<br><em>채팅방</em>', '만날 곳·시간 정하기', 2);
     zoom(s, SCR('C4w-moa-chat'), 390, [8, 52, 374, 262], 130, y + 40, 640, { rot: -1.5, at: 800, cap: '참여자 4명만 보는 방 · 실제 화면' });
     return s;
   },
   34(root) {
     const s = scene(root);
-    const y = clipSlide(s, 'nuti-match', '누티 · AI 챗봇 밥친구 찾기', '혼밥 친구 <em>찾기</em>', '네 가지만 고르면 됩니다', 1);
+    const y = clipSlide(s, 'nuti-match', '누티 · AI 챗봇 밥친구 찾기', '혼밥 친구 <em>찾기</em>', '요일 · 시간 · 메뉴 · 장소, 네 가지 선택', 1);
     zoom(s, SCR('C6-match-form'), 1170, [45, 450, 1095, 840], 130, y + 40, 640, { rot: -1.5, at: 800, cap: '요일 · 시간 · 메뉴 · 장소 고르기' });
     return s;
   },
@@ -344,7 +356,7 @@ export const MADE = {
   // ---------- 04 AI 활용 ----------
   39(root) {
     const s = scene(root);
-    title(s, 150, 110, 'AI 활용 ①', '카드뉴스는 <em>AI</em>가 그렸습니다', '원본 데이터 한 줄 → gpt-image', { size: 84 });
+    title(s, 150, 110, 'AI 활용 ①', '<em>AI</em>로 그린 카드뉴스', '원본 데이터 한 줄 → gpt-image', { size: 84 });
     const R = REAL.rows[1];
     const sh = sheet(s, 110, 470, 640, ['이름', '분류', '지역'], [[R.name, R.category, R.area]], 300); sh.style.fontSize = '30px'; sh.querySelector('table').style.fontSize = '30px';
     s.rise(h(s.el, 'hm-sub', { left: '110px', top: '620px', fontSize: '28px' }, '원본 데이터 한 줄'), 400);
@@ -354,7 +366,7 @@ export const MADE = {
   },
   40(root) {
     const s = scene(root);
-    title(s, 150, 110, '문제', 'AI는 <em>숫자</em>를 틀리게 쓰기도 합니다', '가격이 틀린 카드뉴스는 없는 것보다 나쁩니다', { size: 80 });
+    title(s, 150, 110, '문제', 'AI 그림 속 <em>숫자 오류</em>', '가격이 틀린 카드뉴스 = 없느니만 못함', { size: 80 });
     const R2 = REAL.rows[2];
     photo(s, RC(R2.card), 1200, 170, 560, 700, { rot: 2, cap: '카드 속 가격', at: 300 });
     ring(s, 1230, 742, 470, 105, 1700, -1);
@@ -365,7 +377,7 @@ export const MADE = {
   },
   41(root) {
     const s = scene(root);
-    title(s, 150, 90, '검사', '그리고, 다시 읽고, <em>대조</em>합니다', 'gpt-image로 그린 카드를 OCR로 읽어 원본과 비교', { size: 80 });
+    title(s, 150, 90, '검사', '그리기 → 다시 읽기 → <em>대조</em>', 'gpt-image로 그린 카드를 OCR로 읽어 원본과 비교', { size: 80 });
     const R2 = REAL.rows[2];
     const st = [['원본 데이터', `${R2.name}<br>가격 ${won(R2.price)}`], ['gpt-image 생성', `<img src="${RC(R2.card)}" style="width:100%;border-radius:4px">`], ['OCR로 읽기', '카드 속 글자를 다시 글로<div style="margin-top:14px;padding:12px 14px;background:#F3F4F7;border-radius:4px;font-size:26px">「12시 10분부터<br>1인 5,500원」</div>'], ['원본과 대조', `${MARK(true)}가격 5,500원<br>= 원본 5,500원`]];
     st.forEach(([a, b], i) => {
@@ -379,51 +391,60 @@ export const MADE = {
   },
   42(root) {
     const s = scene(root);
-    title(s, 150, 130, '기준', '문구 85% · 가격 <em>100%</em>', '숫자는 하나라도 틀리면 다시 만듭니다', { size: 88 });
-    num(s, 200, 470, 85, { size: 300, fmt: v => Math.round(v) + '%', label: '문구', at: 400 });
-    num(s, 1000, 470, 100, { size: 300, fmt: v => Math.round(v) + '%', label: '가격', at: 700 });
-    ring(s, 930, 430, 780, 340, 1700);
+    title(s, 150, 130, '기준', '문구 85% · 가격 <em>100%</em>', '숫자는 하나라도 틀리면 재생성', { size: 88 });
+    num(s, 200, 420, 85, { size: 300, fmt: v => Math.round(v) + '%', label: '문구', at: 400 });
+    num(s, 1000, 420, 100, { size: 300, fmt: v => Math.round(v) + '%', label: '가격', at: 700 });
+    ring(s, 930, 380, 780, 340, 1700);
+    s.rise(h(s.el, 'hm-label', { left: '206px', top: '800px', width: '640px', fontSize: '28px', fontWeight: '700', color: '#4A5260', whiteSpace: 'normal', lineHeight: '1.5' }, '카드에서 읽은 글이 원본 글과<br><b style="color:#141A24">85% 이상 같으면</b> 통과'), 1000);
+    s.rise(h(s.el, 'hm-label', { left: '1006px', top: '800px', width: '760px', fontSize: '28px', fontWeight: '700', color: '#4A5260', whiteSpace: 'normal', lineHeight: '1.5' }, '카드 속 가격이 원본 가격과<br><b style="color:#C2412D">한 글자라도 다르면</b> 다시 그림'), 1300);
     return s;
   },
   43(root) {
     const s = scene(root), el = s.el;
-    const g = h(el, '', { position: 'absolute', left: '880px', top: '40px', width: '1000px', display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '10px' });
-    for (let i = 0; i < 64; i++) {
+    title(s, 150, 100, '결과', 'AI 카드뉴스 <em>567장</em>,<br>한 장씩 OCR 재검사', null, { size: 72, lines: 2 });
+    const row = (y, v, u, what, mean, at) => {
+      const r = h(el, '', { position: 'absolute', left: '150px', top: px(y), whiteSpace: 'nowrap' }, `<div style="display:flex;align-items:baseline;gap:10px"><b class="n" style="font-size:120px;font-weight:900;letter-spacing:-.05em;line-height:1"></b><span style="font-size:44px;font-weight:900">${u}</span><span style="font-size:30px;font-weight:800;margin-left:10px">${what}</span></div><div style="font-size:26px;font-weight:700;color:#4A5260;margin-top:8px">${mean}</div>`);
+      s.rise(r, at); s.count(r.querySelector('.n'), v, at, 1000, v ? undefined : () => '0');
+    };
+    row(370, 567, '장', '검사', '새로 그린 카드뉴스 전부 — OCR로 글자를 읽어 원본 데이터와 비교', 400);
+    row(590, 0, '장', '다시 그릴 카드', '원본과 다른 글자·가격이 나온 카드 없음', 900);
+    const st = h(el, 'hm-stamp', { left: '150px', top: '820px', color: '#1F9D55', fontSize: '58px' }, '가격 오류 0');
+    s.custom(st, [{ opacity: 0, transform: 'scale(2)' }, { opacity: .88, transform: 'none' }], 1700, 350, 'cubic-bezier(.3,1.4,.5,1)');
+    s.rise(h(el, 'hm-label', { left: '560px', top: '845px', fontSize: '28px', color: '#141A24', fontWeight: '800' }, '→ 학생에게 틀린 가격 노출 없음'), 1900);
+    photo(s, 'media/rich/ocrcheck.webp', 1120, 110, 700, 467, { rot: 2, at: 300 });
+    const g = h(el, '', { position: 'absolute', left: '1100px', top: '680px', width: '760px', display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '10px' });
+    for (let i = 0; i < 12; i++) {
       const c = h(g, '', { position: 'relative', aspectRatio: '4 / 5', borderRadius: '4px', overflow: 'hidden', boxShadow: '0 4px 10px rgba(30,35,55,.12)' });
-      img(c, CARD(i), '', { width: '100%', height: '100%', objectFit: 'cover' });
-      const k = h(c, '', { position: 'absolute', right: '4px', bottom: '2px', fontSize: '26px', fontWeight: '900', color: '#1F9D55', textShadow: '0 0 6px #fff, 0 0 3px #fff' }, '✓');
-      s.fade(c, 100 + i * 18, 300); s.pop(k, 900 + i * 25, { s: .3 });
+      img(c, CARD(i * 5), '', { width: '100%', height: '100%', objectFit: 'cover' });
+      const k = h(c, '', { position: 'absolute', right: '4px', bottom: '0', fontSize: '28px', fontWeight: '900', color: '#1F9D55', textShadow: '0 0 6px #fff, 0 0 3px #fff' }, '✓');
+      s.fade(c, 700 + i * 60, 300); s.pop(k, 1200 + i * 80, { s: .3 });
     }
-    title(s, 150, 110, '결과', '<em>567장</em> 검사,<br>다시 만들 장 0', null, { size: 88 });
-    num(s, 110, 480, 567, { size: 200, label: '장 검사', at: 400, fmt: v => Math.round(v) + '' });
-    num(s, 580, 480, 0, { size: 200, label: '다시 만들 장', at: 800, fmt: () => '0' });
-    const st = h(el, 'hm-stamp', { left: '130px', top: '850px', color: '#1F9D55', fontSize: '64px' }, '가격 오류 0');
-    s.custom(st, [{ opacity: 0, transform: 'scale(2)' }, { opacity: .88, transform: 'none' }], 2400, 350, 'cubic-bezier(.3,1.4,.5,1)');
+    s.fade(h(el, 'hm-label', { left: '1104px', top: '1035px', fontSize: '20px', color: '#6B7280' }, '실제 검사한 카드 일부'), 1400);
     return s;
   },
   44(root) {
     const s = scene(root);
-    title(s, 150, 90, 'AI 활용 ② · 누티 AI 챗봇', '먼저 <em>찾고</em>, 그다음 말합니다', null, { size: 80 });
+    title(s, 150, 90, 'AI 활용 ② · 누티 AI 챗봇', '먼저 <em>검색</em>, 그다음 답변', null, { size: 80 });
     [['1', '질문'], ['2', '484개 자료에서 6곳 찾기'], ['3', '그 자료만 LLM에 전달'], ['4', '답 + 근거 3곳']].forEach(([n, t], i) => {
       const c = note(s, 110 + i * 25, 280 + i * 150, 720, `<b style="font-size:46px;margin-right:18px">${n}</b><span style="font-size:36px;font-weight:700">${t}</span>`, { rot: i % 2 ? 1 : -1, at: 300 + i * 260, tape: false });
       c.style.padding = '18px 26px';
     });
-    s.rise(h(s.el, 'hm-sub', { left: '110px', top: '920px', fontSize: '38px', color: '#141A24', fontWeight: '800' }, '지어내지 않고,<br><em>모은 자료로만</em> 답합니다'), 1500);
+    s.rise(h(s.el, 'hm-sub', { left: '110px', top: '920px', fontSize: '38px', color: '#141A24', fontWeight: '800' }, '지어내지 않고,<br><em>모은 자료로만</em> 답변'), 1500);
     P(s, 'C5-nuti', 980, 110, 920, -3, 400);
     P(s, 'A4-place-card', 1440, 140, 900, 4, 700);
     return s;
   },
   45(root) {
     const s = scene(root);
-    title(s, 150, 110, '로컬 LLM', '질문이 밖으로<br><em>나가지 않습니다</em>', '노트북 안에서 도는 한국어 소형 모델', { size: 84, lines: 2 });
+    title(s, 150, 110, '로컬 LLM', '질문은<br><em>노트북 안에서만</em>', '노트북 안에서 도는 한국어 소형 모델', { size: 84, lines: 2 });
     device(s, 'hold-left-flip', 1250, 60, 700, SCR('C5-nuti'), 400);
-    const n = note(s, 150, 480, 520, '<div style="display:flex;align-items:center;gap:18px"><img src="media/brand/ollama.png" style="height:120px"><div><b style="font-size:40px">Ollama</b><div style="font-size:28px;color:#4A5260">한국어 소형 모델<br>exaone3.5 2.4B</div></div></div>', { rot: -2, at: 800, src: '로컬 LLM 실행 도구' });
+    const n = note(s, 150, 480, 520, '<div style="display:flex;align-items:center;gap:18px"><img src="media/brand/ollama.png" style="height:120px"><div><b style="font-size:40px">Ollama</b><div style="font-size:28px;color:#4A5260">한국어 소형 모델<br>exaone3.5 2.4B</div><div style="font-size:20px;color:#6B7280;margin-top:6px">2.4B = 매개변수 24억 개,<br>노트북에서 도는 크기</div></div></div>', { rot: -2, at: 800, src: '로컬 LLM 실행 도구' });
     memo(s, 720, 520, 380, '인터넷 밖으로<br>안 나감', { rot: 3, at: 1300, size: 46, mh: 250 });
     return s;
   },
   46(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 110, '품질', '테스트를 통과해야만 <em>배포</em>됩니다', '11월 18일부터, 코드를 올릴 때마다', { size: 80 });
+    title(s, 150, 110, '품질', '테스트 통과 시에만 <em>배포</em>', '11월 18일부터 코드 올릴 때마다 자동 실행', { size: 80 });
     const box = noteIn(el, '', { abs: true, w: 660, src: '실제 자동 테스트 이름 (Playwright)', tape: true });
     Object.assign(box.style, { left: '150px', top: '400px', height: '600px', overflow: 'hidden' });
     const win = h(box, '', { position: 'relative', height: '500px', overflow: 'hidden', maskImage: 'linear-gradient(transparent, #000 8%, #000 92%, transparent)', WebkitMaskImage: 'linear-gradient(transparent, #000 8%, #000 92%, transparent)' });
@@ -439,7 +460,7 @@ export const MADE = {
   },
   47(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 110, '품질', '하나라도 실패하면 <em>배포하지 않습니다</em>', '누가 고쳐도 앱이 망가지지 않게', { size: 80 });
+    title(s, 150, 110, '품질', '하나라도 실패 → <em>배포 중지</em>', '누가 고쳐도 앱이 망가지지 않도록', { size: 80 });
     const mk = (x, bad, at) => {
       const box = noteIn(el, PICK_TESTS.map((t, i) => `<div class="hm-row" style="font-size:30px">${MARK(!(bad && i === FAIL_AT))}<span>${t}</span></div>`).join(''), { abs: true, w: 760, tape: false });
       Object.assign(box.style, { left: px(x), top: '400px' });
@@ -459,7 +480,7 @@ export const MADE = {
   49(root) {
     const s = scene(root), el = s.el;
     title(s, 150, 110, '한계와 다음', '아직 남은 <em>숙제</em>', null, { size: 96 });
-    const T = [['좋아요·댓글·MOA는 브라우저에만 저장', '서버 연결'], ['「확인 안 됨」 66건', '다시 확인'], ['카드 속 글자는 번역 안 됨', '유학생용 카드'], ['누티는 로컬 LLM이 켜진 컴퓨터에서만', '배포 방식 검토']];
+    const T = [['좋아요·댓글·MOA는 브라우저에만 저장', '서버 연결'], ['확인 날짜 없는 꿀팁 66건', '다시 확인'], ['카드 속 글자는 번역 안 됨', '유학생용 카드'], ['누티는 로컬 LLM이 켜진 컴퓨터에서만', '배포 방식 검토']];
     const box = noteIn(el, `<div style="display:grid;grid-template-columns:70px 1fr 70px 380px;align-items:center;font-size:26px;color:#6B7280;font-weight:700;padding-bottom:12px;border-bottom:2px solid #1C2330"><span></span><span>지금</span><span></span><span>다음</span></div>` + T.map(([a, b]) => `<div style="display:grid;grid-template-columns:70px 1fr 70px 380px;align-items:center;padding:34px 0;border-bottom:1px dashed #CBD0D8;font-size:40px;font-weight:700"><span style="width:36px;height:36px;border:3px solid #1C2330;border-radius:4px;display:inline-block"></span><span>${a}</span><span style="color:#9AA2AE">→</span><b>${b}</b></div>`).join(''), { abs: true, w: 1620, tape: true });
     Object.assign(box.style, { left: '150px', top: '300px' });
     s.rise(box, 300);
@@ -468,7 +489,7 @@ export const MADE = {
   },
   50(root) {
     const s = scene(root);
-    title(s, 150, 110, '다음', '학생 제보로 <em>계속 쌓이게</em>', null, { size: 84 });
+    title(s, 150, 110, '다음', '학생 제보로 <em>계속 쌓는 구조</em>', null, { size: 84 });
     device(s, 'hold-left', -40, 330, 520, SCR('43-tip'), 300);
     arrow(s, 490, 680, 90, 700, 0);
     const n = note(s, 600, 560, 320, '<b style="font-size:32px">GitHub 이슈</b><br>제보가 쌓이는 곳', { rot: 2, at: 900 });
@@ -501,13 +522,13 @@ export const MADE = {
     num(s, 170, 690, 484, { size: 150, label: '장소·꿀팁', at: 1000 });
     num(s, 640, 690, 567, { size: 150, label: '검사한 카드뉴스', at: 1200 });
     photo(s, 'media/brand/qr.png', 1340, 220, 480, 480, { rot: 3, cap: 'kth4778.github.io/knut-campus-guide', at: 900 });
-    s.rise(h(el, 'hm-sub', { left: '160px', top: '960px', fontSize: '40px', color: '#141A24', fontWeight: '800' }, '따로 찾지 마세요. <em>넘기면 교통대가 보입니다</em>'), 1700);
+    s.rise(h(el, 'hm-sub', { left: '160px', top: '960px', fontSize: '40px', color: '#141A24', fontWeight: '800' }, '따로 찾지 말고, <em>넘겨 보는 교통대</em>'), 1700);
     return s;
   },
   53(root) {
     const s = scene(root), el = s.el;
     s.rise(h(el, 'hm-title', { left: '150px', top: '330px', fontSize: '170px' }, '감사합니다'), 0);
-    s.rise(h(el, 'hm-sub', { left: '160px', top: '560px', fontSize: '44px' }, '질문 받겠습니다'), 200);
+    s.rise(h(el, 'hm-sub', { left: '160px', top: '560px', fontSize: '44px' }, 'Q &amp; A'), 200);
     under(s, 150, 640, 420, 700);
     photo(s, PHOTO('dorm-yeseong'), 960, 90, 600, 400, { rot: -4, at: 300 });
     photo(s, PHOTO('cafe-flore'), 1360, 330, 480, 320, { rot: 5, at: 450 });

@@ -1,6 +1,6 @@
 // 모션 장 16개(이름 키)를 실제 자료 + 손으로 만든 스타일로. 대본의 (영상: …) 설명을 그대로 움직임으로 옮겼다.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795490889';
+import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795494651';
 
 const RC = n => `media/real/cards/${n}`;
 const rnd = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };   // 고정된 흩뿌림
@@ -42,7 +42,7 @@ export const MM = {
   questions(root) {
     // 답을 찾으려면 에타 · 학교 인스타 · 학교 홈페이지 · 학과 사무실 전화를 따로 — gpt-image 그림 위에 실제 로고
     const s = scene(root), el = s.el;
-    title(s, 150, 70, '기획 배경', '답은 <em>여기저기</em>에', '에타 · 인스타 · 학교 홈페이지 · 사무실 전화까지 따로 찾아야 했어요', { size: 80 });
+    title(s, 150, 70, '기획 배경', '답은 <em>여기저기</em>에', '에타 · 인스타 · 학교 홈페이지 · 사무실 전화, 전부 따로 확인', { size: 80 });
     const FW = 1020, FH = FW * 2 / 3;
     const fr = h(el, 'hm-photo', { left: '450px', top: '320px', width: px(FW), rotate: '-1deg' });
     img(fr, 'media/rich/confused.webp', '', { width: '100%', display: 'block' });
@@ -69,28 +69,30 @@ export const MM = {
       img(c, src, '', { width: '100%', height: px(hh), objectFit: 'cover', objectPosition: 'top', display: 'block' });
       s.custom(c, [{ opacity: 0, transform: 'scale(.5)' }, { opacity: 1, transform: 'none', offset: .25 }, { opacity: 1, transform: 'none', offset: .6 }, { opacity: 0, transform: `translate(${960 - x}px, ${560 - y}px) scale(.1) rotate(40deg)` }], 100 + i * 30, 3200, 'cubic-bezier(.5,0,.3,1)');
     });
-    [['65', '학교 공식 페이지', 200, 160], ['8층 · 19곳', '대학본부 한 건물', 1340, 150], ['4곳', '에타·인스타·홈페이지·전화', 760, 820]].forEach(([b, l, x, y], i) => {
-      const m = memo(s, x, y, 380, `<span style="font-size:72px;letter-spacing:-.04em">${b}</span><div style="font-size:26px;margin-top:8px">${l}</div>`, { rot: [-4, 3, -2][i], at: 300 + i * 250 });
+    [['65페이지', '학교 꿀팁이<br>페이지마다 따로', 200, 160], ['8층 19곳', '한 건물 안 부서,<br>몇 층인지 모름', 1340, 150], ['4곳', '질문 하나에<br>에타·인스타·홈피·전화', 760, 800]].forEach(([b, l, x, y], i) => {
+      const m = memo(s, x, y, 380, `<span style="font-size:68px;letter-spacing:-.04em">${b}</span><div style="font-size:27px;margin-top:8px;line-height:1.35">${l}</div>`, { rot: [-4, 3, -2][i], at: 300 + i * 250 });
       s.custom(m, [{ opacity: 1 }, { opacity: 0, transform: `translate(${960 - x - 190}px, ${560 - y - 150}px) scale(.1)` }], 2300, 900, 'cubic-bezier(.5,0,.3,1)');
     });
-    const lg = brand(el, null, 360, 190);
+    photo(s, 'media/rich/oneapp.webp', 150, 250, 840, 560, { rot: -2, at: 3100 });
+    const lg = brand(el, 1080, 380, 140);
     s.custom(lg, [{ opacity: 0, transform: 'scale(.2)' }, { opacity: 1, transform: 'none' }], 3200, 700, 'cubic-bezier(.3,1.5,.5,1)');
-    s.rise(h(el, 'hm-title', { left: '0', width: '1920px', textAlign: 'center', top: '610px', fontSize: '110px' }, '<em>한 앱</em>으로'), 3500);
+    s.rise(h(el, 'hm-title', { left: '1080px', top: '570px', fontSize: '84px' }, '흩어진 정보를<br><em>한 앱</em>에서'), 3500);
     return s;
   },
   // 숫자 8개가 차례로 멈춘다 — 숫자마다 실제 자료 한 장
   numbers(root) {
     const s = scene(root), el = s.el;
     title(s, 150, 70, '숫자로 본 KNUTIPS', '모은 것, <em>세어 보면</em>', null, { size: 76 });
-    const N = [[484, '장소·꿀팁', RC('P035-1.webp')], [532, '게시물', CARD(10)], [680, '카드뉴스 그림', CARD(22)], [37, '건물', PHOTO('hq-entrance')], [24, '버스 노선', SCR('B5-map-bus')], [20, '정류장', SCR('B7-bus-live')], [48, '제휴 매장', PHOTO('haekbap')], [14, '실제 사진', PHOTO('library-w20')]];
+    const N = [[484, '장소·꿀팁', RC('P035-1.webp'), '맛집·건물·생활 꿀팁 하나하나'], [532, '게시물', CARD(10), '484 + 제휴 48, 피드에 뜨는 글'], [680, '카드뉴스 그림', CARD(22), '게시물 하나에 1~4장'], [37, '건물', PHOTO('hq-entrance'), '교내 건물 · 지도 핀 34동'], [24, '버스 노선', SCR('B5-map-bus'), '학교 앞 정류장에 서는 노선'], [20, '정류장', SCR('B7-bus-live'), '학교 안·정문 앞 정류장'], [48, '제휴 매장', PHOTO('haekbap'), '학생증 보여 주면 혜택'], [14, '실제 사진', PHOTO('library-w20'), '팀이 직접 찍은 장소']];
     // 칸마다 사진을 위에, 숫자를 아래에(세 자리 숫자도 사진과 겹치지 않게)
-    N.forEach(([v, l, src], i) => {
+    N.forEach(([v, l, src, mean], i) => {
       const x = 150 + (i % 4) * 450, y = 250 + Math.floor(i / 4) * 400;
       const c = h(el, 'hm-photo', { left: px(x), top: px(y), width: '230px', padding: '6px', rotate: `${(rnd(i) - .5) * 10}deg` });
       img(c, src, '', { width: '100%', height: '120px', objectFit: 'cover', objectPosition: 'top', display: 'block' });
       if (i % 2 === 0) tape(c, 60, -14, 100, 3);
       s.custom(c, [{ opacity: 0, transform: 'translateY(-30px) rotate(8deg)' }, { opacity: 1, transform: 'none' }], 200 + i * 200, 600);
       num(s, x, y + 160, v, { size: 130, label: l, at: 300 + i * 200, dur: 900 });
+      s.rise(h(el, 'hm-label', { left: px(x + 6), top: px(y + 345), fontSize: '21px', fontWeight: '700', color: '#6B7280', whiteSpace: 'nowrap' }, mean), 600 + i * 200);
     });
     return s;
   },
@@ -156,7 +158,7 @@ export const MM = {
   // 대학본부 실제 외곽선이 8개 층으로 솟고 6층 다섯 곳이 켜진다
   building3d(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 90, '3D 층', '<em>6층</em> 다섯 곳이 켜집니다', '대학본부 실제 외곽선을 8개 층으로 쌓았어요', { size: 76 });
+    title(s, 150, 90, '3D 층', '<em>6층</em> 선택 → 다섯 곳 표시', '대학본부 실제 외곽선을 8개 층으로 쌓아 제작', { size: 76 });
     const b = REAL.buildings.find(x => /E8/.test(x.name));
     const n = b.d.match(/-?[\d.]+/g).map(Number), xs = n.filter((_, i) => i % 2 === 0), ys = n.filter((_, i) => i % 2);
     const x0 = Math.min(...xs), y0 = Math.min(...ys), bw = Math.max(...xs) - x0, bh = Math.max(...ys) - y0;
@@ -180,11 +182,12 @@ export const MM = {
   // TAGO 공공데이터로 노선 24 · 정류장 20, 버스 위치 10~20초마다
   bus(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 90, '버스', '노선 <em>24</em> · 정류장 <em>20</em>', '버스 위치는 10~20초마다 새로 받아옵니다', { size: 84 });
+    title(s, 150, 90, '버스', '노선 <em>24</em> · 정류장 <em>20</em>', '버스 위치 10~20초마다 갱신', { size: 84 });
     const n = note(s, 160, 470, 460, '', { rot: -2, at: 300, src: '국토교통부 TAGO 공공데이터' });
     n.prepend(img(n, LOGO('molit-h'), '', { height: '70px', display: 'block' }));
     num(s, 170, 700, 24, { size: 160, label: '노선', at: 600 });
     num(s, 470, 700, 20, { size: 160, label: '정류장', at: 800 });
+    s.rise(h(el, 'hm-label', { left: '176px', top: '930px', fontSize: '26px', color: '#141A24', fontWeight: '800' }, '학교 안·정문 앞 정류장 20곳에 서는 버스 노선 24개'), 1100);
     phone(s, SCR('B5-map-bus'), 1000, 220, 290, { rot: -4, at: 500 });
     phone(s, SCR('B7-bus-live'), 1420, 260, 290, { rot: 3, at: 800 });
     // 다시 받아오기: 둥근 시계가 계속 돈다
@@ -194,7 +197,7 @@ export const MM = {
   // 실제 버스 실시간 위치: 실제 사이트에서 999번을 켜면 지금 달리는 버스가 지도에 뜬다(녹화)
   'bus-live'(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 110, '실시간 버스', '버스가 <em>지금 어디</em> 있는지', '노선을 누르면 실제 버스 위치가 지도에 떠요', { size: 84 });
+    title(s, 150, 110, '실시간 버스', '버스가 <em>지금 어디</em> 있는지', '노선 선택 → 실제 버스 위치 지도 표시', { size: 84 });
     const steps = [['1', '버스 탭에서 노선 고르기', '예) 999번 — 학교 ↔ 충주역·터미널'], ['2', '지금 달리는 버스가 지도에', '국토교통부 TAGO 실시간 위치'], ['3', '10~20초마다 새 위치', '정류장을 누르면 도착 예정 시간']];
     steps.forEach(([n, a, b], i) => {
       const c = note(s, 150 + (i % 2) * 30, 400 + i * 190, 760, `<b style="font-size:44px;margin-right:16px">${n}</b><b style="font-size:34px">${a}</b><div style="font-size:26px;color:#4A5260;margin:6px 0 0 58px">${b}</div>`, { rot: i % 2 ? 1 : -1, at: 400 + i * 260, tape: i === 0 });
@@ -250,7 +253,7 @@ export const MM = {
   'ai-cards'(root) {
     const s = scene(root), el = s.el;
     const R0 = REAL.rows[2];
-    title(s, 150, 80, '검사', '그리고, 다시 읽고, <em>대조</em>', null, { size: 76 });
+    title(s, 150, 80, '검사', '그리기 → 다시 읽기 → <em>대조</em>', null, { size: 76 });
     const row = noteIn(el, `<div class="hm-row" style="font-size:26px"><i style="width:56px">이름</i>${R0.name}</div><div class="hm-row" style="font-size:26px"><i style="width:56px">가격</i>${R0.price.toLocaleString('ko-KR')}원</div>`, { abs: true, w: 470, src: '원본 데이터 한 줄' });
     Object.assign(row.style, { left: '150px', top: '330px' }); s.rise(row, 200);
     arrow(s, 640, 420, 130, 700, 0);
@@ -269,7 +272,7 @@ export const MM = {
   // 484개 자료 중 6곳만 노트북 속 로컬 LLM으로 → 답과 근거 3곳
   'nuti-rag'(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 70, '누티', '먼저 <em>찾고</em>, 그다음 말합니다', null, { size: 76 });
+    title(s, 150, 70, '누티', '먼저 <em>검색</em>, 그다음 답변', null, { size: 76 });
     const grid = h(el, '', { position: 'absolute', left: '150px', top: '280px', display: 'grid', gridTemplateColumns: 'repeat(22, 22px)', gap: '6px' });
     const hits = [37, 101, 188, 250, 333, 420];
     const cells = [];
@@ -292,7 +295,7 @@ export const MM = {
   // 테스트 하나가 실패하면 배포가 멈추고, 고쳐서 모두 통과해야 GitHub Pages로
   ci(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 80, '자동 테스트', '통과해야만 <em>배포</em>됩니다', null, { size: 80 });
+    title(s, 150, 80, '자동 테스트', '테스트 통과 시에만 <em>배포</em>', null, { size: 80 });
     const box = noteIn(el, PICK_TESTS.map((t, i) => `<div class="hm-row" style="font-size:30px"><span class="mk" data-i="${i}">${MARK(true)}</span><span>${t}</span></div>`).join(''), { abs: true, w: 780, src: '실제 자동 테스트(Playwright)' });
     Object.assign(box.style, { left: '150px', top: '290px' });
     s.rise(box, 100);
@@ -307,7 +310,7 @@ export const MM = {
     };
     const stop = stamp(s, 1080, 340, '배포 중지', '#D63A2F', 1700);
     s.custom(stop, [{ opacity: .88 }, { opacity: 0 }], 3000, 300);
-    s.rise(h(el, 'hm-label', { left: '1080px', top: '470px', fontSize: '38px', fontWeight: '800', color: '#D63A2F' }, '하나라도 실패 → 멈추고 고친다'), 1900);
+    s.rise(h(el, 'hm-label', { left: '1080px', top: '470px', fontSize: '38px', fontWeight: '800', color: '#D63A2F' }, '하나라도 실패 → 중지 후 수정'), 1900);
     s.rise(h(el, '', { position: 'absolute', left: '1080px', top: '600px', display: 'flex', gap: '12px', alignItems: 'center', fontSize: '26px', fontWeight: '800', color: '#141A24' }, `<img src="${LOGO('github')}" style="height:40px"> 모두 통과하면 — 실제 기록 #91`), 3300);
     jobs(s, 1080, 670, 3400, 110, true);
     stamp(s, 1480, 760, '배포', '#1F9D55', 4500);
@@ -316,7 +319,7 @@ export const MM = {
   // 꿀팁 제보 → GitHub 이슈 → 팀 확인 → 카드뉴스로 쌓인다
   report(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 80, '다음', '학생 제보로 <em>계속 쌓이게</em>', null, { size: 80 });
+    title(s, 150, 80, '다음', '학생 제보로 <em>계속 쌓는 구조</em>', null, { size: 80 });
     phone(s, SCR('43-tip'), 150, 380, 250, { rot: -4, at: 200 });
     arrow(s, 440, 520, 110, 600, 0);
     const n = note(s, 580, 420, 300, '<b style="font-size:32px">GitHub 이슈</b><br>제보가 들어오는 곳', { rot: 2, at: 800 });
@@ -328,7 +331,7 @@ export const MM = {
       const p = img(el, RC(c), '', { position: 'absolute', left: px(1470 + i * 8), top: px(330 - i * 26), width: '300px', height: '375px', objectFit: 'cover', borderRadius: '6px', boxShadow: '0 12px 24px rgba(30,35,55,.18)', rotate: `${(i % 2 ? 1 : -1) * (2 + i)}deg` });
       s.custom(p, [{ opacity: 0, transform: 'translateY(-300px)' }, { opacity: 1, transform: 'none' }], 1800 + i * 300, 500, 'cubic-bezier(.3,1.3,.5,1)');
     });
-    s.rise(h(el, 'hm-label', { left: '1480px', top: '760px' }, '카드뉴스로 쌓인다'), 2400);
+    s.rise(h(el, 'hm-label', { left: '1480px', top: '760px' }, '카드뉴스로 누적'), 2400);
     return s;
   },
   // 앱 화면들이 모여 KNUTIPS 로고가 된다
@@ -342,7 +345,7 @@ export const MM = {
     });
     const lg = brand(el, null, 380, 200);
     s.custom(lg, [{ opacity: 0, transform: 'scale(.2)' }, { opacity: 1, transform: 'none' }], 2900, 700, 'cubic-bezier(.3,1.5,.5,1)');
-    s.rise(h(el, 'hm-sub', { left: '0', width: '1920px', textAlign: 'center', top: '700px', fontSize: '50px', color: '#141A24', fontWeight: '800' }, '따로 찾지 마세요. <em>넘기면 교통대가 보입니다</em>'), 3400);
+    s.rise(h(el, 'hm-sub', { left: '0', width: '1920px', textAlign: 'center', top: '700px', fontSize: '50px', color: '#141A24', fontWeight: '800' }, '따로 찾지 말고, <em>넘겨 보는 교통대</em>'), 3400);
     return s;
   },
 };

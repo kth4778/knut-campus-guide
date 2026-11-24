@@ -9,11 +9,11 @@
 //   ?preview&live   발표자 창의 「지금 화면」. 따라가며 연출도 재생
 //   ?preview&i=N    발표자 창의 「다음 장」. 움직임 없이 끝 상태만
 // 창끼리는 BroadcastChannel('knutips-deck')로 {type:'go', i} · {type:'black', on}을 주고받는다.
-import { MOTION } from './motion.js?v=1795490889';
-import { RICH } from './rich.js?v=1795490889';
-import { MM } from './mm.js?v=1795490889';
-import { MADE } from './made.js?v=1795490889';
-import { REALSCENES } from './real.js?v=1795490889';
+import { MOTION } from './motion.js?v=1795494651';
+import { RICH } from './rich.js?v=1795494651';
+import { MM } from './mm.js?v=1795494651';
+import { MADE } from './made.js?v=1795494651';
+import { REALSCENES } from './real.js?v=1795494651';
 
 const q = new URLSearchParams(location.search);
 // 링크(Artifact)에서는 주소 끝 #aud 로 청중 화면을 연다(링크에는 ?aud 같은 물음표 옵션이 전달되지 않는다)
@@ -201,7 +201,7 @@ SLIDE_DATA = slides;
 SLIDES = order.map(it => ({ item: it, built: null }));
 window.KNUTIPS = { DECK, count: SLIDES.length, go: i => go(i) };
 const startAt = q.has('i') ? +q.get('i') : (+(location.hash.match(/#\/?s?(\d+)/) || [])[1] || 1) - 1;
-if (SOLO) { const { initNotes } = await import('./notes.js?v=1795490889'); initNotes(DECK, fit, { open: ARTIFACT && innerWidth >= 900 }); }
+if (SOLO) { const { initNotes } = await import('./notes.js?v=1795494651'); initNotes(DECK, fit, { open: ARTIFACT && innerWidth >= 900 }); }
 if (PREVIEW && !LIVE) { show(startAt, false); }
 else {
   show(startAt, true);
