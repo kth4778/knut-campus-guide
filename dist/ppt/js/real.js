@@ -2,7 +2,7 @@
 // 학교 인스타 언급, 수업에서 학생들이 같은 형식으로 정리한 표준화 기록, 실제 카드뉴스, 팀이 찍은 사진, OSM 외곽선.
 // 꾸밈은 hand.js(테이프 · 메모 · 형광펜 · 마커)로 — 손으로 붙여 만든 발표처럼.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, SCR, OFF, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker } from './hand.js?v=1795498706';
+import { px, LOGO, SCR, OFF, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker } from './hand.js?v=1795500448';
 
 const won = v => v ? v.toLocaleString('ko-KR') + '원' : '-';
 function colHead(s, x, y, logos, t, sub, at) {
@@ -24,21 +24,21 @@ export const REALSCENES = {
   // 흩어진 정보 ① — 학교 공식 꿀팁이 65개 페이지에. 주제 하나도 여러 페이지로 나뉜다(앱 데이터: 페이지 주소 ↔ 그 페이지에서 가져온 꿀팁)
   5(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 80, '흩어진 정보 ①', '학교 꿀팁, <em>65개 페이지</em>에 분산', '주제 하나도 여러 페이지로 — 하나씩 열어 확인 필요', { size: 72 });
+    title(s, 150, 80, '흩어진 정보 ①', '학교 꿀팁, <em>페이지마다 따로</em>', '주제 하나도 여러 페이지로 — 하나씩 열어 확인 필요', { size: 72 });
     photo(s, 'media/rich/tabs65.webp', 90, 360, 700, 350, { rot: -2, cap: '꿀팁 하나 = 열어 볼 페이지 하나', at: 300 });
     const T = [['생활관', '생활관'], ['장학금', '장학'], ['졸업', '졸업']];
     T.forEach(([name, kw], r) => {
       const pages = REAL.pageTips.filter(p => p.tips.some(t => t.includes(kw)));
       const n = pages.reduce((a, p) => a + p.tips.filter(t => t.includes(kw)).length, 0);
       const y = 320 + r * 215, at = 700 + r * 600;
-      s.rise(h(el, 'hm-label', { left: '850px', top: px(y), fontSize: '32px', color: '#141A24', fontWeight: '700' }, `<b style="font-weight:900">${name}</b> 꿀팁 ${n}개 → <b style="background:#FFF1A8;padding:0 6px">페이지 ${pages.length}개</b>에 따로`), at);
+      s.rise(h(el, 'hm-label', { left: '850px', top: px(y), fontSize: '32px', color: '#141A24', fontWeight: '700' }, `<b style="font-weight:900">${name}</b> 정보 하나 → <b style="background:#FFF1A8;padding:0 6px">이 페이지를 전부 열어야</b>`), at);
       pages.slice(0, 5).forEach((p, i) => {
-        const tip = p.tips.find(t => t.includes(kw)), more = p.tips.length - 1;
-        const tab = h(el, 'hm-tab', { left: px(850 + i * 196), top: px(y + 58) }, `<i></i><b>${tip}${more ? ` <small>외 ${more}</small>` : ''}</b><u>${p.url.replace(/^https:\/\/(www\.)?/, '').replace(/\.do$/, '')}</u>`);
+        const tip = p.tips.find(t => t.includes(kw));
+        const tab = h(el, 'hm-tab', { left: px(850 + i * 196), top: px(y + 58) }, `<i></i><b>${tip}</b><u>${p.url.replace(/^https:\/\/(www\.)?/, '').replace(/\.do$/, '')}</u>`);
         s.custom(tab, [{ opacity: 0, transform: 'translateY(14px) scale(.9)' }, { opacity: 1, transform: 'none' }], at + 200 + i * 140, 350, 'cubic-bezier(.3,1.4,.5,1)');
       });
     });
-    const tally = h(el, '', { position: 'absolute', left: '100px', top: '965px', fontSize: '24px', fontWeight: '700', color: '#4A5260', whiteSpace: 'nowrap' }, `<img src="${LOGO('emblem')}" style="height:30px;vertical-align:-7px;margin-right:8px">학교 홈페이지 www.ut.ac.kr <b>56</b> + 도서관 chains.ut.ac.kr <b>8</b> + hrc.ut.ac.kr <b>1</b> = <b style="color:#8b1a1f">65페이지</b> · 앱이 꿀팁을 가져온 실제 페이지`);
+    const tally = h(el, '', { position: 'absolute', left: '100px', top: '965px', fontSize: '24px', fontWeight: '700', color: '#4A5260', whiteSpace: 'nowrap' }, `<img src="${LOGO('emblem')}" style="height:30px;vertical-align:-7px;margin-right:8px">학교 홈페이지 · 도서관 홈페이지 · 상담 센터 홈페이지 곳곳에 — 앱이 꿀팁을 가져온 실제 페이지`);
     s.fade(tally, 2600);
     return s;
   },
@@ -60,33 +60,28 @@ export const REALSCENES = {
     // 나머지 출처
     const src = h(el, '', { position: 'absolute', left: '1040px', top: '950px', width: '540px', display: 'flex', flexWrap: 'wrap', gap: '6px 14px', alignItems: 'center', fontSize: '20px', fontWeight: '700', color: '#4A5260', whiteSpace: 'nowrap' }, `+ 총학생회 제휴 · <img src="${LOGO('osm')}" style="height:30px"> OpenStreetMap · 캠퍼스지도 · <img src="${LOGO('molit-emblem')}" style="height:30px"> 국토교통부 TAGO`);
     s.rise(src, 1500);
-    // → 실제 앱 + 484
+    // → 실제 앱
     phone(s, SCR('A1-home'), 1610, 400, 260, { rot: 2, at: 1900, k: 1 });
-    num(s, 1615, 205, 484, { size: 120, at: 2100 });
-    s.rise(h(el, 'hm-label', { left: '1620px', top: '335px', fontSize: '22px' }, '장소·꿀팁, 한 앱에'), 2300);
+    s.rise(h(el, 'hm-label', { left: '1615px', top: '300px', fontSize: '40px', fontWeight: '900', color: '#141A24' }, '→ <em>한 앱</em>에'), 2100);
     return s;
   },
-  // 장소·꿀팁 484 — 세 출처의 실제 기록 이름이 기록지처럼 흐른다
+  // 장소·꿀팁 — 세 출처의 실제 기록 이름이 기록지처럼 흐른다(개수 대신 실제 이름으로)
   11(root) {
     const s = scene(root), el = s.el;
-    s.rise(h(el, 'hm-kicker', { left: '150px', top: '60px' }, '장소·꿀팁'), 0);
-    num(s, 150, 130, 484, { size: 190, at: 150, dur: 1500 });
-    ring(s, 90, 90, 560, 260, 1800);
-    s.rise(h(el, 'hm-sub', { left: '700px', top: '200px', fontSize: '34px', color: '#1E2430', fontWeight: '700' }, '= 기존 앱 321 + 누팁스 64 + 학교 공식 99'), 600);
-    const C = [['기존 앱', '수업 표준화 데이터 · 학생들이 정리', 321, REAL.names.class, []], ['누팁스', '팀 제보 · 에타 · 인스타', 64, REAL.names.knutips, ['everytime', 'instagram']], ['학교 공식', '홈페이지 65개 페이지', 99, REAL.names.official, ['emblem']]];
-    C.forEach(([t, sub, v, names, lg], i) => {
+    title(s, 150, 70, '장소·꿀팁', '맛집부터 학사 꿀팁까지 <em>한곳에</em>', '세 곳에서 모은 실제 이름 그대로', { size: 76 });
+    const C = [['기존 앱', '수업에서 학생들이 정리한 맛집·장소', REAL.names.class, []], ['누팁스', '팀 제보 · 에타 · 인스타', REAL.names.knutips, ['everytime', 'instagram']], ['학교 공식', '학교 홈페이지의 생활 꿀팁', REAL.names.official, ['emblem']]];
+    C.forEach(([t, sub, names, lg], i) => {
       const x = 110 + i * 590;
-      const head = h(el, '', { position: 'absolute', left: px(x), top: '370px', width: '540px', display: 'flex', alignItems: 'center', gap: '12px', whiteSpace: 'nowrap' });
+      const head = h(el, '', { position: 'absolute', left: px(x), top: '330px', width: '540px', display: 'flex', alignItems: 'center', gap: '12px', whiteSpace: 'nowrap' });
       lg.forEach(l => img(head, LOGO(l), '', { height: '40px' }));
-      h(head, '', { fontSize: '30px', fontWeight: '800' }, `${t}<div style="font-size:19px;color:#6B7280;font-weight:600">${sub}</div>`);
+      h(head, '', { fontSize: '32px', fontWeight: '800' }, `${t}<div style="font-size:20px;color:#6B7280;font-weight:600">${sub}</div>`);
       s.rise(head, 300 + i * 150);
-      const n = h(el, 'hm-num', { left: px(x + 400), top: '368px', fontSize: '64px' }); s.fade(n, 500 + i * 150); s.count(n, v, 500 + i * 150, 1400);
-      const sheet = h(el, 'hm-sheet', { left: px(x), top: '460px', width: '540px', height: '560px' });
+      const sheet = h(el, 'hm-sheet', { left: px(x), top: '430px', width: '540px', height: '590px' });
       tape(sheet, 210, -14, 120, i - 1);
       s.rise(sheet, 400 + i * 150);
       const win = h(sheet, 'hm-ticker', { left: '0', top: '0', width: '100%', height: '100%' });
       const col = h(win, '', { position: 'absolute', left: '0', top: '0', width: '100%', padding: '10px 22px' });
-      [...names, ...names].forEach((nm, k) => h(col, 'hm-row', {}, `<i>${String((k % names.length) + 1).padStart(3, '0')}</i><span style="overflow:hidden;text-overflow:ellipsis">${nm}</span>`));
+      [...names, ...names].forEach(nm => h(col, 'hm-row', {}, `<i>·</i><span style="overflow:hidden;text-overflow:ellipsis">${nm}</span>`));
       s.custom(col, [{ transform: 'translateY(0)' }, { transform: 'translateY(-50%)' }], 600, 40000 + i * 4000, 'linear');
     });
     return s;
@@ -94,7 +89,7 @@ export const REALSCENES = {
   // 건물 37동 — OSM 실제 외곽선이 그려지고, 팀이 찍은 대학본부 사진
   12(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 90, '건물', '교내 건물 <em>37동</em>', '그중 지도 핀 34동 · OpenStreetMap 외곽선 + 학교 층별 안내', { size: 84 });
+    title(s, 150, 90, '건물', '교내 건물, <em>지도 위에</em>', 'OpenStreetMap 건물 외곽선 + 학교 층별 안내', { size: 84 });
     const [bw, bh] = REAL.bbox;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', `0 0 ${bw} ${bh}`);
@@ -117,26 +112,23 @@ export const REALSCENES = {
   13(root) {
     const s = scene(root), el = s.el;
     title(s, 150, 70, '교통·제휴·사진', '학교 앞 버스, 학생 할인, <em>직접 찍은 사진</em>', null, { size: 72 });
-    const fact = (x, y, v, unit, what, at) => {
-      const f = h(el, '', { position: 'absolute', left: px(x), top: px(y), display: 'flex', alignItems: 'baseline', gap: '14px', whiteSpace: 'nowrap' }, `<b class="n" style="font-size:84px;font-weight:900;letter-spacing:-.04em;line-height:1"></b><span style="font-size:30px;font-weight:900">${unit}</span><span style="font-size:25px;font-weight:700;color:#4A5260">${what}</span>`);
-      s.rise(f, at); s.count(f.querySelector('.n'), v, at, 900);
-    };
+    const fact = (x, y, head, what, at) => s.rise(h(el, '', { position: 'absolute', left: px(x), top: px(y), whiteSpace: 'nowrap' }, `<b style="font-size:44px;font-weight:900;letter-spacing:-.03em">${head}</b><div style="font-size:25px;font-weight:700;color:#4A5260;margin-top:4px">${what}</div>`), at);
     const ex = (x, y, w, html, at) => s.fade(h(el, '', { position: 'absolute', left: px(x), top: px(y), width: px(w), fontSize: '21px', fontWeight: '600', color: '#4A5260', lineHeight: '1.5' }, html), at);
     // ① 버스
     photo(s, 'media/rich/busstop.webp', 100, 230, 540, 360, { rot: -2, at: 200 });
-    fact(110, 640, 20, '곳', '학교 안·정문 앞 정류장', 600);
+    fact(110, 640, '학교 앞 정류장', '학교 안·정문 앞, 도착 시간까지', 600);
     ex(112, 735, 540, '예) 한국교통대(정문) · (대학본부) · (체육관)', 800);
-    fact(110, 800, 24, '개', '그 정류장에 서는 노선', 900);
+    fact(110, 800, '지나는 버스 노선', '지금 어디쯤 오는지 실시간 위치', 900);
     ex(112, 895, 540, `예) 999 · 700 · 급행1 · 급행2 …<br><img src="${LOGO('molit-emblem')}" style="height:26px;vertical-align:-6px"> 국토교통부 TAGO 실시간 데이터`, 1100);
     // ② 제휴
     photo(s, 'media/rich/partner.webp', 700, 230, 540, 360, { rot: 2, at: 400 });
-    fact(710, 640, 48, '곳', '학생증 보여 주면 혜택', 1300);
-    ex(712, 735, 540, '총학생회 제휴 · 식당 17 · 카페 7 · 주점 6 …', 1500);
+    fact(710, 640, '학생 할인 제휴', '학생증만 보여 주면 받는 혜택', 1300);
+    ex(712, 735, 540, '총학생회 제휴 · 식당 · 카페 · 운동 · 미용 …', 1500);
     const P = [['윤박사 탕수육', '음료수 1개 제공'], ['보스찜닭', '현금결제 시 1,000원 할인']];
     P.forEach(([n, b], i) => note(s, 712 + i * 10, 790 + i * 100, 500, `<b>${n}</b> — <span style="font-size:22px">${b}</span>`, { rot: i ? 1 : -1, at: 1600 + i * 200, tape: false }).style.padding = '14px 20px');
     // ③ 사진
     ['library-w20', 'cafeteria', 'dorm-yeseong', 'post-office', 'cafe-flore', 'copy-room'].forEach((n, i) => photo(s, PHOTO(n), 1300 + (i % 3) * 180, 235 + Math.floor(i / 3) * 175, 165, 120, { rot: ((i * 13) % 7) - 3, at: 600 + i * 90, tape: i % 3 === 0 }));
-    fact(1310, 640, 14, '장', '팀이 직접 가서 찍은 사진', 1900);
+    fact(1310, 640, '직접 찍은 사진', '팀이 직접 가서 찍은 장소', 1900);
     ex(1312, 735, 520, '도서관 · 학생식당 · 생활관 · 우체국 …<br>사진 있는 곳은 피드에서 사진 먼저', 2100);
     return s;
   },

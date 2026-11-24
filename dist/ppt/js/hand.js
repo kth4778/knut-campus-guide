@@ -12,7 +12,7 @@ export const PHOTO = n => `media/real/photos/${n}.webp`;
 // 손으로 그린 체크(✓)·엑스(✗) 표시
 export const MARK = ok => `<img src="media/hand/${ok ? 'check' : 'cross'}.webp" alt="${ok ? '통과' : '실패'}" style="height:1.15em;width:auto;vertical-align:-.22em;margin-right:.35em">`;
 // 실패 1개를 정해 두고 두 장(47·ci)에서 같은 테스트로 보여 준다
-export const PICK_TESTS = ['A1 첫 화면', 'B1 계정 동그라미', 'D11 건물 핀을 누르면 건물 화면', 'E3 실시간 노선', 'F5 픽업 N빵', 'H1 「학생식당 어디야」'];
+export const PICK_TESTS = ['첫 화면', '계정 동그라미', '건물 핀을 누르면 건물 화면', '실시간 노선', '픽업 N빵', '「학생식당 어디야」 질문'];
 export const FAIL_AT = 3;
 // 실제 앱 로고: 빨간 네모 K + NUTIPS (앱 화이트 모드 머리글과 같은 모양)
 export const brand = (parent, x, y, size, o = {}) => h(parent, 'hm-brand', { left: x == null ? '0' : px(x), width: x == null ? '1920px' : null, textAlign: x == null ? 'center' : null, top: px(y), fontSize: px(size), ...o }, '<i>K</i>NUTIPS');
@@ -59,10 +59,10 @@ export function zoom(s, src, nw, crop, x, y, w, o = {}) {
   drop(s, c, o.at || 0, o.rot || 0);
   return c;
 }
-// GitHub Actions 실제 기록(#91)의 세 단계를 크게: 테스트 → 배포 → 공개 사이트 다시 확인
+// 자동 배포의 세 단계: 테스트 → 배포 → 공개 사이트 다시 확인
 export function jobs(s, x, y, at = 0, gap = 345, down = false) {
-  [['테스트', '1분 49초'], ['배포', '14초'], ['다시 확인', '30초']].forEach(([a, b], i) => {
-    s.pop(h(s.el, 'hm-job', { left: px(down ? x : x + i * gap), top: px(down ? y + i * gap : y) }, `<i>✓</i><b>${a}</b><small>${b}</small>`), at + i * 350);
+  ['테스트', '배포', '사이트 확인'].forEach((a, i) => {
+    s.pop(h(s.el, 'hm-job', { left: px(down ? x : x + i * gap), top: px(down ? y + i * gap : y) }, `<i>✓</i><b>${a}</b>`), at + i * 350);
     if (i < 2) down ? arrow(s, x + 18, y + i * gap + gap - 34, 36, at + 200 + i * 350, 90) : arrow(s, x + i * gap + gap - 66, y + 22, 50, at + 200 + i * 350, 0);
   });
 }

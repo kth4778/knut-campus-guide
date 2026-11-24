@@ -1,7 +1,7 @@
 // 발표 화면의 「대본」 패널: 장마다 대본을 고치면 팀 공유 저장소(js/notes-store.js)에 쌓이고, 열어 둔 모든 사람에게 바로 보인다.
 // 여러 명이 같은 장을 동시에 고쳐도 글자 단위로 합쳐져 서로의 글이 지워지지 않는다.
 // 고친 적 없는 장은 원래 대본(data/deck-order.json). 「이 장 원래대로」는 그 장을 원래 대본으로 다시 고친다(고친 기록은 남는다).
-import { notesStore, tidy, myName, setMyName, shiftCaret } from './notes-store.js?v=1795498706';
+import { notesStore, tidy, myName, setMyName, shiftCaret } from './notes-store.js?v=1795500448';
 
 const key = it => (it.kind === 'static' ? 's' + it.n : it.id);
 const head = it => (it.notes.match(/^\[([^\]]+)\]\s*/) || [])[1] || it.speaker || '';

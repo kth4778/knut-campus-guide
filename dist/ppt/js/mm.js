@@ -1,6 +1,6 @@
 // 모션 장 16개(이름 키)를 실제 자료 + 손으로 만든 스타일로. 대본의 (영상: …) 설명을 그대로 움직임으로 옮겼다.
 import { scene, h, img } from './motion.js';
-import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795498706';
+import { px, LOGO, brand, zoom, jobs, SCR, OFF, CARD, PHOTO, REAL, title, tape, note, noteIn, memo, photo, phone, ring, under, arrow, swipe, num, device, ticker, clip, MARK, PICK_TESTS, FAIL_AT } from './hand.js?v=1795500448';
 
 const RC = n => `media/real/cards/${n}`;
 const rnd = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };   // 고정된 흩뿌림
@@ -69,7 +69,7 @@ export const MM = {
       img(c, src, '', { width: '100%', height: px(hh), objectFit: 'cover', objectPosition: 'top', display: 'block' });
       s.custom(c, [{ opacity: 0, transform: 'scale(.5)' }, { opacity: 1, transform: 'none', offset: .25 }, { opacity: 1, transform: 'none', offset: .6 }, { opacity: 0, transform: `translate(${960 - x}px, ${560 - y}px) scale(.1) rotate(40deg)` }], 100 + i * 30, 3200, 'cubic-bezier(.5,0,.3,1)');
     });
-    [['65페이지', '학교 꿀팁이<br>페이지마다 따로', 200, 160], ['8층 19곳', '한 건물 안 부서,<br>몇 층인지 모름', 1340, 150], ['4곳', '질문 하나에<br>에타·인스타·홈피·전화', 760, 800]].forEach(([b, l, x, y], i) => {
+    [['페이지마다', '학교 꿀팁이<br>여기저기 따로', 200, 160], ['몇 층?', '건물 안 사무실<br>찾기 어려움', 1340, 150], ['어디서 봐?', '에타·인스타·홈피·전화<br>전부 따로', 760, 800]].forEach(([b, l, x, y], i) => {
       const m = memo(s, x, y, 380, `<span style="font-size:68px;letter-spacing:-.04em">${b}</span><div style="font-size:27px;margin-top:8px;line-height:1.35">${l}</div>`, { rot: [-4, 3, -2][i], at: 300 + i * 250 });
       s.custom(m, [{ opacity: 1 }, { opacity: 0, transform: `translate(${960 - x - 190}px, ${560 - y - 150}px) scale(.1)` }], 2300, 900, 'cubic-bezier(.5,0,.3,1)');
     });
@@ -106,7 +106,7 @@ export const MM = {
     }
     const p = phone(s, SCR('A2-home-swipe'), 760, 160, 390, { at: 1700 });
     s.custom(p, [{ opacity: 0, transform: 'scale(1.6)' }, { opacity: 1, transform: 'none' }], 1700, 900, 'cubic-bezier(.2,.9,.3,1)');
-    memo(s, 1240, 300, 400, '<span style="font-size:110px;letter-spacing:-.05em">532</span><div style="font-size:30px">게시물, 하나의 피드</div>', { rot: 4, at: 2400, pin: true });
+    memo(s, 1240, 300, 400, '<span style="font-size:64px;letter-spacing:-.04em">하나의 피드</span><div style="font-size:30px;margin-top:10px">맛집 · 꿀팁 · 제휴</div>', { rot: 4, at: 2400, pin: true });
     return s;
   },
   // 「장학금」을 치면 흩어진 카드 중 15건이 한 목록으로
@@ -129,15 +129,14 @@ export const MM = {
       const c = img(el, CARD((i * 4) % 65), '', { position: 'absolute', left: px(160 + (i % 5) * 150), top: px(330 + Math.floor(i / 5) * 175), width: '130px', height: '162px', objectFit: 'cover', borderRadius: '5px', boxShadow: '0 6px 12px rgba(30,35,55,.14)' });
       s.custom(c, [{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'none' }], 2300 + i * 50, 400);
     }
-    num(s, 160, 880, 15, { size: 130, fmt: v => Math.round(v) + '건', at: 2700 });
-    ring(s, 110, 850, 380, 190, 3300);
+    s.rise(h(el, 'hm-label', { left: '160px', top: '890px', fontSize: '56px', fontWeight: '900', color: '#141A24' }, '→ <em>한 목록</em>으로'), 2700);
     phone(s, SCR('A7-search-result'), 1250, 240, 320, { rot: 3, at: 2600 });
     return s;
   },
   // 실제 지도(OSM 외곽선) 위에 건물 핀이 꽂히고 대학본부로
   map(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 90, '지도', '교내 건물 <em>34동</em>이 지도 위에', null, { size: 76 });
+    title(s, 150, 90, '지도', '교내 건물이 <em>지도 위에</em>', null, { size: 76 });
     const m = h(el, 'hm-photo', { left: '150px', top: '250px', width: '820px', height: '780px', rotate: '-1.5deg' });
     tape(m, 340, -18, 150, 2);
     s.rise(m, 100);
@@ -182,12 +181,10 @@ export const MM = {
   // TAGO 공공데이터로 노선 24 · 정류장 20, 버스 위치 10~20초마다
   bus(root) {
     const s = scene(root), el = s.el;
-    title(s, 150, 90, '버스', '노선 <em>24</em> · 정류장 <em>20</em>', '버스 위치 10~20초마다 갱신', { size: 84 });
+    title(s, 150, 90, '버스', '학교 앞 <em>버스</em>, 한눈에', '정류장 · 노선 · 지금 위치', { size: 84 });
     const n = note(s, 160, 470, 460, '', { rot: -2, at: 300, src: '국토교통부 TAGO 공공데이터' });
     n.prepend(img(n, LOGO('molit-h'), '', { height: '70px', display: 'block' }));
-    num(s, 170, 700, 24, { size: 160, label: '노선', at: 600 });
-    num(s, 470, 700, 20, { size: 160, label: '정류장', at: 800 });
-    s.rise(h(el, 'hm-label', { left: '176px', top: '930px', fontSize: '26px', color: '#141A24', fontWeight: '800' }, '학교 안·정문 앞 정류장 20곳에 서는 버스 노선 24개'), 1100);
+    s.rise(h(el, 'hm-label', { left: '170px', top: '720px', fontSize: '34px', color: '#141A24', fontWeight: '800', lineHeight: '1.6', whiteSpace: 'normal', width: '700px' }, '학교 안·정문 앞 정류장<br>+ 그곳을 지나는 모든 노선<br>+ 버스가 지금 어디쯤인지'), 800);
     phone(s, SCR('B5-map-bus'), 1000, 220, 290, { rot: -4, at: 500 });
     phone(s, SCR('B7-bus-live'), 1420, 260, 290, { rot: 3, at: 800 });
     // 다시 받아오기: 둥근 시계가 계속 돈다
@@ -198,7 +195,7 @@ export const MM = {
   'bus-live'(root) {
     const s = scene(root), el = s.el;
     title(s, 150, 110, '실시간 버스', '버스가 <em>지금 어디</em> 있는지', '노선 선택 → 실제 버스 위치 지도 표시', { size: 84 });
-    const steps = [['1', '버스 탭에서 노선 고르기', '예) 999번 — 학교 ↔ 충주역·터미널'], ['2', '지금 달리는 버스가 지도에', '국토교통부 TAGO 실시간 위치'], ['3', '10~20초마다 새 위치', '정류장을 누르면 도착 예정 시간']];
+    const steps = [['1', '버스 탭에서 노선 고르기', '예) 999번 — 학교 ↔ 충주역·터미널'], ['2', '지금 달리는 버스가 지도에', '국토교통부 TAGO 실시간 위치'], ['3', '몇 초마다 새 위치', '정류장을 누르면 도착 예정 시간']];
     steps.forEach(([n, a, b], i) => {
       const c = note(s, 150 + (i % 2) * 30, 400 + i * 190, 760, `<b style="font-size:44px;margin-right:16px">${n}</b><b style="font-size:34px">${a}</b><div style="font-size:26px;color:#4A5260;margin:6px 0 0 58px">${b}</div>`, { rot: i % 2 ? 1 : -1, at: 400 + i * 260, tape: i === 0 });
       c.style.padding = '18px 26px';
@@ -261,12 +258,11 @@ export const MM = {
     const scan = h(card, '', { position: 'absolute', left: '14px', right: '14px', top: '14px', height: '6px', background: '#22C55E', boxShadow: '0 0 18px 4px rgba(34,197,94,.6)' });
     s.custom(scan, [{ transform: 'translateY(0)', opacity: 0 }, { opacity: 1, offset: .1 }, { transform: 'translateY(520px)', opacity: 1, offset: .9 }, { transform: 'translateY(520px)', opacity: 0 }], 1500, 1500, 'linear');
     s.rise(h(el, 'hm-label', { left: '800px', top: '820px', fontSize: '26px' }, 'OCR로 읽은 글자: 「1인 5,500원」'), 1500);
-    [['문구', '85%', 3100], ['가격', '100%', 3400]].forEach(([k, v, at], i) => {
-      const c = noteIn(el, `${MARK(true)}<b style="font-size:34px">${k}</b> <span style="font-size:52px;font-weight:900;margin-left:12px">${v}</span>`, { abs: true, w: 380, tape: false });
-      Object.assign(c.style, { left: '1290px', top: px(300 + i * 160) }); s.slide(c, at, 80);
+    [['글', '원본과 거의 같으면 통과', 3100], ['가격', '정확히 같아야 통과', 3400]].forEach(([k, v, at], i) => {
+      const c = noteIn(el, `${MARK(true)}<b style="font-size:34px">${k}</b><div style="font-size:25px;margin-top:6px">${v}</div>`, { abs: true, w: 420, tape: false });
+      Object.assign(c.style, { left: '1290px', top: px(300 + i * 180) }); s.slide(c, at, 80);
     });
-    num(s, 1290, 680, 567, { size: 120, label: '장 검사', at: 3800 });
-    num(s, 1620, 680, 0, { size: 120, label: '다시 만들 장', at: 4000, fmt: () => '0' });
+    s.rise(h(el, 'hm-label', { left: '1290px', top: '700px', fontSize: '36px', fontWeight: '900', color: '#141A24', lineHeight: '1.5' }, '모든 카드 검사<br><em>다시 그릴 카드 없음</em>'), 3800);
     return s;
   },
   // 484개 자료 중 6곳만 노트북 속 로컬 LLM으로 → 답과 근거 3곳
@@ -277,11 +273,11 @@ export const MM = {
     const hits = [37, 101, 188, 250, 333, 420];
     const cells = [];
     for (let i = 0; i < 484; i++) { const c = h(grid, '', { width: '22px', height: '22px', borderRadius: '4px', background: '#D9DDE4' }); cells.push(c); s.custom(c, [{ opacity: 0 }, { opacity: 1 }], 100 + (i % 22) * 15 + Math.floor(i / 22) * 10, 200); }
-    s.rise(h(el, 'hm-label', { left: '150px', top: '900px' }, '자료 484개'), 300);
+    s.rise(h(el, 'hm-label', { left: '150px', top: '900px' }, '모아 둔 자료'), 300);
     hits.forEach((i, k) => {
       s.custom(cells[i], [{ background: '#D9DDE4', transform: 'none' }, { background: '#FFC21A', transform: 'scale(1.6)' }], 1300 + k * 120, 300);
     });
-    s.rise(h(el, 'hm-label', { left: '420px', top: '900px', color: '#141A24' }, '→ 맞는 6곳만'), 2000);
+    s.rise(h(el, 'hm-label', { left: '420px', top: '900px', color: '#141A24' }, '→ 질문에 맞는 곳만'), 2000);
     phone(s, SCR('C5-nuti'), 1000, 330, 290, { rot: -2, at: 500 });
     const ol = note(s, 1470, 640, 380, '<b style="font-size:28px">노트북 안 로컬 LLM</b><br>질문이 밖으로 안 나감', { rot: 2, at: 1600 });
     ol.prepend(img(ol, LOGO('ollama'), '', { height: '60px', display: 'block', marginBottom: '8px' }));
@@ -289,7 +285,7 @@ export const MM = {
       const dot = h(el, '', { position: 'absolute', left: px(150 + (hits[k] % 22) * 28), top: px(280 + Math.floor(hits[k] / 22) * 28), width: '22px', height: '22px', borderRadius: '4px', background: '#FFC21A', zIndex: 3, opacity: 0 });
       s.custom(dot, [{ opacity: 1, transform: 'none' }, { opacity: 1, transform: `translate(${1145 - 150 - (hits[k] % 22) * 28}px, ${560 - 280 - Math.floor(hits[k] / 22) * 28}px) scale(.6)`, offset: .85 }, { opacity: 0, transform: `translate(${1145 - 150 - (hits[k] % 22) * 28}px, ${560 - 280 - Math.floor(hits[k] / 22) * 28}px) scale(.2)` }], 2200 + k * 120, 1000, 'cubic-bezier(.5,0,.3,1)');
     }
-    memo(s, 1560, 300, 300, '답<br><span style="font-size:30px">+ 근거 3곳</span>', { rot: 4, at: 3500, size: 60, pin: true });
+    memo(s, 1560, 300, 300, '답<br><span style="font-size:30px">+ 근거 함께</span>', { rot: 4, at: 3500, size: 60, pin: true });
     return s;
   },
   // 테스트 하나가 실패하면 배포가 멈추고, 고쳐서 모두 통과해야 GitHub Pages로
@@ -311,7 +307,7 @@ export const MM = {
     const stop = stamp(s, 1080, 340, '배포 중지', '#D63A2F', 1700);
     s.custom(stop, [{ opacity: .88 }, { opacity: 0 }], 3000, 300);
     s.rise(h(el, 'hm-label', { left: '1080px', top: '470px', fontSize: '38px', fontWeight: '800', color: '#D63A2F' }, '하나라도 실패 → 중지 후 수정'), 1900);
-    s.rise(h(el, '', { position: 'absolute', left: '1080px', top: '600px', display: 'flex', gap: '12px', alignItems: 'center', fontSize: '26px', fontWeight: '800', color: '#141A24' }, `<img src="${LOGO('github')}" style="height:40px"> 모두 통과하면 — 실제 기록 #91`), 3300);
+    s.rise(h(el, '', { position: 'absolute', left: '1080px', top: '600px', display: 'flex', gap: '12px', alignItems: 'center', fontSize: '26px', fontWeight: '800', color: '#141A24' }, `<img src="${LOGO('github')}" style="height:40px"> 모두 통과하면`), 3300);
     jobs(s, 1080, 670, 3400, 110, true);
     stamp(s, 1480, 760, '배포', '#1F9D55', 4500);
     return s;
